@@ -98,7 +98,7 @@ function resetBorders() {
 // resets selected piece properties
 function resetSelectedPieceProperties() {
     selectedPiece.pieceId = -1;
-    selectedPiece.pieceId = -1;
+    selectedPiece.indexOfBoardPiece = -1;
     selectedPiece.moveTwo= false;
     selectedPiece.isKing = false;
     selectedPiece.seventhSpace = false;
@@ -119,6 +119,7 @@ function resetSelectedPieceProperties() {
 function getSelectedPiece() {
     selectedPiece.pieceId = parseInt(event.target.id);
     selectedPiece.indexOfBoardPiece = findPiece(selectedPiece.pieceId);
+    console.log(findPiece(selectedPiece.pieceId));
     isPieceKing();
 }
 
@@ -145,6 +146,9 @@ function getAvailableSpaces() {
     if (selectedPiece.moveTwo){
         if (board[selectedPiece.indexOfBoardPiece + 16] === null) {
             selectedPiece.sixteenthSpace = true;
+        }
+        if (board[selectedPiece.indexOfBoardPiece - 16] === null) {
+            selectedPiece.minusSixteenthSpace = true;
         }
     }
     checkAvailableJumpSpaces();
@@ -199,7 +203,7 @@ function checkPieceConditions() {
             selectedPiece.eighthSpace = false;
             selectedPiece.ninthSpace = false;
             selectedPiece.fourteenthSpace = false;
-            selectedPiece.minusSixteenthSpace = false;
+            selectedPiece.sixteenthSpace = false;
             selectedPiece.eighteenthSpace = false;
         }
         givePieceBorder();
@@ -208,9 +212,10 @@ function checkPieceConditions() {
 
 // gives the piece a green highlight for the user (showing its movable)
 function givePieceBorder() {
-    if (selectedPiece.seventhSpace || selectedPiece.ninthSpace || selectedPiece.fourteenthSpace || selectedPiece.eighteenthSpace
-        || selectedPiece.minusSeventhSpace || selectedPiece.minusNinthSpace || selectedPiece.minusFourteenthSpace || selectedPiece.minusEighteenthSpace) {
+    if (selectedPiece.seventhSpace || selectedPiece.ninthSpace || selectedPiece.eighthSpace || selectedPiece.sixteenthSpace
+        || selectedPiece.minusSeventhSpace || selectedPiece.minusEighthSpace || selectedPiece.minusNinthSpace || selectedPiece.minusSixteenthSpace) {
         document.getElementById(selectedPiece.pieceId).style.border = "3px solid green";
+        console.log(selectedPiece);
         giveCellsClick();
     } else {
     }
