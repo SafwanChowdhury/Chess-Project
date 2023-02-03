@@ -1,18 +1,17 @@
 /*----------- Game State Data ----------*/
 
 const board = [
+    null, 0, null, 1, null, 2, null, 3,
+    4, null, 5, null, 6, null, 7, null,
+    null, 8, null, 9, null, 10, null, 11,
     null, null, null, null, null, null, null, null,
-    0, 1, 2, 3, 4, 5, 6, 7,
     null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
-    16, 17, 18, 19, 20, 21, 22, 23,
-    null, null, null, null, null, null, null, null
+    12, null, 13, null, 14, null, 15, null,
+    null, 16, null, 17, null, 18, null, 19,
+    20, null, 21, null, 22, null, 23, null
 ]
 
-const left = [0,8,16,24,32,40,48,56]
-const right = [7,15,23,31,39,47,55,63]
+/*---------- Cached Variables ----------*/
 
 // parses pieceId's and returns the index of that piece's place on the board
 let findPiece = function (pieceId) {
@@ -20,40 +19,33 @@ let findPiece = function (pieceId) {
     return board.indexOf(parsed);
 };
 
-/*------- DOM References -------*/
+// DOM referenes
 const cells = document.querySelectorAll("td");
 let redsPieces = document.querySelectorAll("p");
-let blacksPieces = document.querySelectorAll("span");
-const redTurntext = document.querySelectorAll(".red-turn-text");
+let blacksPieces = document.querySelectorAll("span")
+const redTurnText = document.querySelectorAll(".red-turn-text");
 const blackTurntext = document.querySelectorAll(".black-turn-text");
-const divider = document.querySelector("#divider");
+const divider = document.querySelector("#divider")
 
-/*--- Player Properties ---*/
+// player properties
 let turn = true;
 let redScore = 12;
 let blackScore = 12;
 let playerPieces;
 
-/*--- selected piece properties ---*/
+// selected piece properties
 let selectedPiece = {
     pieceId: -1,
     indexOfBoardPiece: -1,
-    moveTwo: false,
     isKing: false,
     seventhSpace: false,
-    eighthSpace: false,
     ninthSpace: false,
     fourteenthSpace: false,
-    sixteenthSpace: false,
     eighteenthSpace: false,
     minusSeventhSpace: false,
-    minusEighthSpace: false,
     minusNinthSpace: false,
     minusFourteenthSpace: false,
-    minusSixteenthSpace: false,
-    minusEighteenthSpace: false,
-    isLeft: false,
-    isRight: false
+    minusEighteenthSpace: false
 }
 
 /*---------- Event Listeners ----------*/
@@ -103,23 +95,16 @@ function resetBorders() {
 // resets selected piece properties
 function resetSelectedPieceProperties() {
     selectedPiece.pieceId = -1;
-    selectedPiece.indexOfBoardPiece = -1;
-    selectedPiece.moveTwo= false;
+    selectedPiece.pieceId = -1;
     selectedPiece.isKing = false;
     selectedPiece.seventhSpace = false;
-    selectedPiece.eighthSpace = false;
     selectedPiece.ninthSpace = false;
     selectedPiece.fourteenthSpace = false;
-    selectedPiece.sixteenthSpace = false;
     selectedPiece.eighteenthSpace = false;
     selectedPiece.minusSeventhSpace = false;
-    selectedPiece.minusEighthSpace = false;
     selectedPiece.minusNinthSpace = false;
     selectedPiece.minusFourteenthSpace = false;
-    selectedPiece.minusSixteenthSpace = false;
     selectedPiece.minusEighteenthSpace = false;
-    selectedPiece.isLeft = false;
-    selectedPiece.isRight = false;
 }
 
 // gets ID and index of the board cell its on
@@ -131,41 +116,31 @@ function getSelectedPiece() {
 
 // checks if selected piece is a king
 function isPieceKing() {
-    selectedPiece.isKing = document.getElementById(selectedPiece.pieceId).classList.contains("king");
-    isMove2();
-}
-
-function isMove2() {
-    selectedPiece.moveTwo = document.getElementById(selectedPiece.pieceId).classList.contains("move2");
-    isLeftOrRight();
-}
-
-function isLeftOrRight(){
-    if (left.includes(selectedPiece.indexOfBoardPiece)){
-        selectedPiece.isLeft = true;
-    }
-    else if (right.includes(selectedPiece.indexOfBoardPiece)){
-        selectedPiece.isRight = true;
+    if (document.getElementById(selectedPiece.pieceId).classList.contains("king")) {
+        selectedPiece.isKing = true;
+    } else {
+        selectedPiece.isKing = false;
     }
     getAvailableSpaces();
 }
 
-
 // gets the moves that the selected piece can make
 function getAvailableSpaces() {
-    if (board[selectedPiece.indexOfBoardPiece + 8] === null){
-        selectedPiece.eighthSpace = true;
+    if (board[selectedPiece.indexOfBoardPiece + 7] === null && 
+        cells[selectedPiece.indexOfBoardPiece + 7].classList.contains("noPieceHere") !== true) {
+        selectedPiece.seventhSpace = true;
     }
-    if (board[selectedPiece.indexOfBoardPiece - 8] === null){
-        selectedPiece.minusEighthSpace = true;
+    if (board[selectedPiece.indexOfBoardPiece + 9] === null && 
+        cells[selectedPiece.indexOfBoardPiece + 9].classList.contains("noPieceHere") !== true) {
+        selectedPiece.ninthSpace = true;
     }
-    if (selectedPiece.moveTwo){
-        if (board[selectedPiece.indexOfBoardPiece + 16] === null) {
-            selectedPiece.sixteenthSpace = true;
-        }
-        if (board[selectedPiece.indexOfBoardPiece - 16] === null) {
-            selectedPiece.minusSixteenthSpace = true;
-        }
+    if (board[selectedPiece.indexOfBoardPiece - 7] === null && 
+        cells[selectedPiece.indexOfBoardPiece - 7].classList.contains("noPieceHere") !== true) {
+        selectedPiece.minusSeventhSpace = true;
+    }
+    if (board[selectedPiece.indexOfBoardPiece - 9] === null && 
+        cells[selectedPiece.indexOfBoardPiece - 9].classList.contains("noPieceHere") !== true) {
+        selectedPiece.minusNinthSpace = true;
     }
     checkAvailableJumpSpaces();
 }
@@ -173,30 +148,46 @@ function getAvailableSpaces() {
 // gets the moves that the selected piece can jump
 function checkAvailableJumpSpaces() {
     if (turn) {
-        if (board[selectedPiece.indexOfBoardPiece + 7] >= 12 && selectedPiece.isLeft === false) {
-            selectedPiece.seventhSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece + 14] === null 
+        && cells[selectedPiece.indexOfBoardPiece + 14].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece + 7] >= 12) {
+            selectedPiece.fourteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece + 9] >= 12 && selectedPiece.isRight === false) {
-            selectedPiece.ninthSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece + 18] === null 
+        && cells[selectedPiece.indexOfBoardPiece + 18].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece + 9] >= 12) {
+            selectedPiece.eighteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 7] >= 12 && selectedPiece.isRight === false) {
-            selectedPiece.minusSeventhSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece - 14] === null 
+        && cells[selectedPiece.indexOfBoardPiece - 14].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece - 7] >= 12) {
+            selectedPiece.minusFourteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 9] >= 12 && selectedPiece.isLeft === false) {
-            selectedPiece.minusNinthSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece - 18] === null 
+        && cells[selectedPiece.indexOfBoardPiece - 18].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece - 9] >= 12) {
+            selectedPiece.minusEighteenthSpace = true;
         }
     } else {
-        if (board[selectedPiece.indexOfBoardPiece + 7] < 12 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece + 7] !== null) {
-            selectedPiece.seventhSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece + 14] === null 
+        && cells[selectedPiece.indexOfBoardPiece + 14].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece + 7] < 12 && board[selectedPiece.indexOfBoardPiece + 7] !== null) {
+            selectedPiece.fourteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece + 9] < 12 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece + 9] !== null) {
-            selectedPiece.ninthSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece + 18] === null 
+        && cells[selectedPiece.indexOfBoardPiece + 18].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece + 9] < 12 && board[selectedPiece.indexOfBoardPiece + 9] !== null) {
+            selectedPiece.eighteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 7] < 12 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
-            selectedPiece.minusSeventhSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece - 14] === null && cells[selectedPiece.indexOfBoardPiece - 14].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece - 7] < 12 
+        && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
+            selectedPiece.minusFourteenthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 9] < 12 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
-            selectedPiece.minusNinthSpace = true;
+        if (board[selectedPiece.indexOfBoardPiece - 18] === null && cells[selectedPiece.indexOfBoardPiece - 18].classList.contains("noPieceHere") !== true
+        && board[selectedPiece.indexOfBoardPiece - 9] < 12
+        && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
+            selectedPiece.minusEighteenthSpace = true;
         }
     }
     checkPieceConditions();
@@ -206,22 +197,16 @@ function checkAvailableJumpSpaces() {
 function checkPieceConditions() {
     if (selectedPiece.isKing) {
         givePieceBorder();
-    }
-    else {
+    } else {
         if (turn) {
             selectedPiece.minusSeventhSpace = false;
-            selectedPiece.minusEighthSpace = false;
             selectedPiece.minusNinthSpace = false;
             selectedPiece.minusFourteenthSpace = false;
-            selectedPiece.minusSixteenthSpace = false;
             selectedPiece.minusEighteenthSpace = false;
-        }
-        else {
+        } else {
             selectedPiece.seventhSpace = false;
-            selectedPiece.eighthSpace = false;
             selectedPiece.ninthSpace = false;
             selectedPiece.fourteenthSpace = false;
-            selectedPiece.sixteenthSpace = false;
             selectedPiece.eighteenthSpace = false;
         }
         givePieceBorder();
@@ -230,12 +215,13 @@ function checkPieceConditions() {
 
 // gives the piece a green highlight for the user (showing its movable)
 function givePieceBorder() {
-    if (selectedPiece.seventhSpace || selectedPiece.ninthSpace || selectedPiece.eighthSpace || selectedPiece.sixteenthSpace
-        || selectedPiece.minusSeventhSpace || selectedPiece.minusEighthSpace || selectedPiece.minusNinthSpace || selectedPiece.minusSixteenthSpace) {
+    if (selectedPiece.seventhSpace || selectedPiece.ninthSpace || selectedPiece.fourteenthSpace || selectedPiece.eighteenthSpace
+    || selectedPiece.minusSeventhSpace || selectedPiece.minusNinthSpace || selectedPiece.minusFourteenthSpace || selectedPiece.minusEighteenthSpace) {
         document.getElementById(selectedPiece.pieceId).style.border = "3px solid green";
         console.log(selectedPiece);
         giveCellsClick();
     } else {
+        return;
     }
 }
 
@@ -244,38 +230,40 @@ function giveCellsClick() {
     if (selectedPiece.seventhSpace) {
         cells[selectedPiece.indexOfBoardPiece + 7].setAttribute("onclick", "makeMove(7)");
     }
-    if (selectedPiece.eighthSpace) {
-        cells[selectedPiece.indexOfBoardPiece + 8].setAttribute("onclick", "makeMove(8)");
-    }
     if (selectedPiece.ninthSpace) {
         cells[selectedPiece.indexOfBoardPiece + 9].setAttribute("onclick", "makeMove(9)");
     }
-    if (selectedPiece.sixteenthSpace) {
-        cells[selectedPiece.indexOfBoardPiece + 16].setAttribute("onclick", "makeMove(16)");
+    if (selectedPiece.fourteenthSpace) {
+        cells[selectedPiece.indexOfBoardPiece + 14].setAttribute("onclick", "makeMove(14)");
+    }
+    if (selectedPiece.eighteenthSpace) {
+        cells[selectedPiece.indexOfBoardPiece + 18].setAttribute("onclick", "makeMove(18)");
     }
     if (selectedPiece.minusSeventhSpace) {
         cells[selectedPiece.indexOfBoardPiece - 7].setAttribute("onclick", "makeMove(-7)");
     }
-    if (selectedPiece.minusEighthSpace) {
-        cells[selectedPiece.indexOfBoardPiece - 8].setAttribute("onclick", "makeMove(-8)");
-    }
     if (selectedPiece.minusNinthSpace) {
         cells[selectedPiece.indexOfBoardPiece - 9].setAttribute("onclick", "makeMove(-9)");
     }
-    if (selectedPiece.minusSixteenthSpace) {
-        cells[selectedPiece.indexOfBoardPiece - 16].setAttribute("onclick", "makeMove(-16)");
+    if (selectedPiece.minusFourteenthSpace) {
+        cells[selectedPiece.indexOfBoardPiece - 14].setAttribute("onclick", "makeMove(-14)");
+    }
+    if (selectedPiece.minusEighteenthSpace) {
+        cells[selectedPiece.indexOfBoardPiece - 18].setAttribute("onclick", "makeMove(-18)");
     }
 }
 
-//make move
-function makeMove(number){
+/* v when the cell is clicked v */
+
+// makes the move that was clicked
+function makeMove(number) {
     document.getElementById(selectedPiece.pieceId).remove();
     cells[selectedPiece.indexOfBoardPiece].innerHTML = "";
     if (turn) {
-        if (selectedPiece.isKing){
+        if (selectedPiece.isKing) {
             cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="red-piece king" id="${selectedPiece.pieceId}"></p>`;
             redsPieces = document.querySelectorAll("p");
-        } else{
+        } else {
             cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="red-piece" id="${selectedPiece.pieceId}"></p>`;
             redsPieces = document.querySelectorAll("p");
         }
@@ -290,15 +278,15 @@ function makeMove(number){
     }
 
     let indexOfPiece = selectedPiece.indexOfBoardPiece
-    if (number === 7 || number === -7 || number === 9 || number === -9) {
-        changeData(indexOfPiece, indexOfPiece + number, indexOfPiece);
+    if (number === 14 || number === -14 || number === 18 || number === -18) {
+        changeData(indexOfPiece, indexOfPiece + number, indexOfPiece + number / 2);
     } else {
         changeData(indexOfPiece, indexOfPiece + number);
     }
 }
 
 // Changes the board states data on the back end
-function changeData(indexOfBoardPiece, modifiedIndex, removePiece){
+function changeData(indexOfBoardPiece, modifiedIndex, removePiece) {
     board[indexOfBoardPiece] = null;
     board[modifiedIndex] = parseInt(selectedPiece.pieceId);
     if (turn && selectedPiece.pieceId < 12 && modifiedIndex >= 57) {
@@ -306,12 +294,6 @@ function changeData(indexOfBoardPiece, modifiedIndex, removePiece){
     }
     if (turn === false && selectedPiece.pieceId >= 12 && modifiedIndex <= 7) {
         document.getElementById(selectedPiece.pieceId).classList.add("king");
-    }
-    if (turn && selectedPiece.pieceId < 12 && modifiedIndex >= 16) {
-        document.getElementById(selectedPiece.pieceId).classList.remove("move2");
-    }
-    if (turn === false && selectedPiece.pieceId >= 12 && modifiedIndex <= 47) {
-        document.getElementById(selectedPiece.pieceId).classList.remove("move2");
     }
     if (removePiece) {
         board[removePiece] = null;
@@ -347,16 +329,16 @@ function removeEventListeners() {
 function checkForWin() {
     if (blackScore === 0) {
         divider.style.display = "none";
-        for (let i = 0; i < redTurntext.length; i++) {
-            redTurntext[i].style.color = "black";
+        for (let i = 0; i < redTurnText.length; i++) {
+            redTurnText[i].style.color = "black";
             blackTurntext[i].style.display = "none";
-            redTurntext[i].textContent = "RED WINS!";
+            redTurnText[i].textContent = "RED WINS!";
         }
     } else if (redScore === 0) {
         divider.style.display = "none";
-        for (let i = 0; i < blackTurntext.length; i++) {
+        for (let i = 0; i < blackTurntext.length; i++) {            
             blackTurntext[i].style.color = "black";
-            redTurntext[i].style.display = "none";
+            redTurnText[i].style.display = "none";
             blackTurntext[i].textContent = "BLACK WINS!";
         }
     }
@@ -367,19 +349,18 @@ function checkForWin() {
 function changePlayer() {
     if (turn) {
         turn = false;
-        for (let i = 0; i < redTurntext.length; i++) {
-            redTurntext[i].style.color = "lightGrey";
+        for (let i = 0; i < redTurnText.length; i++) {
+            redTurnText[i].style.color = "lightGrey";
             blackTurntext[i].style.color = "black";
         }
     } else {
         turn = true;
         for (let i = 0; i < blackTurntext.length; i++) {
             blackTurntext[i].style.color = "lightGrey";
-            redTurntext[i].style.color = "black";
+            redTurnText[i].style.color = "black";
         }
     }
     givePiecesEventListeners();
 }
-
 
 givePiecesEventListeners();
