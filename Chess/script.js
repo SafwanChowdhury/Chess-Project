@@ -2,7 +2,7 @@
 
 const board = [
     null, null, null, null, null, null, null, null,
-    0, 1, 2, 3, 4, 5, 6, 7,
+    8, 9, 10, 11, 12, 13, 14, 15,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
@@ -173,29 +173,29 @@ function getAvailableSpaces() {
 // gets the moves that the selected piece can jump
 function checkAvailableJumpSpaces() {
     if (turn) {
-        if (board[selectedPiece.indexOfBoardPiece + 7] >= 12 && selectedPiece.isLeft === false) {
+        if (board[selectedPiece.indexOfBoardPiece + 7] >= 16 && selectedPiece.isLeft === false) {
             selectedPiece.seventhSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece + 9] >= 12 && selectedPiece.isRight === false) {
+        if (board[selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
             selectedPiece.ninthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 7] >= 12 && selectedPiece.isRight === false) {
+        if (board[selectedPiece.indexOfBoardPiece - 7] >= 16 && selectedPiece.isRight === false) {
             selectedPiece.minusSeventhSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 9] >= 12 && selectedPiece.isLeft === false) {
+        if (board[selectedPiece.indexOfBoardPiece - 9] >= 16 && selectedPiece.isLeft === false) {
             selectedPiece.minusNinthSpace = true;
         }
     } else {
-        if (board[selectedPiece.indexOfBoardPiece + 7] < 12 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece + 7] !== null) {
+        if (board[selectedPiece.indexOfBoardPiece + 7] < 16 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece + 7] !== null) {
             selectedPiece.seventhSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece + 9] < 12 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece + 9] !== null) {
+        if (board[selectedPiece.indexOfBoardPiece + 9] < 16 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece + 9] !== null) {
             selectedPiece.ninthSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 7] < 12 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
+        if (board[selectedPiece.indexOfBoardPiece - 7] < 16 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
             selectedPiece.minusSeventhSpace = true;
         }
-        if (board[selectedPiece.indexOfBoardPiece - 9] < 12 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
+        if (board[selectedPiece.indexOfBoardPiece - 9] < 16 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
             selectedPiece.minusNinthSpace = true;
         }
     }
@@ -301,25 +301,25 @@ function makeMove(number){
 function changeData(indexOfBoardPiece, modifiedIndex, removePiece){
     board[indexOfBoardPiece] = null;
     board[modifiedIndex] = parseInt(selectedPiece.pieceId);
-    if (turn && selectedPiece.pieceId < 12 && modifiedIndex >= 57) {
+    if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
         document.getElementById(selectedPiece.pieceId).classList.add("king")
     }
-    if (turn === false && selectedPiece.pieceId >= 12 && modifiedIndex <= 7) {
+    if (turn === false && selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
         document.getElementById(selectedPiece.pieceId).classList.add("king");
     }
-    if (turn && selectedPiece.pieceId < 12 && modifiedIndex >= 16) {
+    if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
         document.getElementById(selectedPiece.pieceId).classList.remove("move2");
     }
-    if (turn === false && selectedPiece.pieceId >= 12 && modifiedIndex <= 47) {
+    if (turn === false && selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
         document.getElementById(selectedPiece.pieceId).classList.remove("move2");
     }
     if (removePiece) {
         board[removePiece] = null;
-        if (turn && selectedPiece.pieceId < 12) {
+        if (turn && selectedPiece.pieceId < 16) {
             cells[removePiece].innerHTML = "";
             blackScore--
         }
-        if (turn === false && selectedPiece.pieceId >= 12) {
+        if (turn === false && selectedPiece.pieceId >= 16) {
             cells[removePiece].innerHTML = "";
             redScore--
         }
@@ -378,6 +378,7 @@ function changePlayer() {
             redTurntext[i].style.color = "black";
         }
     }
+    console.log(board)
     givePiecesEventListeners();
 }
 

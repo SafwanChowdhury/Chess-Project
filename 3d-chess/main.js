@@ -5,6 +5,8 @@ import {OBJLoader} from "three/addons/loaders/OBJLoader.js";
 import {MTLLoader} from "three/addons/loaders/MTLLoader.js";
 import {load} from "three/addons/libs/opentype.module.js";
 import init from "three/addons/offscreen/scene.js";
+import {DragControls} from "./DragControls";
+import {MathUtils} from "three";
 
 const scene = new THREE.Scene();
 
@@ -16,8 +18,8 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize( window.innerWidth, window.innerHeight);
-camera.position.setZ(30);
 
+camera.position.set(0 , 0, 20);
 
 
 const pointLight = new THREE.PointLight(0xffffff, 0.5)
@@ -37,9 +39,9 @@ scene.add(ambientLight)
 
 
 const lightHelper = new THREE.PointLightHelper(pointLight2)
-scene.add(lightHelper)
+const gridHelper = new THREE.GridHelper(16.9, 8, 0x000000, 0xffffff)
+scene.add(lightHelper, gridHelper)
 
-const controls = new OrbitControls(camera, renderer.domElement);
 
 
 
@@ -63,20 +65,20 @@ scene.add(moon)
 moon.position.set(0,25,0)
 
 const mtlLoader = new MTLLoader();
-mtlLoader.load(
-    "models/ChessBoard.mtl",
-    function (materials){
-        materials.preload();
-        const loader = new OBJLoader();
-        loader.setMaterials(materials);
-        loader.load(
-            'models/ChessBoard.obj',
-            function (object) {
-                scene.add(object);
-            }
-        );
-    }
-)
+// mtlLoader.load(
+//     "models/ChessBoard.mtl",
+//     function (materials){
+//         materials.preload();
+//         const loader = new OBJLoader();
+//         loader.setMaterials(materials);
+//         loader.load(
+//             'models/ChessBoard.obj',
+//             function (object) {
+//                 scene.add(object);
+//             }
+//         );
+//     }
+// )
 
 
 const coordsMap = [7.36, 5.36, 3.16, 1.06, -1.06, -3.16, -5.16, -7.36];
@@ -153,12 +155,16 @@ const objArray = [
     "models/bRookL.obj"
 ]
 
+
+const manager = new THREE.LoadingManager();
+
+
 function loadObject(mtl, obj, x1, z1){
     mtlLoader.load(
         mtl,
         function (materials){
             materials.preload();
-            const loader = new OBJLoader();
+            const loader = new OBJLoader( manager );
             loader.setMaterials(materials);
             loader.load(
                 obj,
@@ -186,14 +192,57 @@ for (let i = 0; i < lenMTL; i++) {
     loadObject(mtlArray[i], objArray[i], initArray[i].x, initArray[i].y)
 }
 
+const camControls = new OrbitControls(camera, renderer.domElement);
+const dragControls = new DragControls(pieces, camera, renderer.domElement);
+
+dragControls.addEventListener( 'dragstart', function ( event ) {
+
+    event.object.material.emissive.set( 0xaaaaaa );
+
+} );
+
+dragControls.addEventListener( 'dragend', function ( event ) {
+
+    event.object.material.emissive.set( 0x000000 );
+    console.log(event.object.name)
+
+} );
+
+
+dragControls.enabled = false
+window.addEventListener("keydown", function(event) {
+    if (event.code === "Space") {
+        dragControls.enabled = !dragControls.enabled
+        camControls.enabled = !camControls.enabled
+        //camera.position.set(0,20,0)
+        //camera.lookAt(0,0,0)
+    }
+}, true)
+
+
 
 function animate(){
     requestAnimationFrame(animate);
 /*    let num = Math.floor(Math.random() * 32)
     pieces[num].position.x = coordsMap[Math.floor(Math.random() * 8)]
     pieces[num].position.z = coordsMap[Math.floor(Math.random() * 8)]*/
-    controls.update();
+    // camControls.update()
     renderer.render(scene,camera);
 }
 
-animate()
+manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+    document.getElementById("title").innerHTML = "Loading";
+};
+
+manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+    document.getElementById("title").innerHTML = (Math.floor((itemsLoaded/itemsTotal) * 100).toString());
+    console.log(Math.floor((itemsLoaded/itemsTotal) * 100))
+};
+
+
+manager.onLoad = function ( ) {
+    document.getElementById("title").innerHTML = "Loading Complete";
+    console.log( 'Loading complete!');
+    document.getElementById("title").innerHTML = "Online Chess Game";
+    animate()
+};
