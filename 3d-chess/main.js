@@ -65,20 +65,20 @@ scene.add(moon)
 moon.position.set(0,25,0)
 
 const mtlLoader = new MTLLoader();
-// mtlLoader.load(
-//     "models/ChessBoard.mtl",
-//     function (materials){
-//         materials.preload();
-//         const loader = new OBJLoader();
-//         loader.setMaterials(materials);
-//         loader.load(
-//             'models/ChessBoard.obj',
-//             function (object) {
-//                 scene.add(object);
-//             }
-//         );
-//     }
-// )
+mtlLoader.load(
+    "models/ChessBoard.mtl",
+    function (materials){
+        materials.preload();
+        const loader = new OBJLoader();
+        loader.setMaterials(materials);
+        loader.load(
+            'models/ChessBoard.obj',
+            function (object) {
+                scene.add(object);
+            }
+        );
+    }
+)
 
 
 const coordsMap = [7.36, 5.36, 3.16, 1.06, -1.06, -3.16, -5.16, -7.36];
@@ -246,3 +246,13 @@ manager.onLoad = function ( ) {
     document.getElementById("title").innerHTML = "Online Chess Game";
     animate()
 };
+
+function resize_window(camera, renderer){
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setPixelRatio(window.devicePixelRatio)
+}
+
+window.addEventListener('resize',() => resize_window(camera,renderer))
