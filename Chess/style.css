@@ -38,7 +38,7 @@ td {
     height: 65px;
 }
 
-.red-turn-text {
+.white-turn-text {
     text-align: center;
     color: black;
     font-family: "open sans";
@@ -52,7 +52,7 @@ td {
     color: lightgray;
 }
 
-.black-piece {
+.bPawn {
     width: 20px;
     height: 20px;
     padding: 12px;
@@ -61,16 +61,16 @@ td {
     border-radius: 50px;
 }
 
-.red-piece {
+.wPawn {
     width: 20px;
     height: 20px;
     padding: 12px;
-    background-color: red;
-    border: 1px solid white;
+    background-color: white;
+    border: 1px solid black;
     border-radius: 50px;
 }
 
-.king.red-piece {
+.king.white-piece {
     background-color: orange;
 }
 
@@ -93,7 +93,7 @@ span {
 }
 
 @media screen and (max-width: 560px) {
-    .red-piece {
+    .white-piece {
         height: 4.5vw;
         width: 4.5vw;
     }
@@ -108,7 +108,7 @@ span {
         height: 12vw;
     }
 
-    .red-turn-text {
+    .white-turn-text {
         font-size: 40px;
     }
 
@@ -128,7 +128,7 @@ span {
         display: none;
     }
 
-    .red-turn-text {
+    .white-turn-text {
         -webkit-transform:rotate(-180deg);
         -moz-transform:rotate(-180deg);
         -o-transform:rotate(-180deg);
@@ -138,7 +138,7 @@ span {
 }
 
 @media screen and (max-width: 380px) {
-    .red-piece {
+    .white-piece {
         height: 3vw;
         width: 3vw;
     }
@@ -150,7 +150,7 @@ span {
 }
 
 @media screen and (max-width: 345px) {
-    .red-piece {
+    .white-piece {
         height: 2.5vw;
         width: 2.5vw;
     }
@@ -162,7 +162,7 @@ span {
 }
 
 @media screen and (max-width: 300px) {
-    .red-piece {
+    .white-piece {
         height: 1.5vw;
         width: 1.5vw;
     }
@@ -172,7 +172,7 @@ span {
         width: 1.5vw;
     }
 
-    .red-turn-text {
+    .white-turn-text {
         font-size: 35px;
     }
 
