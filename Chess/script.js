@@ -85,6 +85,7 @@ function getPlayerPieces() {
 function removeCellonclick() {
     for (let i = 0; i < cells.length; i++) {
         cells[i].removeAttribute("onclick");
+        cells[i].removeAttribute("style");
     }
 }
 
@@ -187,45 +188,107 @@ function pawn(){
 }
 
 function rook(){ //if two for loops not used then we cant stop when we meet a friendly piece. row, col need to be separate
+    let rowMove = []
+    let colMove = []
     for (let i = 0; i < 8; i++) {
         let col = i + (selectedPiece.row * 8) - selectedPiece.indexOfBoardPiece
-        if (col !== selectedPiece.indexOfBoardPiece) {
+        if (col !== 0) {
             if (turn){
                 if (board[selectedPiece.indexOfBoardPiece + col] < 16 && board[selectedPiece.indexOfBoardPiece + col] !== null){
-                    break
+                    if (col < 0){
+                        colMove = []
+                    }
+                    else{
+                        break;
+                    }
+                }
+                else if (board[selectedPiece.indexOfBoardPiece + col] >= 16){
+                    if (col < 0){
+                        colMove = []
+                        colMove.push(col)
+                    }
+                    else{
+                        colMove.push(col)
+                        break;
+                    }
                 }
                 else
-                    selectedPiece.moves.push(col)
+                    colMove.push(col)
             }
             else{
-                if (board[selectedPiece.indexOfBoardPiece + col] >= 16 && board[selectedPiece.indexOfBoardPiece + col] !== null){
-                    break
+                if (board[selectedPiece.indexOfBoardPiece + col] >= 16) {
+                    if (col < 0) {
+                        colMove = []
+                    } else {
+                        break;
+                    }
+                }
+                else if (board[selectedPiece.indexOfBoardPiece + col] < 16 && board[selectedPiece.indexOfBoardPiece + col] !== null){
+                    if (col < 0){
+                        colMove = []
+                        colMove.push(col)
+                    }
+                    else{
+                        colMove.push(col)
+                        break;
+                    }
                 }
                 else
-                    selectedPiece.moves.push(col)
+                    colMove.push(col)
             }
         }
     }
     for (let i = 0; i < 8; i++) {
         let row = ((i * 8) + selectedPiece.col) - selectedPiece.indexOfBoardPiece
-        if (row !== selectedPiece.indexOfBoardPiece) {
+        if (row !== 0) {
             if (turn){
                 if (board[selectedPiece.indexOfBoardPiece + row] < 16 && board[selectedPiece.indexOfBoardPiece + row] !== null){
-                    break
+                    if (row < 0){
+                        rowMove = []
+                    }
+                    else{
+                        break;
+                    }
+                }
+                else if (board[selectedPiece.indexOfBoardPiece + row] >= 16){
+                    if (row < 0){
+                        rowMove = []
+                        rowMove.push(row)
+                    }
+                    else{
+                        rowMove.push(row)
+                        break;
+                    }
                 }
                 else
-                    selectedPiece.moves.push(row)
+                    rowMove.push(row)
             }
             else{
-                if (board[selectedPiece.indexOfBoardPiece + row] >= 16 && board[selectedPiece.indexOfBoardPiece + row] !== null){
-                    break
+                if (board[selectedPiece.indexOfBoardPiece + row] >= 16){
+                    if (row < 0){
+                        rowMove = []
+                    }
+                    else{
+                        break;
+                    }
                 }
-                else
-                    selectedPiece.moves.push(row)
+                else if (board[selectedPiece.indexOfBoardPiece + row] < 16 && board[selectedPiece.indexOfBoardPiece + row] !== null){
+                    if (row < 0){
+                        rowMove = []
+                        rowMove.push(row)
+                    }
+                    else{
+                        rowMove.push(row)
+                        break;
+                    }
+                }
+                else {
+                    rowMove.push(row)
+                }
             }
         }
     }
-    console.log(selectedPiece.moves)
+    selectedPiece.moves = rowMove.concat(colMove)
     givePieceBorder();
 }
 
@@ -263,6 +326,7 @@ function giveCellsClick() {
     for (let i = 0; i < selectedPiece.moves.length; i++){
         // console.log(selectedPiece.moves[i])
         cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
+        cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("style", ("background-color: #39bd51"))
     }
 }
 
