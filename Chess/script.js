@@ -1,14 +1,14 @@
 /*----------- Game State Data ----------*/
 
 const board = [
-    null, null, null, null, null, null, null, null,
+    0, 1, 2, 3, 4, 5, 6, 7,
     8, 9, 10, 11, 12, 13, 14, 15,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     16, 17, 18, 19, 20, 21, 22, 23,
-    null, null, null, null, null, null, null, null
+    24, 25, 26, 27, 28, 29, 30, 31
 ]
 
 const left = [0,8,16,24,32,40,48,56]
@@ -38,8 +38,9 @@ let playerPieces;
 let selectedPiece = {
     pieceId: -1,
     indexOfBoardPiece: -1,
+    class: '',
     moveTwo: false,
-    isKing: false,
+    isQueen: false,
     seventhSpace: false,
     eighthSpace: false,
     ninthSpace: false,
@@ -64,10 +65,12 @@ function givePiecesEventListeners() {
         for (let i = 0; i < whitePieces.length; i++) {
             whitePieces[i].addEventListener("click", getPlayerPieces);
         }
+        console.log(whitePieces.length)
     } else {
         for (let i = 0; i < blacksPieces.length; i++) {
             blacksPieces[i].addEventListener("click", getPlayerPieces);
         }
+        console.log(blacksPieces.length)
     }
 }
 
@@ -104,8 +107,9 @@ function resetBorders() {
 function resetSelectedPieceProperties() {
     selectedPiece.pieceId = -1;
     selectedPiece.indexOfBoardPiece = -1;
+    selectedPiece.class = "";
     selectedPiece.moveTwo= false;
-    selectedPiece.isKing = false;
+    selectedPiece.isQueen = false;
     selectedPiece.seventhSpace = false;
     selectedPiece.eighthSpace = false;
     selectedPiece.ninthSpace = false;
@@ -126,12 +130,13 @@ function resetSelectedPieceProperties() {
 function getSelectedPiece() {
     selectedPiece.pieceId = parseInt(event.target.id);
     selectedPiece.indexOfBoardPiece = findPiece(selectedPiece.pieceId);
-    isPieceKing();
+    selectedPiece.class = document.getElementById(selectedPiece.pieceId).classList.value;
+    isPieceQueen();
 }
 
-// checks if selected piece is a king
-function isPieceKing() {
-    selectedPiece.isKing = document.getElementById(selectedPiece.pieceId).classList.contains("king");
+// checks if selected piece is a Queen
+function isPieceQueen() {
+    selectedPiece.isQueen = (document.getElementById(selectedPiece.pieceId).classList.contains("wQueen") || document.getElementById(selectedPiece.pieceId).classList.contains("bQueen"));
     isMove2();
 }
 
@@ -202,9 +207,9 @@ function checkAvailableJumpSpaces() {
     checkPieceConditions();
 }
 
-// restricts movement if the piece is a king
+// restricts movement if the piece is a Queen
 function checkPieceConditions() {
-    if (selectedPiece.isKing) {
+    if (selectedPiece.isQueen) {
         givePieceBorder();
     }
     else {
@@ -272,19 +277,19 @@ function makeMove(number){
     document.getElementById(selectedPiece.pieceId).remove();
     cells[selectedPiece.indexOfBoardPiece].innerHTML = "";
     if (turn) {
-        if (selectedPiece.isKing){
-            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="white-piece king" id="${selectedPiece.pieceId}"></p>`;
+        if (selectedPiece.isQueen){
+            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="wQueen" id="${selectedPiece.pieceId}"></p>`;
             whitePieces = document.querySelectorAll("p");
         } else{
-            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="wPawn" id="${selectedPiece.pieceId}"></p>`;
+            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></p>`;
             whitePieces = document.querySelectorAll("p");
         }
     } else {
-        if (selectedPiece.isKing) {
-            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="black-piece king" id="${selectedPiece.pieceId}"></span>`;
+        if (selectedPiece.isQueen) {
+            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="bQueen" id="${selectedPiece.pieceId}"></span>`;
             blacksPieces = document.querySelectorAll("span");
         } else {
-            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="bPawn" id="${selectedPiece.pieceId}"></span>`;
+            cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></span>`;
             blacksPieces = document.querySelectorAll("span");
         }
     }
@@ -302,10 +307,10 @@ function changeData(indexOfBoardPiece, modifiedIndex, removePiece){
     board[indexOfBoardPiece] = null;
     board[modifiedIndex] = parseInt(selectedPiece.pieceId);
     if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
-        document.getElementById(selectedPiece.pieceId).classList.add("king")
+        document.getElementById(selectedPiece.pieceId).classList.replace("wPawn", "wQueen")
     }
     if (turn === false && selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
-        document.getElementById(selectedPiece.pieceId).classList.add("king");
+        document.getElementById(selectedPiece.pieceId).classList.replace("bPawn", "bQueen")
     }
     if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
         document.getElementById(selectedPiece.pieceId).classList.remove("move2");
