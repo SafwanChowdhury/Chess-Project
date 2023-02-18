@@ -244,6 +244,10 @@ function bishop(){
                     possibleMoves.push(i * (8 * dy + dx));
                     // if there is a piece at current position, stop iterating along this diagonal
                     if (board[r * 8 + c] !== null) {
+                        if(turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
+                            possibleMoves.pop()
+                            console.log("pop")
+                        }
                         break;
                     }
                 }
@@ -255,7 +259,6 @@ function bishop(){
         }
     }
 
-    console.log(possibleMoves)
     for (let i = 0; i < possibleMoves.length; i++){
         if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
             selectedPiece.moves.push(possibleMoves[i])
