@@ -1,10 +1,10 @@
 /*----------- Game State Data ----------*/
 
 const board = [
-    0, 1, 2, 3, 4, null, 6, 7,
+    0, null, 2, 3, 4, 5, 6, 7,
     8, 9, 10, 11, 12, 13, 14, 15,
     null, null, null, null, null, null, null, null,
-    null, null, 5, null, null, null, null, null,
+    null, null, 1, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     16, 17, 18, 19, 20, 21, 22, 23,
@@ -135,60 +135,62 @@ function getSelectedPiece() {
         selectedPiece.isRight = true;
     }
     if (selectedPiece.isRook)
-        rook();
+        givePieceBorder(rook())
     else if (selectedPiece.isKnight)
-        knight();
+        givePieceBorder(knight())
     else if (selectedPiece.isBishop)
-        bishop();
+        givePieceBorder(bishop())
     else if (selectedPiece.isQueen)
-        queen();
+        givePieceBorder(queen())
     else if (selectedPiece.isKing)
-        king();
+        givePieceBorder(king())
     else
-        pawn()
+        givePieceBorder(pawn())
 }
 
 function pawn(){
+    let moves = []
     if (selectedPiece.pieceId < 16){ //white
         if (board[selectedPiece.indexOfBoardPiece + 8] === null){
-            selectedPiece.moves.push(8)
+            moves.push(8)
         }
         if (selectedPiece.moveTwo){
             if (board[selectedPiece.indexOfBoardPiece + 16] === null) {
-                selectedPiece.moves.push(16)
+                moves.push(16)
             }
         }
         if (board[selectedPiece.indexOfBoardPiece + 7] >= 16 && selectedPiece.isLeft === false) {
-            selectedPiece.moves.push(7)
+            moves.push(7)
         }
         if (board[selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
-            selectedPiece.moves.push(9)
+            moves.push(9)
         }
     }
     else{ //black
         if (board[selectedPiece.indexOfBoardPiece - 8] === null){
-            selectedPiece.moves.push(-8)
+            moves.push(-8)
         }
         if (selectedPiece.moveTwo){
             if (board[selectedPiece.indexOfBoardPiece - 16] === null) {
-                selectedPiece.moves.push(-16)
+                moves.push(-16)
             }
         }
         if (board[selectedPiece.indexOfBoardPiece - 7] < 16 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
-            selectedPiece.moves.push(-7)
+            moves.push(-7)
         }
         if (board[selectedPiece.indexOfBoardPiece - 9] < 16 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
-            selectedPiece.moves.push(-9)
+            moves.push(-9)
         }
     }
-    givePieceBorder();
+    return moves
 }
 
 function rook(){
+    let moves = []
     let rowMove = getMovesInDirection(1, turn, board, selectedPiece).concat(getMovesInDirection(-1, turn, board, selectedPiece));
     let colMove = getMovesInDirection(8, turn, board, selectedPiece).concat(getMovesInDirection(-8, turn, board, selectedPiece));
-    selectedPiece.moves = rowMove.concat(colMove)
-    givePieceBorder();
+    moves = rowMove.concat(colMove)
+    return moves
 }
 
 function getMovesInDirection(direction, turn, board, selectedPiece) {
@@ -219,12 +221,38 @@ function getMovesInDirection(direction, turn, board, selectedPiece) {
 
 
 function knight(){
-    givePieceBorder();
+    let moves = [-17, -15, -10, -6, 6, 10, 15, 17];
+    let validMoves = [];
+
+    for (let i = 0; i < moves.length; i++) {
+        let destinationIndex = selectedPiece.indexOfBoardPiece + moves[i];
+        if (destinationIndex < 0 || destinationIndex > 63) {
+            continue // skip invalid moves
+        }
+        let destinationPiece = board[destinationIndex];
+        if (moves[i] === -1 && Math.floor(destinationIndex % 8) === 7) {
+            continue // skip left edge moves
+        }
+        if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
+            continue // skip right edge moves
+        }
+        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 2 || Math.floor(destinationIndex % 8) < selectedPiece.col - 2){
+            continue
+        }
+        if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
+        }
+        else{
+            validMoves.push(moves[i]);
+        }
+    }
+    moves = validMoves
+    return moves
 }
 
 function bishop(){
     let position = selectedPiece.indexOfBoardPiece;
     let possibleMoves = [];
+    let moves = []
 
 // compute row and column of bishop
     let row = Math.floor(position / 8);
@@ -261,31 +289,57 @@ function bishop(){
 
     for (let i = 0; i < possibleMoves.length; i++){
         if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
-            selectedPiece.moves.push(possibleMoves[i])
+            moves.push(possibleMoves[i])
         }
     }
-    console.log(selectedPiece.moves)
-    givePieceBorder();
+    return moves
 }
 
 function queen(){
-    givePieceBorder();
+    let moves1 = rook()
+    let moves2 = bishop()
+    let moves = moves1.concat(moves2)
+    moves.sort(function(a, b){return a-b});
+    return moves
 }
 
 function king(){
-    givePieceBorder();
+    let moves = [-9, -8, -7, -1, 1, 7, 8, 9];
+    let validMoves = [];
+
+    for (let i = 0; i < moves.length; i++) {
+        let destinationIndex = selectedPiece.indexOfBoardPiece + moves[i];
+        if (destinationIndex < 0 || destinationIndex > 63) {
+            continue // skip invalid moves
+        }
+        let destinationPiece = board[destinationIndex];
+        if (moves[i] === -1 && Math.floor(destinationIndex % 8) === 7) {
+            continue // skip left edge moves
+        }
+        if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
+            continue // skip right edge moves
+        }
+        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 1 || Math.floor(destinationIndex % 8) < selectedPiece.col - 1){
+            continue
+        }
+        if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
+        }
+        else{
+            validMoves.push(moves[i]);
+        }
+    }
+    moves = validMoves
+    return moves
 }
 
-// restricts movement if the piece is a Queen
 
 // gives the piece a green highlight for the user (showing its movable)
-function givePieceBorder() {
+function givePieceBorder(moves) {
+    selectedPiece.moves = moves
     if (selectedPiece.moves){
         document.getElementById(selectedPiece.pieceId).style.border = "3px solid green";
         console.log(selectedPiece);
         giveCellsClick();
-    }
-    else {
     }
 }
 
