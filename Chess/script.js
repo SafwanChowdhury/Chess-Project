@@ -309,7 +309,6 @@ function bishop(){
     let position = selectedPiece.indexOfBoardPiece
     let possibleMoves = [];
     let col = selectedPiece.col; // column of bishop
-    let row = selectedPiece.row; // row of bishop
 
     // check diagonals going down and to the right
     let i = position;
@@ -338,7 +337,7 @@ function bishop(){
         counter++
     }
 
-    // check diagonals going down and to the right
+    // check diagonals going up and to the right
     i = position;
     counter = 0
     while (i % 8 >= col && i >= 0) { // check if the position is on the same diagonal
@@ -346,30 +345,12 @@ function bishop(){
         i -= 7;
         counter++
     }
-    console.log("possible moves " + possibleMoves)
-    // exclude current position from possible moves
-    console.log(possibleMoves.length)
-/*    for (let i = 0; i < possibleMoves.length; i++){
-        console.log("i " + i + " Val: " + possibleMoves[i])
-        if (possibleMoves[i] + position === position) {
-            //console.log("splice " + possibleMoves[i])
-            possibleMoves.splice(i, 1);
-        }
-    }*/
 
     for (let i = 0; i < possibleMoves.length; i++){
         if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
             selectedPiece.moves.push(possibleMoves[i])
         }
     }
-/*    console.log("possible moves " + possibleMoves)
-
-    selectedPiece.moves = possibleMoves
-    selectedPiece.moves.sort( function( a , b){
-        if(a > b) return 1;
-        if(a < b) return -1;
-        return 0;
-    });*/
     console.log(selectedPiece.moves)
     givePieceBorder();
 }
