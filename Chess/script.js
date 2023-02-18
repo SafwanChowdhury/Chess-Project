@@ -1,10 +1,10 @@
 /*----------- Game State Data ----------*/
 
 const board = [
-    0, 1, 2, 3, 4, 5, 6, 7,
+    0, 1, 2, 3, 4, null, 6, 7,
     8, 9, 10, 11, 12, 13, 14, 15,
     null, null, null, null, null, null, null, null,
-    null, null, null, null, null, null, null, null,
+    null, null, 5, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     null, null, null, null, null, null, null, null,
     16, 17, 18, 19, 20, 21, 22, 23,
@@ -41,6 +41,7 @@ let selectedPiece = {
     row: 0,
     col: 0,
     class: '',
+    color: 0,
     moveTwo: false,
     isPawn: false,
     isRook: false,
@@ -105,6 +106,7 @@ function resetSelectedPieceProperties() {
     selectedPiece.row = 0;
     selectedPiece.col = 0;
     selectedPiece.class = "";
+    selectedPiece.color = 0;
     selectedPiece.moveTwo = false;
     selectedPiece.isPawn = false;
     selectedPiece.isRook = false;
@@ -137,6 +139,13 @@ function getSelectedPiece() {
     else if (right.includes(selectedPiece.indexOfBoardPiece)){
         selectedPiece.isRight = true;
     }
+    if (selectedPiece.pieceId < 16){
+        selectedPiece.color = 0
+    }
+    else{
+        selectedPiece.color = 1
+    }
+    console.log(selectedPiece)
     if (selectedPiece.isRook)
         rook();
     else if (selectedPiece.isKnight)
@@ -297,6 +306,71 @@ function knight(){
 }
 
 function bishop(){
+    let position = selectedPiece.indexOfBoardPiece
+    let possibleMoves = [];
+    let col = selectedPiece.col; // column of bishop
+    let row = selectedPiece.row; // row of bishop
+
+    // check diagonals going down and to the right
+    let i = position;
+    let counter = 0
+    while (i % 8 >= col && i < 64) { // check if the position is on the same diagonal
+        possibleMoves.push(counter * 9);
+        i += 9;
+        counter++
+    }
+
+    // check diagonals going down and to the left
+    i = position;
+    counter = 0
+    while (i % 8 <= col && i < 64) { // check if the position is on the same diagonal
+        possibleMoves.push(counter * 7);
+        i += 7;
+        counter++
+    }
+
+    // check diagonals going up and to the left
+    i = position;
+    counter = 0
+    while (i % 8 <= col && i >= 0) { // check if the position is on the same diagonal
+        possibleMoves.push(counter * -9);
+        i -= 9;
+        counter++
+    }
+
+    // check diagonals going down and to the right
+    i = position;
+    counter = 0
+    while (i % 8 >= col && i >= 0) { // check if the position is on the same diagonal
+        possibleMoves.push(counter * -7);
+        i -= 7;
+        counter++
+    }
+    console.log("possible moves " + possibleMoves)
+    // exclude current position from possible moves
+    console.log(possibleMoves.length)
+/*    for (let i = 0; i < possibleMoves.length; i++){
+        console.log("i " + i + " Val: " + possibleMoves[i])
+        if (possibleMoves[i] + position === position) {
+            //console.log("splice " + possibleMoves[i])
+            possibleMoves.splice(i, 1);
+        }
+    }*/
+
+    for (let i = 0; i < possibleMoves.length; i++){
+        if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
+            selectedPiece.moves.push(possibleMoves[i])
+        }
+    }
+/*    console.log("possible moves " + possibleMoves)
+
+    selectedPiece.moves = possibleMoves
+    selectedPiece.moves.sort( function( a , b){
+        if(a > b) return 1;
+        if(a < b) return -1;
+        return 0;
+    });*/
+    console.log(selectedPiece.moves)
     givePieceBorder();
 }
 
@@ -324,9 +398,8 @@ function givePieceBorder() {
 // gives the cells on the board a 'click' bassed on the possible moves
 function giveCellsClick() {
     for (let i = 0; i < selectedPiece.moves.length; i++){
-        // console.log(selectedPiece.moves[i])
         cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
-        cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("style", ("background-color: #39bd51"))
+        cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("style", ("background-color: #2be34d"))
     }
 }
 
