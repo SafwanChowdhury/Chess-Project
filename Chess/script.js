@@ -11,9 +11,6 @@ const board = [
     24, 25, 26, 27, 28, 29, 30, 31
 ]
 
-const left = [0,8,16,24,32,40,48,56]
-const right = [7,15,23,31,39,47,55,63]
-
 // parses pieceId's and returns the index of that piece's place on the board
 let findPiece = function (pieceId) {
     let parsed = parseInt(pieceId);
@@ -41,7 +38,6 @@ let selectedPiece = {
     row: 0,
     col: 0,
     class: '',
-    color: 0,
     moveTwo: false,
     isPawn: false,
     isRook: false,
@@ -106,7 +102,6 @@ function resetSelectedPieceProperties() {
     selectedPiece.row = 0;
     selectedPiece.col = 0;
     selectedPiece.class = "";
-    selectedPiece.color = 0;
     selectedPiece.moveTwo = false;
     selectedPiece.isPawn = false;
     selectedPiece.isRook = false;
@@ -133,19 +128,12 @@ function getSelectedPiece() {
     selectedPiece.isQueen = (document.getElementById(selectedPiece.pieceId).classList.contains("wQueen") || document.getElementById(selectedPiece.pieceId).classList.contains("bQueen"));
     selectedPiece.isKing = (document.getElementById(selectedPiece.pieceId).classList.contains("wKing") || document.getElementById(selectedPiece.pieceId).classList.contains("bKing"));
     selectedPiece.moveTwo = document.getElementById(selectedPiece.pieceId).classList.contains("move2");
-    if (left.includes(selectedPiece.indexOfBoardPiece)){
+    if (selectedPiece.col === 0){
         selectedPiece.isLeft = true;
     }
-    else if (right.includes(selectedPiece.indexOfBoardPiece)){
+    else if (selectedPiece.col === 7){
         selectedPiece.isRight = true;
     }
-    if (selectedPiece.pieceId < 16){
-        selectedPiece.color = 0
-    }
-    else{
-        selectedPiece.color = 1
-    }
-    console.log(selectedPiece)
     if (selectedPiece.isRook)
         rook();
     else if (selectedPiece.isKnight)
@@ -196,156 +184,78 @@ function pawn(){
     givePieceBorder();
 }
 
-function rook(){ //if two for loops not used then we cant stop when we meet a friendly piece. row, col need to be separate
-    let rowMove = []
-    let colMove = []
-    for (let i = 0; i < 8; i++) {
-        let col = i + (selectedPiece.row * 8) - selectedPiece.indexOfBoardPiece
-        if (col !== 0) {
-            if (turn){
-                if (board[selectedPiece.indexOfBoardPiece + col] < 16 && board[selectedPiece.indexOfBoardPiece + col] !== null){
-                    if (col < 0){
-                        colMove = []
-                    }
-                    else{
-                        break;
-                    }
-                }
-                else if (board[selectedPiece.indexOfBoardPiece + col] >= 16){
-                    if (col < 0){
-                        colMove = []
-                        colMove.push(col)
-                    }
-                    else{
-                        colMove.push(col)
-                        break;
-                    }
-                }
-                else
-                    colMove.push(col)
-            }
-            else{
-                if (board[selectedPiece.indexOfBoardPiece + col] >= 16) {
-                    if (col < 0) {
-                        colMove = []
-                    } else {
-                        break;
-                    }
-                }
-                else if (board[selectedPiece.indexOfBoardPiece + col] < 16 && board[selectedPiece.indexOfBoardPiece + col] !== null){
-                    if (col < 0){
-                        colMove = []
-                        colMove.push(col)
-                    }
-                    else{
-                        colMove.push(col)
-                        break;
-                    }
-                }
-                else
-                    colMove.push(col)
-            }
-        }
-    }
-    for (let i = 0; i < 8; i++) {
-        let row = ((i * 8) + selectedPiece.col) - selectedPiece.indexOfBoardPiece
-        if (row !== 0) {
-            if (turn){
-                if (board[selectedPiece.indexOfBoardPiece + row] < 16 && board[selectedPiece.indexOfBoardPiece + row] !== null){
-                    if (row < 0){
-                        rowMove = []
-                    }
-                    else{
-                        break;
-                    }
-                }
-                else if (board[selectedPiece.indexOfBoardPiece + row] >= 16){
-                    if (row < 0){
-                        rowMove = []
-                        rowMove.push(row)
-                    }
-                    else{
-                        rowMove.push(row)
-                        break;
-                    }
-                }
-                else
-                    rowMove.push(row)
-            }
-            else{
-                if (board[selectedPiece.indexOfBoardPiece + row] >= 16){
-                    if (row < 0){
-                        rowMove = []
-                    }
-                    else{
-                        break;
-                    }
-                }
-                else if (board[selectedPiece.indexOfBoardPiece + row] < 16 && board[selectedPiece.indexOfBoardPiece + row] !== null){
-                    if (row < 0){
-                        rowMove = []
-                        rowMove.push(row)
-                    }
-                    else{
-                        rowMove.push(row)
-                        break;
-                    }
-                }
-                else {
-                    rowMove.push(row)
-                }
-            }
-        }
-    }
+function rook(){
+    let rowMove = getMovesInDirection(1, turn, board, selectedPiece).concat(getMovesInDirection(-1, turn, board, selectedPiece));
+    let colMove = getMovesInDirection(8, turn, board, selectedPiece).concat(getMovesInDirection(-8, turn, board, selectedPiece));
     selectedPiece.moves = rowMove.concat(colMove)
     givePieceBorder();
 }
+
+function getMovesInDirection(direction, turn, board, selectedPiece) {
+    let moves = [];
+    let maxOffset = 7 * (turn ? 8 : 1);
+    for (let i = 1; i <= maxOffset; i++) {
+        let offset = i * direction;
+        let newRow = selectedPiece.row + (turn ? offset / 8 : 0);
+        let newCol = selectedPiece.col + (turn ? 0 : offset);
+        if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
+            console.log("break1 " + newRow + " " + newCol)
+        }
+        let piece = board[selectedPiece.indexOfBoardPiece + offset];
+        if (piece !== null) {
+            if (turn && piece >= 16 || !turn && piece < 16) {
+                if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+                    moves.push(offset);
+                }
+            }
+            break; // exit loop if the piece is the player's own piece or an opponent's piece
+        } else if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+            moves.push(offset);
+        }
+    }
+    return moves;
+}
+
+
 
 function knight(){
     givePieceBorder();
 }
 
 function bishop(){
-    let position = selectedPiece.indexOfBoardPiece
+    let position = selectedPiece.indexOfBoardPiece;
     let possibleMoves = [];
-    let col = selectedPiece.col; // column of bishop
 
-    // check diagonals going down and to the right
-    let i = position;
-    let counter = 0
-    while (i % 8 >= col && i < 64) { // check if the position is on the same diagonal
-        possibleMoves.push(counter * 9);
-        i += 9;
-        counter++
+// compute row and column of bishop
+    let row = Math.floor(position / 8);
+    let col = position % 8;
+
+// iterate over each diagonal direction
+    for (let dx of [-1, 1]) {
+        for (let dy of [-1, 1]) {
+            // iterate over diagonal steps
+            for (let i = 1; i < 8; i++) {
+                // compute row and column of current position
+                let r = row + i * dy;
+                let c = col + i * dx;
+                // check if current position is on board and on diagonal
+                if (r >= 0 && r < 8 && c >= 0 && c < 8 && Math.abs(r - row) === Math.abs(c - col)) {
+                    // add diagonal step to possible moves
+                    possibleMoves.push(i * (8 * dy + dx));
+                    // if there is a piece at current position, stop iterating along this diagonal
+                    if (board[r * 8 + c] !== null) {
+                        break;
+                    }
+                }
+                else {
+                    // if current position is not on board or not on diagonal, stop iterating along this diagonal
+                    break;
+                }
+            }
+        }
     }
 
-    // check diagonals going down and to the left
-    i = position;
-    counter = 0
-    while (i % 8 <= col && i < 64) { // check if the position is on the same diagonal
-        possibleMoves.push(counter * 7);
-        i += 7;
-        counter++
-    }
-
-    // check diagonals going up and to the left
-    i = position;
-    counter = 0
-    while (i % 8 <= col && i >= 0) { // check if the position is on the same diagonal
-        possibleMoves.push(counter * -9);
-        i -= 9;
-        counter++
-    }
-
-    // check diagonals going up and to the right
-    i = position;
-    counter = 0
-    while (i % 8 >= col && i >= 0) { // check if the position is on the same diagonal
-        possibleMoves.push(counter * -7);
-        i -= 7;
-        counter++
-    }
-
+    console.log(possibleMoves)
     for (let i = 0; i < possibleMoves.length; i++){
         if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
             selectedPiece.moves.push(possibleMoves[i])
@@ -376,7 +286,7 @@ function givePieceBorder() {
     }
 }
 
-// gives the cells on the board a 'click' bassed on the possible moves
+// gives the cells on the board a 'click' based on the possible moves
 function giveCellsClick() {
     for (let i = 0; i < selectedPiece.moves.length; i++){
         cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
