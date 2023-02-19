@@ -128,10 +128,9 @@ function getSelectedPiece() {
     selectedPiece.isQueen = (document.getElementById(selectedPiece.pieceId).classList.contains("wQueen") || document.getElementById(selectedPiece.pieceId).classList.contains("bQueen"));
     selectedPiece.isKing = (document.getElementById(selectedPiece.pieceId).classList.contains("wKing") || document.getElementById(selectedPiece.pieceId).classList.contains("bKing"));
     selectedPiece.moveTwo = document.getElementById(selectedPiece.pieceId).classList.contains("move2");
-    if (selectedPiece.col === 0){
+    if (selectedPiece.col === 0) {
         selectedPiece.isLeft = true;
-    }
-    else if (selectedPiece.col === 7){
+    } else if (selectedPiece.col === 7) {
         selectedPiece.isRight = true;
     }
     if (selectedPiece.isRook)
@@ -148,13 +147,13 @@ function getSelectedPiece() {
         givePieceBorder(pawn())
 }
 
-function pawn(){
+function pawn() {
     let moves = []
-    if (selectedPiece.pieceId < 16){ //white
-        if (board[selectedPiece.indexOfBoardPiece + 8] === null){
+    if (selectedPiece.pieceId < 16) { //white
+        if (board[selectedPiece.indexOfBoardPiece + 8] === null) {
             moves.push(8)
         }
-        if (selectedPiece.moveTwo){
+        if (selectedPiece.moveTwo) {
             if (board[selectedPiece.indexOfBoardPiece + 16] === null) {
                 moves.push(16)
             }
@@ -165,12 +164,11 @@ function pawn(){
         if (board[selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
             moves.push(9)
         }
-    }
-    else{ //black
-        if (board[selectedPiece.indexOfBoardPiece - 8] === null){
+    } else { //black
+        if (board[selectedPiece.indexOfBoardPiece - 8] === null) {
             moves.push(-8)
         }
-        if (selectedPiece.moveTwo){
+        if (selectedPiece.moveTwo) {
             if (board[selectedPiece.indexOfBoardPiece - 16] === null) {
                 moves.push(-16)
             }
@@ -185,7 +183,7 @@ function pawn(){
     return moves
 }
 
-function rook(){
+function rook() {
     let moves = []
     let rowMove = getMovesInDirection(1, turn, board, selectedPiece).concat(getMovesInDirection(-1, turn, board, selectedPiece));
     let colMove = getMovesInDirection(8, turn, board, selectedPiece).concat(getMovesInDirection(-8, turn, board, selectedPiece));
@@ -219,8 +217,7 @@ function getMovesInDirection(direction, turn, board, selectedPiece) {
 }
 
 
-
-function knight(){
+function knight() {
     let moves = [-17, -15, -10, -6, 6, 10, 15, 17];
     let validMoves = [];
 
@@ -236,12 +233,11 @@ function knight(){
         if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
             continue // skip right edge moves
         }
-        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 2 || Math.floor(destinationIndex % 8) < selectedPiece.col - 2){
+        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 2 || Math.floor(destinationIndex % 8) < selectedPiece.col - 2) {
             continue
         }
         if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
-        }
-        else{
+        } else {
             validMoves.push(moves[i]);
         }
     }
@@ -249,7 +245,7 @@ function knight(){
     return moves
 }
 
-function bishop(){
+function bishop() {
     let position = selectedPiece.indexOfBoardPiece;
     let possibleMoves = [];
     let moves = []
@@ -272,14 +268,13 @@ function bishop(){
                     possibleMoves.push(i * (8 * dy + dx));
                     // if there is a piece at current position, stop iterating along this diagonal
                     if (board[r * 8 + c] !== null) {
-                        if(turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
+                        if (turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
                             possibleMoves.pop()
                             console.log("pop")
                         }
                         break;
                     }
-                }
-                else {
+                } else {
                     // if current position is not on board or not on diagonal, stop iterating along this diagonal
                     break;
                 }
@@ -287,23 +282,25 @@ function bishop(){
         }
     }
 
-    for (let i = 0; i < possibleMoves.length; i++){
-        if (possibleMoves[i] > 0 || possibleMoves[i] < 0){
+    for (let i = 0; i < possibleMoves.length; i++) {
+        if (possibleMoves[i] > 0 || possibleMoves[i] < 0) {
             moves.push(possibleMoves[i])
         }
     }
     return moves
 }
 
-function queen(){
+function queen() {
     let moves1 = rook()
     let moves2 = bishop()
     let moves = moves1.concat(moves2)
-    moves.sort(function(a, b){return a-b});
+    moves.sort(function (a, b) {
+        return a - b
+    });
     return moves
 }
 
-function king(){
+function king() {
     let moves = [-9, -8, -7, -1, 1, 7, 8, 9];
     let validMoves = [];
 
@@ -319,12 +316,11 @@ function king(){
         if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
             continue // skip right edge moves
         }
-        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 1 || Math.floor(destinationIndex % 8) < selectedPiece.col - 1){
+        if (Math.floor(destinationIndex % 8) > selectedPiece.col + 1 || Math.floor(destinationIndex % 8) < selectedPiece.col - 1) {
             continue
         }
         if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
-        }
-        else{
+        } else {
             validMoves.push(moves[i]);
         }
     }
@@ -336,7 +332,7 @@ function king(){
 // gives the piece a green highlight for the user (showing its movable)
 function givePieceBorder(moves) {
     selectedPiece.moves = moves
-    if (selectedPiece.moves){
+    if (selectedPiece.moves) {
         document.getElementById(selectedPiece.pieceId).style.border = "3px solid green";
         console.log(selectedPiece);
         giveCellsClick();
@@ -345,21 +341,21 @@ function givePieceBorder(moves) {
 
 // gives the cells on the board a 'click' based on the possible moves
 function giveCellsClick() {
-    for (let i = 0; i < selectedPiece.moves.length; i++){
+    for (let i = 0; i < selectedPiece.moves.length; i++) {
         cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
         cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("style", ("background-color: #2be34d"))
     }
 }
 
 //make move
-function makeMove(number){
+function makeMove(number) {
     document.getElementById(selectedPiece.pieceId).remove();
     cells[selectedPiece.indexOfBoardPiece].innerHTML = "";
     if (turn) {
-        if (selectedPiece.isQueen){
+        if (selectedPiece.isQueen) {
             cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="wQueen" id="${selectedPiece.pieceId}"></p>`;
             whitePieces = document.querySelectorAll("p");
-        } else{
+        } else {
             cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></p>`;
             whitePieces = document.querySelectorAll("p");
         }
@@ -382,7 +378,7 @@ function makeMove(number){
 }
 
 // Changes the board states data on the back end
-function changeData(indexOfBoardPiece, modifiedIndex, removePiece){
+function changeData(indexOfBoardPiece, modifiedIndex, removePiece) {
     board[indexOfBoardPiece] = null;
     board[modifiedIndex] = parseInt(selectedPiece.pieceId);
     if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 57) {

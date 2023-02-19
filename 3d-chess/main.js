@@ -179,6 +179,10 @@ function loadObject(mtl, obj, x1, z1){
     )
 }
 
+for (let i = 0; i < pieces.length; i++){
+    pieces[i].pieceid = i
+}
+
 let lenMTL = mtlArray.length;
 
 const initArray = [
@@ -198,14 +202,11 @@ const dragControls = new DragControls(pieces, camera, renderer.domElement);
 dragControls.addEventListener( 'dragstart', function ( event ) {
 
     event.object.material.emissive.set( 0xaaaaaa );
-
 } );
 
 dragControls.addEventListener( 'dragend', function ( event ) {
 
     event.object.material.emissive.set( 0x000000 );
-    console.log(event.object.name)
-
 } );
 
 
