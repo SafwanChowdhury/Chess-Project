@@ -461,5 +461,4 @@ function changePlayer() {
     givePiecesEventListeners();
 }
 
-
 givePiecesEventListeners();
