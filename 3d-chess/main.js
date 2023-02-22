@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 
+import {game} from "./script"
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -84,6 +85,8 @@ for (var i = 0; i < boardSquares.length; i++) {
 
 const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
 let pieces = [];
+let whitePieces = [];
+let blackPieces = [];
 
 const objArray = [
     "models/wRookR.glb",
@@ -151,21 +154,28 @@ function addPieceData(){
     for (let i = 0; i < pieces.length; i++){
         pieces[i].userData.pieceId = i
         pieces[i].userData.indexOfBoardPiece = i
+        pieces[i].userData.name = pieces[i].children[0].name
         if (i < 16){
             pieces[i].userData.side = "white"
+            whitePieces.push(pieces[i])
         }
         else{
             pieces[i].userData.side = "black"
+            blackPieces.push(pieces[i])
         }
-        console.log(pieces[i].children[0].name)
     }
 }
 
 objectLoading()
 
+const gameLogic = new game()
+
 const camControls = new OrbitControls(camera, renderer.domElement);
 
 document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+let intersectsPiece = null
+let intersectsBoard = null
 function onDocumentMouseDown(event) {
     var vector = new THREE.Vector3(
         (event.clientX / window.innerWidth) * 2 - 1,
@@ -173,29 +183,10 @@ function onDocumentMouseDown(event) {
         0.5);
     var raycaster =  new THREE.Raycaster();
     raycaster.setFromCamera( vector, camera );
-/*    var intersectsBoard = raycaster.intersectObjects(boardSquares);
-    if (intersectsBoard.length > 0) {
-        intersectsBoard[0].object.material.transparent = true;
-        if (intersectsBoard[0].object.material.opacity === 0) {
-            intersectsBoard[0].object.material.opacity = 1;
-        } else {
-            intersectsBoard[0].object.material.opacity = 0;
-        }
-    }*/
-    var intersectsPiece = raycaster.intersectObjects(pieces, true);
-    if (intersectsPiece.length > 0) {
-        if (intersectsPiece[0].object) {
-            intersectsPiece[0].object.material.transparent = true;
-            console.log(intersectsPiece[0].object.parent.userData.pieceId)
-            if (intersectsPiece[0].object.material.opacity === 0.7) {
-                intersectsPiece[0].object.material.opacity = 1;
-            } else {
-                intersectsPiece[0].object.material.opacity = 0.7;
-            }
-        }
-        else{}
-    }
+    intersectsBoard = raycaster.intersectObjects(boardSquares);
+    intersectsPiece = raycaster.intersectObjects(pieces, true);
 }
+
 
 function animate(){
     requestAnimationFrame(animate);
@@ -225,11 +216,7 @@ manager.onLoad = function ( ) {
     console.log( 'Loading complete!');
     document.getElementById("title").innerHTML = "Online Chess Game";
     initScene()
-
     addPieceData()
-    console.log(pieces[3].userData.pieceId)
-    console.log(pieces[3].position.x)
-    console.log(pieces[3].position.y)
     animate()
 };
 
@@ -241,7 +228,3 @@ function resize_window(camera, renderer){
 }
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
-
-export {
-    pieces,
-}
