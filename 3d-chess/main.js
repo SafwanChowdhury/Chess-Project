@@ -234,3 +234,7 @@ function resize_window(camera, renderer){
 }
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
+
+export {
+    pieces,
+}

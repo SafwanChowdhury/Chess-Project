@@ -1,3 +1,4 @@
+import * as game from './main.js'
 /*----------- Game State Data ----------*/
 
 const board = [
