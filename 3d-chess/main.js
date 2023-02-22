@@ -151,6 +151,13 @@ function addPieceData(){
     for (let i = 0; i < pieces.length; i++){
         pieces[i].userData.pieceId = i
         pieces[i].userData.indexOfBoardPiece = i
+        if (i < 16){
+            pieces[i].userData.side = "white"
+        }
+        else{
+            pieces[i].userData.side = "black"
+        }
+        console.log(pieces[i].children[0].name)
     }
 }
 
