@@ -70,7 +70,7 @@ function createBoardSquares() {
             var squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
             var squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
             var squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
-            squareMesh.position.set((i - 3.5) * squareSize, 0 , (j - 3.5) * squareSize);
+            squareMesh.position.set((j - 3.5) * squareSize, 0 , (i - 3.5) * squareSize);
             boardSquares.push(squareMesh);
         }
     }
@@ -78,8 +78,9 @@ function createBoardSquares() {
     return boardSquares;
 }
 
-var boardSquares = createBoardSquares();
-for (var i = 0; i < boardSquares.length; i++) {
+const boardSquares = createBoardSquares();
+for (let i = 0; i < boardSquares.length; i++) {
+    boardSquares[i].userData.index = i
     scene.add(boardSquares[i]);
 }
 
@@ -155,6 +156,25 @@ function addPieceData(){
         pieces[i].userData.pieceId = i
         pieces[i].userData.indexOfBoardPiece = i
         pieces[i].userData.name = pieces[i].children[0].name
+        if (pieces[i].userData.name === "Rook"){
+            pieces[i].userData.isRook = true
+        }
+        else if (pieces[i].userData.name === "Pawn"){
+            pieces[i].userData.isPawn = true
+            pieces[i].userData.moveTwo = true
+        }
+        else if (pieces[i].userData.name === "Bishop"){
+            pieces[i].userData.isBishop = true
+        }
+        else if (pieces[i].userData.name === "Knight"){
+            pieces[i].userData.isKnight = true
+        }
+        else if (pieces[i].userData.name === "Queen"){
+            pieces[i].userData.isQueen = true
+        }
+        else if (pieces[i].userData.name === "King"){
+            pieces[i].userData.isKing = true
+        }
         if (i < 16){
             pieces[i].userData.side = "white"
             whitePieces.push(pieces[i])
@@ -169,6 +189,10 @@ function addPieceData(){
 objectLoading()
 
 const gameLogic = new game()
+gameLogic.whitePieces = whitePieces
+gameLogic.blackPieces = blackPieces
+gameLogic.cells = boardSquares
+gameLogic.pieces = pieces
 
 const camControls = new OrbitControls(camera, renderer.domElement);
 
@@ -185,6 +209,7 @@ function onDocumentMouseDown(event) {
     raycaster.setFromCamera( vector, camera );
     intersectsBoard = raycaster.intersectObjects(boardSquares);
     intersectsPiece = raycaster.intersectObjects(pieces, true);
+    gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
 }
 
 

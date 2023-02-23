@@ -18,15 +18,18 @@ class game {
     };
 
     /*------- DOM References -------*/
-    cells = document.querySelectorAll("td"); //boardPieces
-    whitePieces = document.querySelectorAll("p"); //whitePieces array of objects / objectId's
-    blacksPieces = document.querySelectorAll("span"); //blackPieces array of objects / objectId's
+    cells = []
+    whitePieces = []
+    blackPieces = []
+    pieces = []
+    oldColor = {}
+    highlightedCells = []
     whiteTurntext = document.querySelectorAll(".white-turn-text");
     blackTurntext = document.querySelectorAll(".black-turn-text");
     divider = document.querySelector("#divider");
 
     /*--- Player Properties ---*/
-    turn = true; //need to export
+    turn = true;
     whiteScore = 16;
     blackScore = 16;
     playerPieces;
@@ -37,7 +40,6 @@ class game {
         indexOfBoardPiece: -1,
         row: 0,
         col: 0,
-        class: '',
         moveTwo: false,
         isPawn: false,
         isRook: false,
@@ -51,17 +53,40 @@ class game {
     }
 
     selected = null
+    intersectsBoard = null
     /*---------- Event Listeners ----------*/
 
 // initialize event listeners on pieces
-    givePiecesEventListeners() {
-        if (turn) {
-            for (let i = 0; i < whitePieces.length; i++) {
-                whitePieces[i].addEventListener("click", getPlayerPieces);
+    givePiecesEventListeners(intersectsPiece,intersectsBoard) {
+        this.intersectsBoard = intersectsBoard
+        if (intersectsPiece.length > 0 && (this.turn && intersectsPiece[0].object.parent.userData.pieceId < 16 || !this.turn && intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
+            intersectsPiece[0].object.material.transparent = true;
+            if (this.selected) {
+                if (intersectsPiece[0] !== this.selected) {
+                    this.selected.object.material.opacity = 1
+                    this.selected.object.material.color = this.oldColor
+                    for (let i = 0; i < this.highlightedCells.length; i++){
+                        this.highlightedCells[i].material.opacity = 0
+                    }
+                } else {
+                    this.selected.object.material.opacity = 1
+                }
             }
-        } else {
-            for (let i = 0; i < blacksPieces.length; i++) {
-                blacksPieces[i].addEventListener("click", getPlayerPieces);
+            intersectsPiece[0].object.material.opacity = 0.7;
+            this.selected = intersectsPiece[0]
+            this.oldColor = this.selected.object.material.color
+            this.getPlayerPieces()
+        }
+        else{
+            if (this.selected){
+                this.selected.object.material.opacity = 1
+                this.selected.object.material.color = this.oldColor
+                for (let i = 0; i < this.highlightedCells.length; i++){
+                    this.highlightedCells[i].material.opacity = 0
+                }
+                this.selected = null
+                this.resetSelectedPieceProperties();
+
             }
         }
     }
@@ -71,114 +96,98 @@ class game {
 // holds the length of the players piece count
 
     getPlayerPieces() {
-        if (turn) {
-            playerPieces = whitePieces;
+        if (this.turn) {
+            this.playerPieces = this.whitePieces;
         } else {
-            playerPieces = blacksPieces;
+            this.playerPieces = this.blackPieces;
         }
-        removeCellonclick();
-        resetBorders();
+        this.getSelectedPiece();
     }
 
-// removes possible moves from old selected piece (* this is needed because the user might re-select a piece *)
-    removeCellonclick() {
-        for (let i = 0; i < cells.length; i++) {
-            cells[i].removeAttribute("onclick");
-            cells[i].removeAttribute("style");
-        }
-    }
 
-// resets borders to default
-    resetBorders() {
-        for (let i = 0; i < playerPieces.length; i++) {
-            playerPieces[i].style.border = "1px solid white";
-        }
-        resetSelectedPieceProperties();
-        getSelectedPiece();
-    }
 
 // resets selected piece properties
     resetSelectedPieceProperties() {
-        selectedPiece.pieceId = -1;
-        selectedPiece.indexOfBoardPiece = -1;
-        selectedPiece.row = 0;
-        selectedPiece.col = 0;
-        selectedPiece.class = "";
-        selectedPiece.moveTwo = false;
-        selectedPiece.isPawn = false;
-        selectedPiece.isRook = false;
-        selectedPiece.isKnight = false;
-        selectedPiece.isBishop = false;
-        selectedPiece.isQueen = false;
-        selectedPiece.isKing = false;
-        selectedPiece.isLeft = false;
-        selectedPiece.isRight = false;
-        selectedPiece.moves = [];
+        this.selectedPiece.pieceId = -1;
+        this.selectedPiece.indexOfBoardPiece = -1;
+        this.selectedPiece.row = 0;
+        this.selectedPiece.col = 0;
+        this.selectedPiece.moveTwo = false;
+        this.selectedPiece.isPawn = false;
+        this.selectedPiece.isRook = false;
+        this.selectedPiece.isKnight = false;
+        this.selectedPiece.isBishop = false;
+        this.selectedPiece.isQueen = false;
+        this.selectedPiece.isKing = false;
+        this.selectedPiece.isLeft = false;
+        this.selectedPiece.isRight = false;
+        this.selectedPiece.moves = [];
     }
 
 // gets ID and index of the board cell its on
     getSelectedPiece() {
-        selectedPiece.pieceId = parseInt(event.target.id);
-        selectedPiece.indexOfBoardPiece = findPiece(selectedPiece.pieceId);
-        selectedPiece.row = Math.floor(selectedPiece.indexOfBoardPiece / 8)
-        selectedPiece.col = Math.floor(selectedPiece.indexOfBoardPiece % 8)
-        selectedPiece.class = document.getElementById(selectedPiece.pieceId).classList.value;
-        selectedPiece.isPawn = (document.getElementById(selectedPiece.pieceId).classList.contains("wPawn") || document.getElementById(selectedPiece.pieceId).classList.contains("bPawn"));
-        selectedPiece.isRook = (document.getElementById(selectedPiece.pieceId).classList.contains("wRook") || document.getElementById(selectedPiece.pieceId).classList.contains("bRook"));
-        selectedPiece.isKnight = (document.getElementById(selectedPiece.pieceId).classList.contains("wKnight") || document.getElementById(selectedPiece.pieceId).classList.contains("bKnight"));
-        selectedPiece.isBishop = (document.getElementById(selectedPiece.pieceId).classList.contains("wBishop") || document.getElementById(selectedPiece.pieceId).classList.contains("bBishop"));
-        selectedPiece.isQueen = (document.getElementById(selectedPiece.pieceId).classList.contains("wQueen") || document.getElementById(selectedPiece.pieceId).classList.contains("bQueen"));
-        selectedPiece.isKing = (document.getElementById(selectedPiece.pieceId).classList.contains("wKing") || document.getElementById(selectedPiece.pieceId).classList.contains("bKing"));
-        selectedPiece.moveTwo = document.getElementById(selectedPiece.pieceId).classList.contains("move2");
-        if (selectedPiece.col === 0) {
-            selectedPiece.isLeft = true;
-        } else if (selectedPiece.col === 7) {
-            selectedPiece.isRight = true;
+        console.log(this.selected)
+        this.selectedPiece.pieceId = this.selected.object.parent.userData.pieceId;
+        this.selectedPiece.indexOfBoardPiece = this.selected.object.parent.userData.indexOfBoardPiece;
+        this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
+        this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
+        this.selectedPiece.isPawn = this.selected.object.parent.userData.isPawn;
+        this.selectedPiece.isRook = this.selected.object.parent.userData.isRook;
+        this.selectedPiece.isKnight = this.selected.object.parent.userData.isKnight;
+        this.selectedPiece.isBishop = this.selected.object.parent.userData.isBishop;
+        this.selectedPiece.isQueen = this.selected.object.parent.userData.isQueen;
+        this.selectedPiece.isKing = this.selected.object.parent.userData.isKing;
+        this.selectedPiece.moveTwo = this.selected.object.parent.userData.moveTwo;
+        if (this.selectedPiece.col === 0) {
+            this.selectedPiece.isLeft = true;
+        } else if (this.selectedPiece.col === 7) {
+            this.selectedPiece.isRight = true;
         }
-        if (selectedPiece.isRook)
-            givePieceBorder(rook())
-        else if (selectedPiece.isKnight)
-            givePieceBorder(knight())
-        else if (selectedPiece.isBishop)
-            givePieceBorder(bishop())
-        else if (selectedPiece.isQueen)
-            givePieceBorder(queen())
-        else if (selectedPiece.isKing)
-            givePieceBorder(king())
+        console.log(this.selectedPiece)
+        if (this.selectedPiece.isRook)
+            this.givePieceBorder(this.rook())
+        else if (this.selectedPiece.isKnight)
+            this.givePieceBorder(this.knight())
+        else if (this.selectedPiece.isBishop)
+            this.givePieceBorder(this.bishop())
+        else if (this.selectedPiece.isQueen)
+            this.givePieceBorder(this.queen())
+        else if (this.selectedPiece.isKing)
+            this.givePieceBorder(this.king())
         else
-            givePieceBorder(pawn())
+            this.givePieceBorder(this.pawn())
     }
 
     pawn() {
         let moves = []
-        if (selectedPiece.pieceId < 16) { //white
-            if (board[selectedPiece.indexOfBoardPiece + 8] === null) {
+        if (this.selectedPiece.pieceId < 16) { //white
+            if (this.board[this.selectedPiece.indexOfBoardPiece + 8] === null) {
                 moves.push(8)
             }
-            if (selectedPiece.moveTwo) {
-                if (board[selectedPiece.indexOfBoardPiece + 16] === null) {
+            if (this.selectedPiece.moveTwo) {
+                if (this.board[this.selectedPiece.indexOfBoardPiece + 16] === null) {
                     moves.push(16)
                 }
             }
-            if (board[selectedPiece.indexOfBoardPiece + 7] >= 16 && selectedPiece.isLeft === false) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece + 7] >= 16 && selectedPiece.isLeft === false) {
                 moves.push(7)
             }
-            if (board[selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
                 moves.push(9)
             }
         } else { //black
-            if (board[selectedPiece.indexOfBoardPiece - 8] === null) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece - 8] === null) {
                 moves.push(-8)
             }
-            if (selectedPiece.moveTwo) {
-                if (board[selectedPiece.indexOfBoardPiece - 16] === null) {
+            if (this.selectedPiece.moveTwo) {
+                if (this.board[this.selectedPiece.indexOfBoardPiece - 16] === null) {
                     moves.push(-16)
                 }
             }
-            if (board[selectedPiece.indexOfBoardPiece - 7] < 16 && selectedPiece.isRight === false && board[selectedPiece.indexOfBoardPiece - 7] !== null) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece - 7] < 16 && this.selectedPiece.isRight === false && this.board[this.selectedPiece.indexOfBoardPiece - 7] !== null) {
                 moves.push(-7)
             }
-            if (board[selectedPiece.indexOfBoardPiece - 9] < 16 && selectedPiece.isLeft === false && board[selectedPiece.indexOfBoardPiece - 9] !== null) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece - 9] < 16 && this.selectedPiece.isLeft === false && this.board[this.selectedPiece.indexOfBoardPiece - 9] !== null) {
                 moves.push(-9)
             }
         }
@@ -187,8 +196,8 @@ class game {
 
     rook() {
         let moves = []
-        let rowMove = getMovesInDirection(1, turn, board, selectedPiece).concat(getMovesInDirection(-1, turn, board, selectedPiece));
-        let colMove = getMovesInDirection(8, turn, board, selectedPiece).concat(getMovesInDirection(-8, turn, board, selectedPiece));
+        let rowMove = this.getMovesInDirection(1, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirection(-1, this.turn, this.board, this.selectedPiece));
+        let colMove = this.getMovesInDirection(8, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirection(-8, this.turn, this.board, this.selectedPiece));
         moves = rowMove.concat(colMove)
         return moves
     }
@@ -201,7 +210,6 @@ class game {
             let newRow = selectedPiece.row + (turn ? offset / 8 : 0);
             let newCol = selectedPiece.col + (turn ? 0 : offset);
             if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
-                console.log("break1 " + newRow + " " + newCol)
             }
             let piece = board[selectedPiece.indexOfBoardPiece + offset];
             if (piece !== null) {
@@ -224,21 +232,21 @@ class game {
         let validMoves = [];
 
         for (let i = 0; i < moves.length; i++) {
-            let destinationIndex = selectedPiece.indexOfBoardPiece + moves[i];
+            let destinationIndex = this.selectedPiece.indexOfBoardPiece + moves[i];
             if (destinationIndex < 0 || destinationIndex > 63) {
                 continue // skip invalid moves
             }
-            let destinationPiece = board[destinationIndex];
+            let destinationPiece = this.board[destinationIndex];
             if (moves[i] === -1 && Math.floor(destinationIndex % 8) === 7) {
                 continue // skip left edge moves
             }
             if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
                 continue // skip right edge moves
             }
-            if (Math.floor(destinationIndex % 8) > selectedPiece.col + 2 || Math.floor(destinationIndex % 8) < selectedPiece.col - 2) {
+            if (Math.floor(destinationIndex % 8) > this.selectedPiece.col + 2 || Math.floor(destinationIndex % 8) < this.selectedPiece.col - 2) {
                 continue
             }
-            if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
+            if ((this.turn && destinationPiece < 16 && destinationPiece !== null) || (!this.turn && destinationPiece >= 16)) {
             } else {
                 validMoves.push(moves[i]);
             }
@@ -248,7 +256,7 @@ class game {
     }
 
     bishop() {
-        let position = selectedPiece.indexOfBoardPiece;
+        let position = this.selectedPiece.indexOfBoardPiece;
         let possibleMoves = [];
         let moves = []
 
@@ -269,10 +277,9 @@ class game {
                         // add diagonal step to possible moves
                         possibleMoves.push(i * (8 * dy + dx));
                         // if there is a piece at current position, stop iterating along this diagonal
-                        if (board[r * 8 + c] !== null) {
-                            if (turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && board[selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
+                        if (this.board[r * 8 + c] !== null) {
+                            if (this.turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
                                 possibleMoves.pop()
-                                console.log("pop")
                             }
                             break;
                         }
@@ -293,8 +300,8 @@ class game {
     }
 
     queen() {
-        let moves1 = rook()
-        let moves2 = bishop()
+        let moves1 = this.rook()
+        let moves2 = this.bishop()
         let moves = moves1.concat(moves2)
         moves.sort(function (a, b) {
             return a - b
@@ -307,21 +314,21 @@ class game {
         let validMoves = [];
 
         for (let i = 0; i < moves.length; i++) {
-            let destinationIndex = selectedPiece.indexOfBoardPiece + moves[i];
+            let destinationIndex = this.selectedPiece.indexOfBoardPiece + moves[i];
             if (destinationIndex < 0 || destinationIndex > 63) {
                 continue // skip invalid moves
             }
-            let destinationPiece = board[destinationIndex];
+            let destinationPiece = this.board[destinationIndex];
             if (moves[i] === -1 && Math.floor(destinationIndex % 8) === 7) {
                 continue // skip left edge moves
             }
             if (moves[i] === 1 && Math.floor(destinationIndex % 8) === 0) {
                 continue // skip right edge moves
             }
-            if (Math.floor(destinationIndex % 8) > selectedPiece.col + 1 || Math.floor(destinationIndex % 8) < selectedPiece.col - 1) {
+            if (Math.floor(destinationIndex % 8) > this.selectedPiece.col + 1 || Math.floor(destinationIndex % 8) < this.selectedPiece.col - 1) {
                 continue
             }
-            if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
+            if ((this.turn && destinationPiece < 16 && destinationPiece !== null) || (!this.turn && destinationPiece >= 16)) {
             } else {
                 validMoves.push(moves[i]);
             }
@@ -333,20 +340,23 @@ class game {
 
 // gives the piece a green highlight for the user (showing its movable)
     givePieceBorder(moves) {
-        selectedPiece.moves = moves
-        if (selectedPiece.moves) {
-            document.getElementById(selectedPiece.pieceId).style.border = "3px solid green";
-            console.log(selectedPiece);
-            giveCellsClick();
+        this.selectedPiece.moves = moves
+        if (this.selectedPiece.moves.length > 0) {
+            this.selected.object.material.color = {r: 0, g: 1, b: 0}
+            console.log(this.selectedPiece.moves);
+            this.giveCellsClick();
         }
     }
 
 // gives the cells on the board a 'click' based on the possible moves
     giveCellsClick() {
-        for (let i = 0; i < selectedPiece.moves.length; i++) {
-            cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
-            cells[selectedPiece.indexOfBoardPiece + selectedPiece.moves[i]].setAttribute("style", ("background-color: #2be34d"))
+        console.log(this.cells)
+        for (let i = 0; i < this.selectedPiece.moves.length; i++) {
+            //this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
+            this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].material.opacity = 0.7;
+            this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]])
         }
+        console.log(this.intersectsBoard[0].object.userData.index)
     }
 
 //make move
@@ -364,10 +374,10 @@ class game {
         } else {
             if (selectedPiece.isQueen) {
                 cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="bQueen" id="${selectedPiece.pieceId}"></span>`;
-                blacksPieces = document.querySelectorAll("span");
+                blackPieces = document.querySelectorAll("span");
             } else {
                 cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></span>`;
-                blacksPieces = document.querySelectorAll("span");
+                blackPieces = document.querySelectorAll("span");
             }
         }
 
@@ -419,8 +429,8 @@ class game {
                 whitePieces[i].removeEventListener("click", getPlayerPieces);
             }
         } else {
-            for (let i = 0; i < blacksPieces.length; i++) {
-                blacksPieces[i].removeEventListener("click", getPlayerPieces);
+            for (let i = 0; i < blackPieces.length; i++) {
+                blackPieces[i].removeEventListener("click", getPlayerPieces);
             }
         }
         checkForWin();
