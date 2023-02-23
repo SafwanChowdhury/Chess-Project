@@ -11,18 +11,14 @@ class game {
         24, 25, 26, 27, 28, 29, 30, 31
     ]
 
-// parses pieceId's and returns the index of that piece's place on the board
-    findPiece = function (pieceId) {
-        let parsed = parseInt(pieceId);
-        return board.indexOf(parsed);
-    };
-
     /*------- DOM References -------*/
     cells = []
     whitePieces = []
     blackPieces = []
     pieces = []
+    modified = []
     oldColor = {}
+    oldPiece = null
     highlightedCells = []
     whiteTurntext = document.querySelectorAll(".white-turn-text");
     blackTurntext = document.querySelectorAll(".black-turn-text");
@@ -68,8 +64,6 @@ class game {
                     for (let i = 0; i < this.highlightedCells.length; i++){
                         this.highlightedCells[i].material.opacity = 0
                     }
-                } else {
-                    this.selected.object.material.opacity = 1
                 }
             }
             intersectsPiece[0].object.material.opacity = 0.7;
@@ -78,15 +72,16 @@ class game {
             this.getPlayerPieces()
         }
         else{
-            if (this.selected){
-                this.selected.object.material.opacity = 1
-                this.selected.object.material.color = this.oldColor
-                for (let i = 0; i < this.highlightedCells.length; i++){
-                    this.highlightedCells[i].material.opacity = 0
-                }
-                this.selected = null
+            if (this.selected && intersectsBoard > 0 && this.highlightedCells.includes(intersectsBoard[0].object) !== true){
                 this.resetSelectedPieceProperties();
-
+            }
+            else if (this.selected && intersectsBoard < 1){
+                this.resetSelectedPieceProperties();
+            }
+            else{
+                if(intersectsBoard[0] && this.selected) {
+                    this.makeMove(this.intersectsBoard[0].object.userData.index - this.selectedPiece.indexOfBoardPiece)
+                }
             }
         }
     }
@@ -108,6 +103,13 @@ class game {
 
 // resets selected piece properties
     resetSelectedPieceProperties() {
+        this.selected.object.material.opacity = 1
+        this.selected.object.material.color = this.oldColor
+        for (let i = 0; i < this.highlightedCells.length; i++){
+            this.highlightedCells[i].material.opacity = 0
+        }
+        this.selected = null
+        this.highlightedCells = []
         this.selectedPiece.pieceId = -1;
         this.selectedPiece.indexOfBoardPiece = -1;
         this.selectedPiece.row = 0;
@@ -356,122 +358,101 @@ class game {
             this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].material.opacity = 0.7;
             this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]])
         }
-        console.log(this.intersectsBoard[0].object.userData.index)
     }
 
 //make move
     makeMove(number) {
-        document.getElementById(selectedPiece.pieceId).remove();
-        cells[selectedPiece.indexOfBoardPiece].innerHTML = "";
-        if (turn) {
-            if (selectedPiece.isQueen) {
-                cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="wQueen" id="${selectedPiece.pieceId}"></p>`;
-                whitePieces = document.querySelectorAll("p");
-            } else {
-                cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<p class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></p>`;
-                whitePieces = document.querySelectorAll("p");
-            }
-        } else {
-            if (selectedPiece.isQueen) {
-                cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="bQueen" id="${selectedPiece.pieceId}"></span>`;
-                blackPieces = document.querySelectorAll("span");
-            } else {
-                cells[selectedPiece.indexOfBoardPiece + number].innerHTML = `<span class="${selectedPiece.class}" id="${selectedPiece.pieceId}"></span>`;
-                blackPieces = document.querySelectorAll("span");
-            }
-        }
-
-        let indexOfPiece = selectedPiece.indexOfBoardPiece
-        if (number === 7 || number === -7 || number === 9 || number === -9) {
-            changeData(indexOfPiece, indexOfPiece + number, indexOfPiece);
-        } else {
-            changeData(indexOfPiece, indexOfPiece + number);
-        }
+        let previousIndex = this.selectedPiece.indexOfBoardPiece
+        this.selectedPiece.indexOfBoardPiece += number
+        this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
+        this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
+        if (this.board[this.selectedPiece.indexOfBoardPiece] !== null)
+            this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true)
+        else
+            this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, false)
     }
 
 // Changes the board states data on the back end
 
-    changeData(indexOfBoardPiece, modifiedIndex, removePiece) {
-        board[indexOfBoardPiece] = null;
-        board[modifiedIndex] = parseInt(selectedPiece.pieceId);
-        if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
-            document.getElementById(selectedPiece.pieceId).classList.replace("wPawn", "wQueen")
-        }
-        if (turn === false && selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
-            document.getElementById(selectedPiece.pieceId).classList.replace("bPawn", "bQueen")
-        }
-        if (turn && selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
-            document.getElementById(selectedPiece.pieceId).classList.remove("move2");
-        }
-        if (turn === false && selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
-            document.getElementById(selectedPiece.pieceId).classList.remove("move2");
-        }
+    changeData(previousIndex, modifiedIndex, removePiece) {
         if (removePiece) {
-            board[removePiece] = null;
-            if (turn && selectedPiece.pieceId < 16) {
-                cells[removePiece].innerHTML = "";
-                blackScore--
+            this.oldPiece = this.board[modifiedIndex]
+            if (this.turn && this.selectedPiece.pieceId < 16) {
+                this.blackScore--
             }
-            if (turn === false && selectedPiece.pieceId >= 16) {
-                cells[removePiece].innerHTML = "";
-                whiteScore--
+            if (this.turn === false && this.selectedPiece.pieceId >= 16) {
+                this.whiteScore--
             }
         }
-        resetSelectedPieceProperties();
-        removeCellonclick();
-        removeEventListeners();
+        this.board[previousIndex] = null;
+        this.board[modifiedIndex] = this.selectedPiece.pieceId;
+        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
+            //replace with white queen
+        }
+        if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
+            //replace with black queen
+        }
+        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
+            this.selectedPiece.moveTwo = false
+        }
+        if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+            this.selectedPiece.moveTwo = false
+        }
+        this.updatePiece();
+        this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
+        this.resetSelectedPieceProperties();
+        this.checkForWin()
     }
 
-// removes the 'onClick' event listeners for pieces
-    removeEventListeners() {
-        if (turn) {
-            for (let i = 0; i < whitePieces.length; i++) {
-                whitePieces[i].removeEventListener("click", getPlayerPieces);
-            }
-        } else {
-            for (let i = 0; i < blackPieces.length; i++) {
-                blackPieces[i].removeEventListener("click", getPlayerPieces);
-            }
-        }
-        checkForWin();
+    updatePiece(){
+        this.selected.object.parent.userData.pieceId = this.selectedPiece.pieceId;
+        this.selected.object.parent.userData.indexOfBoardPiece = this.selectedPiece.indexOfBoardPiece;
+        this.selected.object.parent.userData.row = this.selectedPiece.row;
+        this.selected.object.parent.userData.col = this.selectedPiece.col;
+        this.selected.object.parent.userData.isPawn = this.selectedPiece.isPawn;
+        this.selected.object.parent.userData.isRook = this.selectedPiece.isRook;
+        this.selected.object.parent.userData.isKnight = this.selectedPiece.isKnight;
+        this.selected.object.parent.userData.isBishop = this.selectedPiece.isBishop;
+        this.selected.object.parent.userData.isQueen = this.selectedPiece.isQueen;
+        this.selected.object.parent.userData.isKing = this.selectedPiece.isKing;
+        this.selected.object.parent.userData.moveTwo = this.selectedPiece.moveTwo;
     }
 
 // Checks for a win
     checkForWin() {
-        if (blackScore === 0) {
-            divider.style.display = "none";
+        if (this.blackScore === 0) {
+            this.divider.style.display = "none";
             for (let i = 0; i < whiteTurntext.length; i++) {
-                whiteTurntext[i].style.color = "black";
-                blackTurntext[i].style.display = "none";
-                whiteTurntext[i].textContent = "WHITE WINS!";
+                this.whiteTurntext[i].style.color = "black";
+                this.blackTurntext[i].style.display = "none";
+                this.whiteTurntext[i].textContent = "WHITE WINS!";
             }
-        } else if (whiteScore === 0) {
-            divider.style.display = "none";
-            for (let i = 0; i < blackTurntext.length; i++) {
-                blackTurntext[i].style.color = "black";
-                whiteTurntext[i].style.display = "none";
-                blackTurntext[i].textContent = "BLACK WINS!";
+        } else if (this.whiteScore === 0) {
+            this.divider.style.display = "none";
+            for (let i = 0; i < this.blackTurntext.length; i++) {
+                this.blackTurntext[i].style.color = "black";
+                this.whiteTurntext[i].style.display = "none";
+                this.blackTurntext[i].textContent = "BLACK WINS!";
             }
         }
-        changePlayer();
+        this.changePlayer();
     }
 
 // Switches players turn
     changePlayer() {
-        if (turn) {
-            turn = false;
-            for (let i = 0; i < whiteTurntext.length; i++) {
-                whiteTurntext[i].style.color = "lightGrey";
-                blackTurntext[i].style.color = "black";
+        if (this.turn) {
+            this.turn = false;
+            for (let i = 0; i < this.whiteTurntext.length; i++) {
+                this.whiteTurntext[i].style.color = "lightGrey";
+                this.blackTurntext[i].style.color = "black";
             }
         } else {
-            turn = true;
-            for (let i = 0; i < blackTurntext.length; i++) {
-                blackTurntext[i].style.color = "lightGrey";
-                whiteTurntext[i].style.color = "black";
+            this.turn = true;
+            for (let i = 0; i < this.blackTurntext.length; i++) {
+                this.blackTurntext[i].style.color = "lightGrey";
+                this.whiteTurntext[i].style.color = "black";
             }
         }
-        givePiecesEventListeners();
     }
 
 }

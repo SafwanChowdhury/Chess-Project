@@ -4,6 +4,8 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 
 import {game} from "./script"
+import meshPhongNodeMaterial from "three/addons/nodes/materials/MeshPhongNodeMaterial.js";
+import {mod} from "three/nodes";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -200,6 +202,8 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 
 let intersectsPiece = null
 let intersectsBoard = null
+
+let modified = []
 function onDocumentMouseDown(event) {
     var vector = new THREE.Vector3(
         (event.clientX / window.innerWidth) * 2 - 1,
@@ -209,12 +213,21 @@ function onDocumentMouseDown(event) {
     raycaster.setFromCamera( vector, camera );
     intersectsBoard = raycaster.intersectObjects(boardSquares);
     intersectsPiece = raycaster.intersectObjects(pieces, true);
+    gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
 }
 
 
 function animate(){
     requestAnimationFrame(animate);
+    modified = gameLogic.modified
+    if (modified.length > 0){
+        console.log("row :" + modified[1] + " col: " + modified[2])
+        pieces[modified[0]].position.x = coordsMap[modified[2]]
+        pieces[modified[0]].position.z = coordsMap[modified[1]]
+        modified = []
+        gameLogic.modified = []
+    }
     renderer.render(scene,camera);
 }
 
