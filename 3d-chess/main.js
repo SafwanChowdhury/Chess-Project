@@ -222,7 +222,6 @@ function animate(){
     requestAnimationFrame(animate);
     modified = gameLogic.modified
     if (modified.length > 0){
-        console.log("row :" + modified[1] + " col: " + modified[2])
         pieces[modified[0]].position.x = coordsMap[modified[2]]
         pieces[modified[0]].position.z = coordsMap[modified[1]]
         modified = []
