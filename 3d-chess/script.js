@@ -25,7 +25,7 @@ class game {
     divider = document.querySelector("#divider");
 
     /*--- Player Properties ---*/
-    turn = true;
+    turn = false;
     whiteScore = 16;
     blackScore = 16;
     playerPieces;
@@ -54,8 +54,9 @@ class game {
 
 // initialize event listeners on pieces
     givePiecesEventListeners(intersectsPiece,intersectsBoard) {
+        this.oldPiece = null
         this.intersectsBoard = intersectsBoard
-        if (intersectsPiece.length > 0 && (this.turn && intersectsPiece[0].object.parent.userData.pieceId < 16 || !this.turn && intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
+        if ( intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn && intersectsPiece[0].object.parent.userData.pieceId < 16 || !this.turn && intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
             intersectsPiece[0].object.material.transparent = true;
             if (this.selected) {
                 if (intersectsPiece[0] !== this.selected) {
@@ -79,7 +80,7 @@ class game {
                 this.resetSelectedPieceProperties();
             }
             else{
-                if(intersectsBoard[0] && this.selected) {
+                if(intersectsBoard[0] && this.selected && this.highlightedCells.includes(intersectsBoard[0].object)) {
                     this.makeMove(this.intersectsBoard[0].object.userData.index - this.selectedPiece.indexOfBoardPiece)
                 }
             }
@@ -128,7 +129,6 @@ class game {
 
 // gets ID and index of the board cell its on
     getSelectedPiece() {
-        console.log(this.selected)
         this.selectedPiece.pieceId = this.selected.object.parent.userData.pieceId;
         this.selectedPiece.indexOfBoardPiece = this.selected.object.parent.userData.indexOfBoardPiece;
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
@@ -145,7 +145,6 @@ class game {
         } else if (this.selectedPiece.col === 7) {
             this.selectedPiece.isRight = true;
         }
-        console.log(this.selectedPiece)
         if (this.selectedPiece.isRook)
             this.givePieceBorder(this.rook())
         else if (this.selectedPiece.isKnight)
@@ -171,10 +170,10 @@ class game {
                     moves.push(16)
                 }
             }
-            if (this.board[this.selectedPiece.indexOfBoardPiece + 7] >= 16 && selectedPiece.isLeft === false) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece + 7] >= 16 && this.selectedPiece.isLeft === false) {
                 moves.push(7)
             }
-            if (this.board[this.selectedPiece.indexOfBoardPiece + 9] >= 16 && selectedPiece.isRight === false) {
+            if (this.board[this.selectedPiece.indexOfBoardPiece + 9] >= 16 && this.selectedPiece.isRight === false) {
                 moves.push(9)
             }
         } else { //black
@@ -280,7 +279,7 @@ class game {
                         possibleMoves.push(i * (8 * dy + dx));
                         // if there is a piece at current position, stop iterating along this diagonal
                         if (this.board[r * 8 + c] !== null) {
-                            if (this.turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
+                            if (this.turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] < 16 || !this.turn && this.board[this.selectedPiece.indexOfBoardPiece + (i * (8 * dy + dx))] >= 16) {
                                 possibleMoves.pop()
                             }
                             break;
@@ -345,19 +344,19 @@ class game {
         this.selectedPiece.moves = moves
         if (this.selectedPiece.moves.length > 0) {
             this.selected.object.material.color = {r: 0, g: 1, b: 0}
-            console.log(this.selectedPiece.moves);
             this.giveCellsClick();
         }
     }
 
 // gives the cells on the board a 'click' based on the possible moves
     giveCellsClick() {
-        console.log(this.cells)
         for (let i = 0; i < this.selectedPiece.moves.length; i++) {
             //this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].setAttribute("onclick", ("makeMove(" + selectedPiece.moves[i] + ")"));
             this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].material.opacity = 0.7;
             this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]])
         }
+        console.log(this.selectedPiece.moves)
+        console.log(this.selectedPiece.indexOfBoardPiece)
     }
 
 //make move

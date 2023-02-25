@@ -86,10 +86,11 @@ for (let i = 0; i < boardSquares.length; i++) {
     scene.add(boardSquares[i]);
 }
 
-const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
 let pieces = [];
 let whitePieces = [];
 let blackPieces = [];
+let takenWhite = [];
+let takenBlack = [];
 
 const objArray = [
     "models/wRookR.glb",
@@ -126,6 +127,8 @@ const objArray = [
     "models/bRookL.glb"
 ]
 
+const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
+const takenMap = [11.56, 13.66];
 
 const manager = new THREE.LoadingManager();
 function loadObject(i, obj, x1, z1) {
@@ -156,7 +159,13 @@ function objectLoading(){
 function addPieceData(){
     for (let i = 0; i < pieces.length; i++){
         pieces[i].userData.pieceId = i
-        pieces[i].userData.indexOfBoardPiece = i
+        pieces[i].userData.taken = false
+        if (pieces[i].userData.pieceId < 16) {
+            pieces[i].userData.indexOfBoardPiece = i
+        }
+        else{
+            pieces[i].userData.indexOfBoardPiece = i+32
+        }
         pieces[i].userData.name = pieces[i].children[0].name
         if (pieces[i].userData.name === "Rook"){
             pieces[i].userData.isRook = true
@@ -222,6 +231,28 @@ function animate(){
     requestAnimationFrame(animate);
     modified = gameLogic.modified
     if (modified.length > 0){
+        if (modified[3] !== null){
+            if (modified[3] < 16) {
+                takenWhite.push(pieces[modified[3]])
+                pieces[modified[3]].position.x = -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y]
+                pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x]
+                console.log(
+                    "taken map: " + -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x],
+                    "coords map: " + coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y],
+                    "initArrayX: " + initArray[takenWhite.indexOf(pieces[modified[3]])].x,
+                    "initArrayY: " + initArray[takenWhite.indexOf(pieces[modified[3]])].y,
+                    "taken: " + takenWhite.indexOf(pieces[modified[3]]),
+                    "takenArray: " + takenWhite
+                )
+                pieces[modified[3]].userData.taken = true
+            }
+            else{
+                takenBlack.push(pieces[modified[3]])
+                pieces[modified[3]].position.x = takenMap[initArray[takenBlack.indexOf(pieces[modified[3]])].y]
+                pieces[modified[3]].position.z = -coordsMap[initArray[takenBlack.indexOf(pieces[modified[3]])].x]
+                pieces[modified[3]].userData.taken = true
+            }
+        }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
         pieces[modified[0]].position.z = coordsMap[modified[1]]
         modified = []
