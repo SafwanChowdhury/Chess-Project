@@ -386,21 +386,33 @@ class game {
         this.board[previousIndex] = null;
         this.board[modifiedIndex] = this.selectedPiece.pieceId;
         if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
-            //replace with white queen
+            this.selectedPiece.isQueen = true
+            this.selectedPiece.isPawn = false
+            this.updatePiece();
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, "models/wQueen.glb", "white"]
+            this.resetSelectedPieceProperties();
+            this.checkForWin()
         }
-        if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
-            //replace with black queen
+        else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
+            this.selectedPiece.isQueen = true
+            this.selectedPiece.isPawn = false
+            this.updatePiece();
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, "models/bQueen.glb", "black"]
+            this.resetSelectedPieceProperties();
+            this.checkForWin()
         }
-        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
-            this.selectedPiece.moveTwo = false
+        else {
+            if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
+                this.selectedPiece.moveTwo = false
+            }
+            if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+                this.selectedPiece.moveTwo = false
+            }
+            this.updatePiece();
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
+            this.resetSelectedPieceProperties();
+            this.checkForWin()
         }
-        if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
-            this.selectedPiece.moveTwo = false
-        }
-        this.updatePiece();
-        this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
-        this.resetSelectedPieceProperties();
-        this.checkForWin()
     }
 
     updatePiece(){

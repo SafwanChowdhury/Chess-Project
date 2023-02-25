@@ -197,7 +197,19 @@ function addPieceData(){
     }
 }
 
-objectLoading()
+function loadQueen(i, obj, x1, z1){
+    console.log(i, obj, x1, z1)
+    let index = pieces[i].userData.indexOfBoardPiece
+    let side = pieces[i].userData.side
+    scene.remove(pieces[i])
+    loadObject(i, obj, x1, z1)
+    pieces[i].userData.pieceId = i
+    pieces[i].userData.indexOfBoardPiece = index
+    pieces[i].userData.taken = false
+    pieces[i].userData.isQueen = true
+    pieces[i].userData.side = side
+}
+
 
 const gameLogic = new game()
 gameLogic.whitePieces = whitePieces
@@ -239,11 +251,14 @@ function animate(){
                 pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
             }
-            else{
+            else if (modified[3] >= 16){
                 takenBlack.push(pieces[modified[3]])
                 pieces[modified[3]].position.x = takenMap[initArray[takenBlack.indexOf(pieces[modified[3]])].y]
                 pieces[modified[3]].position.z = -coordsMap[initArray[takenBlack.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
+            }
+            else{
+                loadQueen(modified[0], modified[3], modified[1], modified[2])
             }
         }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
@@ -262,24 +277,30 @@ window.addEventListener("keydown", function(event) {
     }
 }, true)
 
-manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-    document.getElementById("title").innerHTML = "Loading";
-};
+let onStart = false
 
-manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
-    document.getElementById("title").innerHTML = (Math.floor((itemsLoaded/itemsTotal) * 100).toString());
-    console.log(Math.floor((itemsLoaded/itemsTotal) * 100))
-};
+if (!onStart) {
+    manager.onStart = function (url, itemsLoaded, itemsTotal) {
+        document.getElementById("title").innerHTML = "Loading";
+    };
 
+    manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+        document.getElementById("title").innerHTML = (Math.floor((itemsLoaded / itemsTotal) * 100).toString());
+        console.log(Math.floor((itemsLoaded / itemsTotal) * 100))
+    };
 
-manager.onLoad = function ( ) {
-    document.getElementById("title").innerHTML = "Loading Complete";
-    console.log( 'Loading complete!');
-    document.getElementById("title").innerHTML = "Online Chess Game";
-    initScene()
-    addPieceData()
-    animate()
-};
+    manager.onLoad = function () {
+        document.getElementById("title").innerHTML = "Loading Complete";
+        console.log('Loading complete!');
+        document.getElementById("title").innerHTML = "Online Chess Game";
+        if (!onStart) {
+            onStart = true
+            initScene()
+            addPieceData()
+            animate()
+        }
+    };
+}
 
 function resize_window(camera, renderer){
     camera.aspect = window.innerWidth / window.innerHeight
@@ -289,3 +310,5 @@ function resize_window(camera, renderer){
 }
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
+
+objectLoading()
