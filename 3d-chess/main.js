@@ -229,6 +229,7 @@ function onDocumentMouseDown(event) {
 
 function animate(){
     requestAnimationFrame(animate);
+    camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
         if (modified[3] !== null){
@@ -236,14 +237,6 @@ function animate(){
                 takenWhite.push(pieces[modified[3]])
                 pieces[modified[3]].position.x = -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y]
                 pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x]
-                console.log(
-                    "taken map: " + -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x],
-                    "coords map: " + coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y],
-                    "initArrayX: " + initArray[takenWhite.indexOf(pieces[modified[3]])].x,
-                    "initArrayY: " + initArray[takenWhite.indexOf(pieces[modified[3]])].y,
-                    "taken: " + takenWhite.indexOf(pieces[modified[3]]),
-                    "takenArray: " + takenWhite
-                )
                 pieces[modified[3]].userData.taken = true
             }
             else{
