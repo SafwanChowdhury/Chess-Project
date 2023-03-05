@@ -25,7 +25,7 @@ class game {
     divider = document.querySelector("#divider");
 
     /*--- Player Properties ---*/
-    turn = false;
+    turn = true;
     whiteScore = 16;
     blackScore = 16;
     playerPieces;
@@ -57,6 +57,7 @@ class game {
         this.oldPiece = null
         this.intersectsBoard = intersectsBoard
         if ( intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn && intersectsPiece[0].object.parent.userData.pieceId < 16 || !this.turn && intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
+            console.log(intersectsPiece[0].object.name)
             intersectsPiece[0].object.material.transparent = true;
             if (this.selected) {
                 if (intersectsPiece[0] !== this.selected) {
@@ -88,8 +89,6 @@ class game {
     }
 
     /*---------- Logic ----------*/
-
-// holds the length of the players piece count
 
     getPlayerPieces() {
         if (this.turn) {
@@ -165,7 +164,7 @@ class game {
             if (this.board[this.selectedPiece.indexOfBoardPiece + 8] === null) {
                 moves.push(8)
             }
-            if (this.selectedPiece.moveTwo) {
+            if (this.selectedPiece.moveTwo && this.board[this.selectedPiece.indexOfBoardPiece + 8] === null) {
                 if (this.board[this.selectedPiece.indexOfBoardPiece + 16] === null) {
                     moves.push(16)
                 }
@@ -180,7 +179,7 @@ class game {
             if (this.board[this.selectedPiece.indexOfBoardPiece - 8] === null) {
                 moves.push(-8)
             }
-            if (this.selectedPiece.moveTwo) {
+            if (this.selectedPiece.moveTwo && this.board[this.selectedPiece.indexOfBoardPiece - 8] === null) {
                 if (this.board[this.selectedPiece.indexOfBoardPiece - 16] === null) {
                     moves.push(-16)
                 }
@@ -449,6 +448,7 @@ class game {
 
 // Switches players turn
     changePlayer() {
+        this.displayGrid()
         if (this.turn) {
             this.turn = false;
             for (let i = 0; i < this.whiteTurntext.length; i++) {
@@ -461,6 +461,12 @@ class game {
                 this.blackTurntext[i].style.color = "lightGrey";
                 this.whiteTurntext[i].style.color = "black";
             }
+        }
+    }
+
+    displayGrid(){
+        for (let i = 0; i < 7; i++){
+            console.log(this.board[(0 + (i * 7))], this.board[(1 + (i * 7))], this.board[(2 + (i * 7))], this.board[(3 + (i * 7))], this.board[(4 + (i * 7))], this.board[(5 + (i * 7))], this.board[(6 + (i * 7))], this.board[(7 + (i * 7))])
         }
     }
 
