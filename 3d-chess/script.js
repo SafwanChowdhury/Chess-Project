@@ -355,8 +355,6 @@ class game {
             this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]].material.opacity = 0.7;
             this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + this.selectedPiece.moves[i]])
         }
-        console.log(this.selectedPiece.moves)
-        console.log(this.selectedPiece.indexOfBoardPiece)
     }
 
 //make move
@@ -385,7 +383,7 @@ class game {
         }
         this.board[previousIndex] = null;
         this.board[modifiedIndex] = this.selectedPiece.pieceId;
-        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 57) {
+        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 57 && this.selectedPiece.isPawn) {
             this.selectedPiece.isQueen = true
             this.selectedPiece.isPawn = false
             this.updatePiece();
@@ -393,7 +391,7 @@ class game {
             this.resetSelectedPieceProperties();
             this.checkForWin()
         }
-        else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7) {
+        else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.isPawn) {
             this.selectedPiece.isQueen = true
             this.selectedPiece.isPawn = false
             this.updatePiece();

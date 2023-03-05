@@ -198,17 +198,23 @@ function addPieceData(){
 }
 
 function loadQueen(i, obj, x1, z1){
-    console.log(i, obj, x1, z1)
-    let index = pieces[i].userData.indexOfBoardPiece
-    let side = pieces[i].userData.side
     scene.remove(pieces[i])
     loadObject(i, obj, x1, z1)
+}
+
+function addPromotionData(){
+    let i = modifiedData[0]
+    let index = modifiedData[1]
+    let side = modifiedData[2]
+    pieces[i].userData.name = pieces[i].children[0].name
     pieces[i].userData.pieceId = i
     pieces[i].userData.indexOfBoardPiece = index
     pieces[i].userData.taken = false
     pieces[i].userData.isQueen = true
     pieces[i].userData.side = side
+    promotion = false
 }
+
 
 
 const gameLogic = new game()
@@ -225,6 +231,8 @@ let intersectsPiece = null
 let intersectsBoard = null
 
 let modified = []
+let modifiedData = []
+let promotion = false
 function onDocumentMouseDown(event) {
     var vector = new THREE.Vector3(
         (event.clientX / window.innerWidth) * 2 - 1,
@@ -258,6 +266,10 @@ function animate(){
                 pieces[modified[3]].userData.taken = true
             }
             else{
+                modifiedData[0] = modified[0]
+                modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
+                modifiedData[2] = pieces[modified[0]].userData.side
+                promotion = true
                 loadQueen(modified[0], modified[3], modified[1], modified[2])
             }
         }
@@ -279,27 +291,28 @@ window.addEventListener("keydown", function(event) {
 
 let onStart = false
 
-if (!onStart) {
-    manager.onStart = function (url, itemsLoaded, itemsTotal) {
-        document.getElementById("title").innerHTML = "Loading";
-    };
+manager.onStart = function (url, itemsLoaded, itemsTotal) {
+    document.getElementById("title").innerHTML = "Loading";
+};
 
-    manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-        document.getElementById("title").innerHTML = (Math.floor((itemsLoaded / itemsTotal) * 100).toString());
-        console.log(Math.floor((itemsLoaded / itemsTotal) * 100))
-    };
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    document.getElementById("title").innerHTML = (Math.floor((itemsLoaded / itemsTotal) * 100).toString());
+    console.log(Math.floor((itemsLoaded / itemsTotal) * 100))
+};
 
-    manager.onLoad = function () {
-        document.getElementById("title").innerHTML = "Loading Complete";
-        console.log('Loading complete!');
-        document.getElementById("title").innerHTML = "Online Chess Game";
-        if (!onStart) {
-            onStart = true
-            initScene()
-            addPieceData()
-            animate()
-        }
-    };
+manager.onLoad = function () {
+    document.getElementById("title").innerHTML = "Loading Complete";
+    console.log('Loading complete!');
+    document.getElementById("title").innerHTML = "Online Chess Game";
+    if (!onStart) {
+        onStart = true
+        initScene()
+        addPieceData()
+        animate()
+    }
+    if (promotion){
+        addPromotionData()
+    }
 }
 
 function resize_window(camera, renderer){
