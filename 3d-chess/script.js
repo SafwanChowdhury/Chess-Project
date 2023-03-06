@@ -65,6 +65,7 @@ class game {
                     this.selected.object.material.color = this.oldColor
                     for (let i = 0; i < this.highlightedCells.length; i++){
                         this.highlightedCells[i].material.opacity = 0
+                        this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
                     }
                 }
             }
@@ -107,6 +108,7 @@ class game {
         this.selected.object.material.color = this.oldColor
         for (let i = 0; i < this.highlightedCells.length; i++){
             this.highlightedCells[i].material.opacity = 0
+            this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
         }
         this.selected = null
         this.highlightedCells = []
@@ -334,6 +336,7 @@ class game {
             }
         }
         moves = validMoves
+        this.checkablePositions()
         return moves
     }
 
@@ -465,9 +468,100 @@ class game {
     }
 
     displayGrid(){
-        for (let i = 0; i < 7; i++){
-            console.log(this.board[(0 + (i * 7))], this.board[(1 + (i * 7))], this.board[(2 + (i * 7))], this.board[(3 + (i * 7))], this.board[(4 + (i * 7))], this.board[(5 + (i * 7))], this.board[(6 + (i * 7))], this.board[(7 + (i * 7))])
+        for (let i = 0; i < 8; i++){
+            console.log(this.board[(0 + (i * 8))], this.board[(1 + (i * 8))], this.board[(2 + (i * 8))], this.board[(3 + (i * 8))], this.board[(4 + (i * 8))], this.board[(5 + (i * 8))], this.board[(6 + (i * 8))], this.board[(7 + (i * 8))])
         }
+    }
+
+    checkablePositions(){
+        let position = this.selectedPiece.indexOfBoardPiece;
+        let checkPostions = []
+        let checkPostionsPawn = [9, 7, -7, -9]
+        let checkPostionsRook = []
+        let checkPostionsBishop = []
+        let checkPostionsQueen = []
+        let checkPostionsKnight = [-17, -15, -10, -6, 6, 10, 15, 17]
+        let row = Math.floor(position / 8);
+        let col = position % 8;
+
+        //diagonals
+        // iterate over each diagonal direction
+        for (let dx of [-1, 1]) {
+            for (let dy of [-1, 1]) {
+                // iterate over diagonal steps
+                for (let i = 1; i < 8; i++) {
+                    // compute row and column of current position
+                    let r = row + i * dy;
+                    let c = col + i * dx;
+                    // check if current position is on board and on diagonal
+                    if (r >= 0 && r < 8 && c >= 0 && c < 8 && Math.abs(r - row) === Math.abs(c - col)) {
+                        // add diagonal step to possible moves
+                        checkPostionsBishop.push(i * (8 * dy + dx));
+                    } else {
+                        // if current position is not on board or not on diagonal, stop iterating along this diagonal
+                        break;
+                    }
+                }
+            }
+        }
+
+        //rook
+        let rowMove = this.getMovesInDirectionNONSTOP(1, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirectionNONSTOP(-1, this.turn, this.board, this.selectedPiece));
+        let colMove = this.getMovesInDirectionNONSTOP(8, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirectionNONSTOP(-8, this.turn, this.board, this.selectedPiece));
+
+        checkPostionsRook = rowMove.concat(colMove)
+        console.log(checkPostionsRook)
+
+        checkPostionsQueen = checkPostionsRook.concat(checkPostionsBishop)
+
+
+        checkPostions = checkPostionsQueen.concat(checkPostionsKnight.concat(checkPostionsPawn))
+
+        for (let i = 0; i <= checkPostions.length; i++){
+            if((this.selectedPiece.indexOfBoardPiece + checkPostions[i]) < 0 || (this.selectedPiece.indexOfBoardPiece + checkPostions[i]) > 63){
+                checkPostions.splice(i, 1);
+                i--
+            }
+        }
+        for(let i=0; i < checkPostions.length; ++i) {
+            for(let j=i+1; j < checkPostions.length; ++j) {
+                if(checkPostions[i] === checkPostions[j])
+                    checkPostions.splice(j--, 1);
+            }
+        }
+        console.log(checkPostions)
+        for (let i = 0; i < checkPostions.length; i++) {
+            this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]].material.opacity = 0.7;
+            this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]].material.color = {r: 1, g: 0, b: 0}
+            this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]])
+        }
+    }
+
+
+    getMovesInDirectionNONSTOP(direction, turn, board, selectedPiece) {
+        let moves = [];
+        let maxOffset = 7 * (turn ? 8 : 1);
+        for (let i = 1; i <= maxOffset; i++) {
+            let offset = i * direction;
+            let newRow = selectedPiece.row + (turn ? offset / 8 : 0);
+            let newCol = selectedPiece.col + (turn ? 0 : offset);
+            if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
+            }
+            let piece = board[selectedPiece.indexOfBoardPiece + offset];
+            if (piece !== null) {
+                if (true) {
+                    if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+                        moves.push(offset);
+                    }
+                    if ((selectedPiece.indexOfBoardPiece + offset) < 0 || (selectedPiece.indexOfBoardPiece + offset) > 63){
+                        break
+                    }
+                }
+            } else if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+                moves.push(offset);
+            }
+        }
+        return moves;
     }
 
 }
