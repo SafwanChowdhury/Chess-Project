@@ -23,9 +23,16 @@ class game {
     whiteTurntext = document.querySelectorAll(".white-turn-text");
     blackTurntext = document.querySelectorAll(".black-turn-text");
     divider = document.querySelector("#divider");
+    checkPositionsPawn = [[],[]]
+    checkPositionsRook = [[],[]]
+    checkPositionsBishop = [[],[]]
+    checkPositionsQueen = [[],[]]
+    checkPositionsKnight = [[],[]]
+    currentCheckPositions = [[],[]]
+    check = []
 
     /*--- Player Properties ---*/
-    turn = true;
+    turn = true; //1 == white, 0 == black
     whiteScore = 16;
     blackScore = 16;
     playerPieces;
@@ -51,13 +58,11 @@ class game {
     selected = null
     intersectsBoard = null
     /*---------- Event Listeners ----------*/
-
 // initialize event listeners on pieces
     givePiecesEventListeners(intersectsPiece,intersectsBoard) {
         this.oldPiece = null
         this.intersectsBoard = intersectsBoard
         if ( intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn && intersectsPiece[0].object.parent.userData.pieceId < 16 || !this.turn && intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
-            console.log(intersectsPiece[0].object.name)
             intersectsPiece[0].object.material.transparent = true;
             if (this.selected) {
                 if (intersectsPiece[0] !== this.selected) {
@@ -130,6 +135,9 @@ class game {
 
 // gets ID and index of the board cell its on
     getSelectedPiece() {
+        let turn = 0
+        if (this.turn)
+            turn = 1
         this.selectedPiece.pieceId = this.selected.object.parent.userData.pieceId;
         this.selectedPiece.indexOfBoardPiece = this.selected.object.parent.userData.indexOfBoardPiece;
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
@@ -312,6 +320,11 @@ class game {
     }
 
     king() {
+        let turn = 0
+        if (this.turn)
+            turn = 0
+        else
+            turn = 1
         let moves = [-9, -8, -7, -1, 1, 7, 8, 9];
         let validMoves = [];
 
@@ -335,8 +348,8 @@ class game {
                 validMoves.push(moves[i]);
             }
         }
+
         moves = validMoves
-        this.checkablePositions()
         return moves
     }
 
@@ -409,6 +422,7 @@ class game {
                 this.selectedPiece.moveTwo = false
             }
             this.updatePiece();
+            this.checkCheck()
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
             this.resetSelectedPieceProperties();
             this.checkForWin()
@@ -451,7 +465,7 @@ class game {
 
 // Switches players turn
     changePlayer() {
-        this.displayGrid()
+        //this.displayGrid()
         if (this.turn) {
             this.turn = false;
             for (let i = 0; i < this.whiteTurntext.length; i++) {
@@ -473,16 +487,19 @@ class game {
         }
     }
 
-    checkablePositions(){
-        let position = this.selectedPiece.indexOfBoardPiece;
-        let checkPostions = []
-        let checkPostionsPawn = [9, 7, -7, -9]
-        let checkPostionsRook = []
-        let checkPostionsBishop = []
-        let checkPostionsQueen = []
-        let checkPostionsKnight = [-17, -15, -10, -6, 6, 10, 15, 17]
-        let row = Math.floor(position / 8);
-        let col = position % 8;
+    checkablePositions(index, turn, modifier){
+        let movesSetP = [9, 7, -7, -9]
+        let movesSetK = [-17, -15, -10, -6, 6, 10, 15, 17]
+        let localBishop = []
+        let localRook = []
+        let localPawn = []
+        let localKnight = []
+        let localQueen = []
+        let row = Math.floor(index / 8);
+        let col = index % 8;
+        let turnI = 0
+        if (turn)
+            turnI = 1
 
         //diagonals
         // iterate over each diagonal direction
@@ -496,7 +513,7 @@ class game {
                     // check if current position is on board and on diagonal
                     if (r >= 0 && r < 8 && c >= 0 && c < 8 && Math.abs(r - row) === Math.abs(c - col)) {
                         // add diagonal step to possible moves
-                        checkPostionsBishop.push(i * (8 * dy + dx));
+                        localBishop.push(i * (8 * dy + dx));
                     } else {
                         // if current position is not on board or not on diagonal, stop iterating along this diagonal
                         break;
@@ -506,62 +523,102 @@ class game {
         }
 
         //rook
-        let rowMove = this.getMovesInDirectionNONSTOP(1, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirectionNONSTOP(-1, this.turn, this.board, this.selectedPiece));
-        let colMove = this.getMovesInDirectionNONSTOP(8, this.turn, this.board, this.selectedPiece).concat(this.getMovesInDirectionNONSTOP(-8, this.turn, this.board, this.selectedPiece));
+        let rowMove = this.getMovesInDirectionNONSTOP(1, turn, this.board, index, row, col).concat(this.getMovesInDirectionNONSTOP(-1, turn, this.board, index, row, col));
+        let colMove = this.getMovesInDirectionNONSTOP(8, turn, this.board, index, row, col).concat(this.getMovesInDirectionNONSTOP(-8, turn, this.board, index, row, col));
 
-        checkPostionsRook = rowMove.concat(colMove)
-        console.log(checkPostionsRook)
+        localRook = rowMove.concat(colMove)
 
-        checkPostionsQueen = checkPostionsRook.concat(checkPostionsBishop)
-
-
-        checkPostions = checkPostionsQueen.concat(checkPostionsKnight.concat(checkPostionsPawn))
-
-        for (let i = 0; i <= checkPostions.length; i++){
-            if((this.selectedPiece.indexOfBoardPiece + checkPostions[i]) < 0 || (this.selectedPiece.indexOfBoardPiece + checkPostions[i]) > 63){
-                checkPostions.splice(i, 1);
+        for (let i = 0; i <= localRook.length; i++){
+            if((index + localRook[i]) < 0 || (index + localRook[i]) > 63){
+                localRook.splice(i, 1);
                 i--
             }
         }
-        for(let i=0; i < checkPostions.length; ++i) {
-            for(let j=i+1; j < checkPostions.length; ++j) {
-                if(checkPostions[i] === checkPostions[j])
-                    checkPostions.splice(j--, 1);
+
+        for (let i = 0; i <= movesSetK.length; i++){
+            if((index + movesSetK[i]) >= 0 && (index + movesSetK[i]) <= 63){
+                localKnight.push(movesSetK[i])
             }
         }
-        console.log(checkPostions)
-        for (let i = 0; i < checkPostions.length; i++) {
-            this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]].material.opacity = 0.7;
-            this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]].material.color = {r: 1, g: 0, b: 0}
-            this.highlightedCells.push(this.cells[this.selectedPiece.indexOfBoardPiece + checkPostions[i]])
+
+
+        for (let i = 0; i <= movesSetP.length; i++){
+            if((index + movesSetP[i]) >= 0 && (index + movesSetP[i]) <= 63){
+                localPawn.push(movesSetP[i])
+            }
         }
+
+        localQueen = localRook.concat(localBishop)
+        let checkPositions = localQueen.concat(localKnight.concat(localPawn))
+
+        //cleanup checkable positions array
+        for(let i=0; i < checkPositions.length; ++i) {
+            for(let j=i+1; j < checkPositions.length; ++j) {
+                if(checkPositions[i] === checkPositions[j])
+                    checkPositions.splice(j--, 1);
+            }
+        }
+
+        //highlight checkable positions
+        for (let i = 0; i < checkPositions.length; i++) {
+            this.cells[index + checkPositions[i]].material.opacity = 0.7;
+            this.cells[index + checkPositions[i]].material.color = {r: 1, g: 0, b: 0}
+            this.highlightedCells.push(this.cells[index + checkPositions[i]])
+        }
+
+        if (modifier) {
+            this.checkPositionsPawn[turnI] = localPawn
+            this.checkPositionsBishop[turnI] = localBishop
+            this.checkPositionsKnight[turnI] = localKnight
+            this.checkPositionsRook[turnI] = localRook
+            this.checkPositionsQueen[turnI] = localQueen
+        }
+        return checkPositions
     }
 
 
-    getMovesInDirectionNONSTOP(direction, turn, board, selectedPiece) {
+    getMovesInDirectionNONSTOP(direction, turn, board, index, row, col) {
         let moves = [];
         let maxOffset = 7 * (turn ? 8 : 1);
         for (let i = 1; i <= maxOffset; i++) {
             let offset = i * direction;
-            let newRow = selectedPiece.row + (turn ? offset / 8 : 0);
-            let newCol = selectedPiece.col + (turn ? 0 : offset);
+            let newRow = row + (turn ? offset / 8 : 0);
+            let newCol = col + (turn ? 0 : offset);
             if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
             }
-            let piece = board[selectedPiece.indexOfBoardPiece + offset];
+            let piece = board[index + offset];
             if (piece !== null) {
                 if (true) {
-                    if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+                    if (Math.floor((index + offset) % 8) === col || Math.floor((index + offset) / 8) === row) {
                         moves.push(offset);
                     }
-                    if ((selectedPiece.indexOfBoardPiece + offset) < 0 || (selectedPiece.indexOfBoardPiece + offset) > 63){
+                    if ((index + offset) < 0 || (index + offset) > 63){
                         break
                     }
                 }
-            } else if (Math.floor((selectedPiece.indexOfBoardPiece + offset) % 8) === selectedPiece.col || Math.floor((selectedPiece.indexOfBoardPiece + offset) / 8) === selectedPiece.row) {
+            } else if (Math.floor((index + offset) % 8) === col || Math.floor((index + offset) / 8) === row) {
                 moves.push(offset);
             }
         }
         return moves;
+    }
+
+
+    checkCheck(){
+        let turn = 1
+        if (this.turn)
+            turn = 0
+        this.selectedPiece.moves.forEach(element => { if (this.currentCheckPositions[turn].includes(element)) {
+            this.check[turn] = true
+            console.log("check")
+        } });
+        this.check[turn] = false
+    }
+
+    initKing(){
+        this.currentCheckPositions[1] = this.checkablePositions(3, true, 1)
+        this.currentCheckPositions[0] = this.checkablePositions(59, false, 1)
+        console.log(this.currentCheckPositions)
     }
 
 }

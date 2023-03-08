@@ -308,6 +308,7 @@ manager.onLoad = function () {
         onStart = true
         initScene()
         addPieceData()
+        gameLogic.initKing()
         animate()
     }
     if (promotion){
