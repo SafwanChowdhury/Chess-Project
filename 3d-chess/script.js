@@ -416,12 +416,6 @@ class game {
             }
             this.updatePiece();
             this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(), this.turn, 1)
-            console.log("current Check Positions: " , this.currentCheckPositions)
-            console.log("Pawn Check Positions: " , this.checkPositionsPawn)
-            console.log("Rook Check Positions: " , this.checkPositionsRook)
-            console.log("Knight Check Positions: " , this.checkPositionsKnight)
-            console.log("Bishop Check Positions: " , this.checkPositionsBishop)
-            console.log("Queen Check Positions: " , this.checkPositionsQueen)
             this.checkCheck()
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
             this.resetSelectedPieceProperties();
@@ -483,7 +477,6 @@ class game {
     }
 
     checkablePositions(index, turn, modifier){
-        console.log(index, turn, modifier)
         let localBishop = []
         let localRook = []
         let localPawn = []
@@ -557,31 +550,42 @@ class game {
         else
             console.log("-----------black------------")
         this.check[turn] = false
-
+        console.log(this.selectedPiece.indexOfBoardPiece)
+        console.log("Check Positions: " , this.currentCheckPositions)
+        console.log("Pawn Check Positions: " , this.checkPositionsPawn)
+        console.log("Rook Check Positions: " , this.checkPositionsRook)
+        console.log("Knight Check Positions: " , this.checkPositionsKnight)
+        console.log("Bishop Check Positions: " , this.checkPositionsBishop)
+        console.log("Queen Check Positions: " , this.checkPositionsQueen)
         switch (this.selectedPiece.type) {
-            case 'rook':
-                if (this.checkPositionsRook.includes(this.selectedPiece.indexOfBoardPiece)) {
-
+            case 'Rook':
+                if (this.checkPositionsRook[turn].includes(this.selectedPiece.indexOfBoardPiece)) {
+                    console.log("check")
+                    this.check = true
                 }
                 break;
-            case 'knight':
-                if (this.checkPositionsKnight.includes(this.selectedPiece.indexOfBoardPiece)) {
-
+            case 'Knight':
+                if (this.checkPositionsKnight[turn].includes(this.selectedPiece.indexOfBoardPiece)) {
+                    console.log("check")
+                    this.check = true
                 }
                 break;
-            case 'bishop':
-                if (this.checkPositionsBishop.includes(this.selectedPiece.indexOfBoardPiece)) {
-
+            case 'Bishop':
+                if (this.checkPositionsBishop[turn].includes(this.selectedPiece.indexOfBoardPiece)) {
+                    console.log("check")
+                    this.check = true
                 }
                 break;
-            case 'queen':
-                if (this.checkPositionsQueen.includes(this.selectedPiece.indexOfBoardPiece)) {
-
+            case 'Queen':
+                if (this.checkPositionsQueen[turn].includes(this.selectedPiece.indexOfBoardPiece)) {
+                    console.log("check")
+                    this.check = true
                 }
                 break;
             default:
-                if (this.checkPositionsPawn.includes(this.selectedPiece.indexOfBoardPiece)) {
-
+                if (this.checkPositionsPawn[turn].includes(this.selectedPiece.indexOfBoardPiece)) {
+                    console.log("check")
+                    this.check = true
                 }
         }
     }

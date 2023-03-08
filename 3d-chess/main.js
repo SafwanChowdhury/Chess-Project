@@ -259,7 +259,6 @@ function animate(){
                 pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
                 if (modified[4] !== undefined){
-                    console.log(modified[4])
                     modifiedData[0] = modified[0]
                     modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
                     modifiedData[2] = pieces[modified[0]].userData.side
@@ -273,7 +272,6 @@ function animate(){
                 pieces[modified[3]].position.z = -coordsMap[initArray[takenBlack.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
                 if (modified[4] !== undefined){
-                    console.log(modified[4])
                     modifiedData[0] = modified[0]
                     modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
                     modifiedData[2] = pieces[modified[0]].userData.side
