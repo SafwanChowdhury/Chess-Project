@@ -35,6 +35,7 @@ class game {
     threatPositions = []
     threatIndex = []
     check = []
+    incr = 0
 
     /*--- Player Properties ---*/
     turn = true; //1 == white, 0 == black
@@ -134,8 +135,10 @@ class game {
 
 // resets selected piece properties
     resetSelectedPieceProperties() {
-        this.selected.object.material.opacity = 1
-        this.selected.object.material.color = this.oldColor
+        if (this.selectedPiece.pieceId >= 0) {
+            this.pieces[this.selectedPiece.pieceId].children[0].material.opacity = 1
+            this.pieces[this.selectedPiece.pieceId].children[0].material.color = this.oldColor
+        }
         for (let i = 0; i < this.highlightedCells.length; i++){
             this.highlightedCells[i].material.opacity = 0
             this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
@@ -377,8 +380,7 @@ class game {
                 validMoves.push(moves[i]);
             }
         }
-
-        for (let i = 0; i < validMoves.length; i++){
+        for (let i = 0; i < validMoves.length; i++){ //logic error here
             let tempMoves = this.checkablePositions(index + validMoves[i], turn, 0)
             let found = tempMoves.some( r => this.piecesIndex[turnI].includes(this.board[r]) );
             if (!found || this.board[validMoves[i] + index] == this.threatIndex[turnI]){
@@ -417,6 +419,7 @@ class game {
 
     //make move
     makeMove(number) {
+        console.log(this.selectedPiece.pieceId , number)
         let previousIndex = this.selectedPiece.indexOfBoardPiece
         this.selectedPiece.indexOfBoardPiece += number
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
@@ -445,15 +448,11 @@ class game {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb"]
-            this.resetSelectedPieceProperties();
-            this.checkForWin()
         }
         else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === 'Pawn') {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb"]
-            this.resetSelectedPieceProperties();
-            this.checkForWin()
         }
         else {
             if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
@@ -463,12 +462,13 @@ class game {
                 this.selectedPiece.moveTwo = false
             }
             this.updatePiece();
-            this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(), this.turn, 1)
-            this.checkCheck()
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
-            this.resetSelectedPieceProperties();
-            this.checkForWin()
         }
+        //console.log("PieceId" , this.selectedPiece.pieceId, " Move: " , (this.selectedPiece.indexOfBoardPiece - previousIndex))
+        this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(), this.turn, 1)
+        this.checkCheck()
+        this.resetSelectedPieceProperties();
+        this.checkForWin()
     }
 
     updatePiece(){
@@ -482,6 +482,7 @@ class game {
 
     // Checks for a win
     checkForWin() {
+        this.incr++
         if (this.blackScore === 0) {
             this.divider.style.display = "none";
             for (let i = 0; i < whiteTurntext.length; i++) {
@@ -503,6 +504,7 @@ class game {
     // Switches players turn
     changePlayer() {
         //this.displayGrid()
+        this.incr++
         if (this.turn) {
             this.turn = false;
             this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(), this.turn, 1)
@@ -612,7 +614,6 @@ class game {
 
         const pieceType = this.selectedPiece.type;
         const pieceIndex = this.selectedPiece.indexOfBoardPiece;
-
         switch (pieceType) {
             case 'Rook':
                 newMoves = this.rook(this.turn, pieceIndex).map(v => v + pieceIndex);
@@ -686,30 +687,27 @@ class game {
         this.saviourPieces[turnIndex] = pieceSet;
     }
 
-    unitTest(){
-        this.testPieceData(12)
-        this.makeMove(16)
-        this.resetSelectedPieceProperties()
-        this.testPieceData(20)
-        this.makeMove(-16)
-        this.resetSelectedPieceProperties()
-        this.testPieceData(4)
-        this.makeMove(27)
-        this.resetSelectedPieceProperties()
-
+    unitTest(id, move){
+        this.testPieceData(id)
+        this.makeMove(move)
     }
 
     testPieceData(index){
+        let turn = this.turn ? 1 : 0
+        if (this.check[turn]) {
+            this.findSaviour()
+        }
         if (this.turn) {
             this.playerPieces = this.whitePieces;
         } else {
             this.playerPieces = this.blackPieces;
         }
+        this.oldColor = this.pieces[index].children[0].material.color
         this.selectedPiece.pieceId = this.pieces[index].userData.pieceId;
         this.selectedPiece.indexOfBoardPiece = this.pieces[index].userData.indexOfBoardPiece;
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
         this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
-        this.selectedPiece.type = this.pieces[index].name
+        this.selectedPiece.type = this.pieces[index].children[0].name
         this.selectedPiece.moveTwo = this.pieces[index].userData.moveTwo;
         this.calculateMoves()
     }

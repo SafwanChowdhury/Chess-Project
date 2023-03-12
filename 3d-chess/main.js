@@ -244,15 +244,20 @@ function onDocumentMouseDown(event) {
     intersectsPiece = raycaster.intersectObjects(pieces, true);
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
+    incr++
+    if (incr < unitTest.length)
+        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
 }
 
+let unitTest = [[12,16], [20, -16], [13,16], [20, -7], [4, 27], [28, -8], [4, 21], [27, -7] , [15, 16], [20,-8], [7, 16], [20, -7], [7,-3]]
 
-function animate(){
+
+let incr = -1
+function animate() {
     requestAnimationFrame(animate);
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
-        console.log(modified)
         if (modified[3] !== null){
             if (modified[3] < 16) {
                 takenWhite.push(pieces[modified[3]])
@@ -310,8 +315,13 @@ manager.onLoad = function () {
         initScene()
         addPieceData()
         gameLogic.initKing()
+        camera.position.x = 8
+        camera.position.y = 18.3
+        camera.position.z = -0.45
+        camera.rotation.x = -1.59
+        camera.rotation.y = 0.41
+        camera.rotation.z = 1.63
         animate()
-        //gameLogic.unitTest()
     }
     if (promotion){
         addPromotionData()
