@@ -160,16 +160,16 @@ class game {
 
 // gets ID and index of the board cell its on
     getSelectedPiece() {
-        let turn = 0
-        if (this.turn)
-            turn = 1
-
         this.selectedPiece.pieceId = this.selected.object.parent.userData.pieceId;
         this.selectedPiece.indexOfBoardPiece = this.selected.object.parent.userData.indexOfBoardPiece;
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
         this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
         this.selectedPiece.type = this.selected.object.name
         this.selectedPiece.moveTwo = this.selected.object.parent.userData.moveTwo;
+        this.calculateMoves()
+    }
+
+    calculateMoves(){
         switch (this.selectedPiece.type) {
             case 'Rook':
                 this.givePieceBorder(this.rook(this.turn, this.selectedPiece.indexOfBoardPiece));
@@ -190,7 +190,6 @@ class game {
                 this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo));
         }
     }
-
     pawn(turn, index, moveTwo) {
         let row = Math.floor(index / 8)
         let col = Math.floor(index % 8)
@@ -397,14 +396,13 @@ class game {
         for (let i = 0; i < this.threatPositions.length; i++) {
             threatMoves.push(this.threatPositions[i] - this.selectedPiece.indexOfBoardPiece)
         }
-        if (this.check[turn] && this.selectedPiece.type !== 'King') {
+        if (this.check[turn]) {
             this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex)
         }
         else
             this.selectedPiece.moves = moves
-
         if (this.selectedPiece.moves.length > 0) {
-            this.selected.object.material.color = {r: 0, g: 1, b: 0}
+            this.pieces[this.selectedPiece.pieceId].children[0].material.color = {r: 0, g: 1, b: 0}
             this.giveCellsClick();
         }
     }
@@ -474,12 +472,12 @@ class game {
     }
 
     updatePiece(){
-        this.selected.object.parent.userData.pieceId = this.selectedPiece.pieceId;
-        this.selected.object.parent.userData.indexOfBoardPiece = this.selectedPiece.indexOfBoardPiece;
-        this.selected.object.parent.userData.row = this.selectedPiece.row;
-        this.selected.object.parent.userData.col = this.selectedPiece.col;
-        this.selected.object.parent.userData.type = this.selectedPiece.type;
-        this.selected.object.parent.userData.moveTwo = this.selectedPiece.moveTwo;
+        this.pieces[this.selectedPiece.pieceId].userData.pieceId = this.selectedPiece.pieceId;
+        this.pieces[this.selectedPiece.pieceId].userData.indexOfBoardPiece = this.selectedPiece.indexOfBoardPiece;
+        this.pieces[this.selectedPiece.pieceId].userData.row = this.selectedPiece.row;
+        this.pieces[this.selectedPiece.pieceId].userData.col = this.selectedPiece.col;
+        this.pieces[this.selectedPiece.pieceId].userData.type = this.selectedPiece.type;
+        this.pieces[this.selectedPiece.pieceId].userData.moveTwo = this.selectedPiece.moveTwo;
     }
 
     // Checks for a win
@@ -688,6 +686,33 @@ class game {
         this.saviourPieces[turnIndex] = pieceSet;
     }
 
+    unitTest(){
+        this.testPieceData(12)
+        this.makeMove(16)
+        this.resetSelectedPieceProperties()
+        this.testPieceData(20)
+        this.makeMove(-16)
+        this.resetSelectedPieceProperties()
+        this.testPieceData(4)
+        this.makeMove(27)
+        this.resetSelectedPieceProperties()
+
+    }
+
+    testPieceData(index){
+        if (this.turn) {
+            this.playerPieces = this.whitePieces;
+        } else {
+            this.playerPieces = this.blackPieces;
+        }
+        this.selectedPiece.pieceId = this.pieces[index].userData.pieceId;
+        this.selectedPiece.indexOfBoardPiece = this.pieces[index].userData.indexOfBoardPiece;
+        this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
+        this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
+        this.selectedPiece.type = this.pieces[index].name
+        this.selectedPiece.moveTwo = this.pieces[index].userData.moveTwo;
+        this.calculateMoves()
+    }
 
 }
 

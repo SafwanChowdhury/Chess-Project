@@ -252,33 +252,27 @@ function animate(){
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
+        console.log(modified)
         if (modified[3] !== null){
             if (modified[3] < 16) {
                 takenWhite.push(pieces[modified[3]])
                 pieces[modified[3]].position.x = -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y]
                 pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
-                if (modified[4] !== undefined){
-                    modifiedData[0] = modified[0]
-                    modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
-                    modifiedData[2] = pieces[modified[0]].userData.side
-                    promotion = true
-                    loadQueen(modified[0], modified[4], modified[1], modified[2])
-                }
             }
             else if (modified[3] >= 16){
                 takenBlack.push(pieces[modified[3]])
                 pieces[modified[3]].position.x = takenMap[initArray[takenBlack.indexOf(pieces[modified[3]])].y]
                 pieces[modified[3]].position.z = -coordsMap[initArray[takenBlack.indexOf(pieces[modified[3]])].x]
                 pieces[modified[3]].userData.taken = true
-                if (modified[4] !== undefined){
-                    modifiedData[0] = modified[0]
-                    modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
-                    modifiedData[2] = pieces[modified[0]].userData.side
-                    promotion = true
-                    loadQueen(modified[0], modified[4], modified[1], modified[2])
-                }
             }
+        }
+        if (modified[4] !== undefined){
+            modifiedData[0] = modified[0]
+            modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
+            modifiedData[2] = pieces[modified[0]].userData.side
+            promotion = true
+            loadQueen(modified[0], modified[4], modified[1], modified[2])
         }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
         pieces[modified[0]].position.z = coordsMap[modified[1]]
@@ -317,6 +311,7 @@ manager.onLoad = function () {
         addPieceData()
         gameLogic.initKing()
         animate()
+        //gameLogic.unitTest()
     }
     if (promotion){
         addPromotionData()
