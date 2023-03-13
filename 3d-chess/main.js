@@ -2,10 +2,10 @@ import './style.css'
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
-
 import {game} from "./script"
-import meshPhongNodeMaterial from "three/addons/nodes/materials/MeshPhongNodeMaterial.js";
+import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import {mod} from "three/nodes";
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -167,25 +167,10 @@ function addPieceData(){
             pieces[i].userData.indexOfBoardPiece = i+32
         }
         pieces[i].userData.name = pieces[i].children[0].name
-        if (pieces[i].userData.name === "Rook"){
-            pieces[i].userData.isRook = true
-        }
-        else if (pieces[i].userData.name === "Pawn"){
-            pieces[i].userData.isPawn = true
+        if (pieces[i].userData.name === "Pawn"){
             pieces[i].userData.moveTwo = true
         }
-        else if (pieces[i].userData.name === "Bishop"){
-            pieces[i].userData.isBishop = true
-        }
-        else if (pieces[i].userData.name === "Knight"){
-            pieces[i].userData.isKnight = true
-        }
-        else if (pieces[i].userData.name === "Queen"){
-            pieces[i].userData.isQueen = true
-        }
-        else if (pieces[i].userData.name === "King"){
-            pieces[i].userData.isKing = true
-        }
+        pieces[i].userData.check = false
         if (i < 16){
             pieces[i].userData.side = "white"
             whitePieces.push(pieces[i])
@@ -225,15 +210,17 @@ gameLogic.pieces = pieces
 
 const camControls = new OrbitControls(camera, renderer.domElement);
 
+const menuElement = document.getElementById('menu');
+const menuObject = new CSS2DObject(menuElement);
+menuObject.position.set(0, 0, 0);
+scene.add(menuObject);
+
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 
 let intersectsPiece = null
 let intersectsBoard = null
-
-let modified = []
-let modifiedData = []
-let promotion = false
 function onDocumentMouseDown(event) {
+    menuElement.style.visibility = 'hidden';
     var vector = new THREE.Vector3(
         (event.clientX / window.innerWidth) * 2 - 1,
         -(event.clientY / window.innerHeight) * 2 + 1,
@@ -245,9 +232,9 @@ function onDocumentMouseDown(event) {
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
     //comment out when not testing game states, click through moves till saved game state
-/*    incr++
+    incr++
     if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
+        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
 }
 
 //copy array object to save game state from console
@@ -267,10 +254,25 @@ let unitTest = [
     [
         20,
         -7
+    ],
+    [
+        4,
+        27
+    ],
+    [
+        28,
+        -8
+    ],
+    [
+        8,
+        16
     ]
 ]
 
 
+let modified = []
+let modifiedData = []
+let promotion = false
 let incr = -1
 function animate() {
     requestAnimationFrame(animate);
@@ -292,11 +294,15 @@ function animate() {
             }
         }
         if (modified[4] !== undefined){
+            console.log(modified)
             modifiedData[0] = modified[0]
             modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
             modifiedData[2] = pieces[modified[0]].userData.side
             promotion = true
-            loadQueen(modified[0], modified[4], modified[1], modified[2])
+            menuObject.position.copy(pieces[modified[0]].children[0].position);
+            // show the menu
+            menuElement.style.visibility = 'visible';
+            loadQueen(modified[0], modified[4], modified[2], modified[1])
         }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
         pieces[modified[0]].position.z = coordsMap[modified[1]]

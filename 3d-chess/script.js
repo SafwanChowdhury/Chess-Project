@@ -15,8 +15,8 @@ class game {
     cells = []
     whitePieces = []
     blackPieces = []
-    piecesIndex = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]]
-    saviourPieces = [[],[]]
+    piecesIndex = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]]
+    saviourPieces = [[], []]
     pieces = []
     modified = []
     oldColor = {}
@@ -26,12 +26,12 @@ class game {
     whiteTurntext = document.querySelectorAll(".white-turn-text");
     blackTurntext = document.querySelectorAll(".black-turn-text");
     divider = document.querySelector("#divider");
-    checkPositionsPawn = [[],[]]
-    checkPositionsRook = [[],[]]
-    checkPositionsBishop = [[],[]]
-    checkPositionsQueen = [[],[]]
-    checkPositionsKnight = [[],[]]
-    currentCheckPositions = [[],[]]
+    checkPositionsPawn = [[], []]
+    checkPositionsRook = [[], []]
+    checkPositionsBishop = [[], []]
+    checkPositionsQueen = [[], []]
+    checkPositionsKnight = [[], []]
+    currentCheckPositions = [[], []]
     threatPositions = []
     threatIndex = []
     check = []
@@ -64,21 +64,25 @@ class game {
     selected = null
     intersectsBoard = null
     /*---------- Event Listeners ----------*/
+
 // initialize event listeners on pieces
-    givePiecesEventListeners(intersectsPiece,intersectsBoard) {
+    givePiecesEventListeners(intersectsPiece, intersectsBoard) {
         let turnW = this.turn ? 1 : 0
         if (this.check[turnW]) {
             this.findSaviour(this.turn)
         }
+        else{
+            this.saviourPieces[turnW] = []
+        }
         this.oldPiece = null
         this.intersectsBoard = intersectsBoard
-        if ( intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16) ) {
+        if (intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16)) {
             intersectsPiece[0].object.material.transparent = true;
             if (this.selected) {
                 if (intersectsPiece[0] !== this.selected) {
                     this.selected.object.material.opacity = 1
                     this.selected.object.material.color = this.oldColor
-                    for (let i = 0; i < this.highlightedCells.length; i++){
+                    for (let i = 0; i < this.highlightedCells.length; i++) {
                         this.highlightedCells[i].material.opacity = 0
                         this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
                     }
@@ -89,15 +93,13 @@ class game {
                 this.selected = intersectsPiece[0]
                 this.oldColor = this.selected.object.material.color
                 this.getPlayerPieces()
-            }
-            else {
+            } else {
                 if (this.saviourPieces[turnW].includes(intersectsPiece[0].object.parent)) {
                     intersectsPiece[0].object.material.opacity = 0.7;
                     this.selected = intersectsPiece[0]
                     this.oldColor = this.selected.object.material.color
                     this.getPlayerPieces()
-                }
-                else if(intersectsPiece[0].object.userData.name == 'King'){
+                } else if (intersectsPiece[0].object.userData.name === 'King') {
                     intersectsPiece[0].object.material.opacity = 0.7;
                     this.selected = intersectsPiece[0]
                     this.oldColor = this.selected.object.material.color
@@ -105,16 +107,13 @@ class game {
                 }
             }
 
-        }
-        else{
-            if (this.selected && intersectsBoard > 0 && this.highlightedCells.includes(intersectsBoard[0].object) !== true){
+        } else {
+            if (this.selected && intersectsBoard > 0 && this.highlightedCells.includes(intersectsBoard[0].object) !== true) {
                 this.resetSelectedPieceProperties();
-            }
-            else if (this.selected && intersectsBoard < 1){
+            } else if (this.selected && intersectsBoard < 1) {
                 this.resetSelectedPieceProperties();
-            }
-            else{
-                if(intersectsBoard[0] && this.selected && this.highlightedCells.includes(intersectsBoard[0].object)) {
+            } else {
+                if (intersectsBoard[0] && this.selected && this.highlightedCells.includes(intersectsBoard[0].object)) {
                     this.makeMove(this.intersectsBoard[0].object.userData.index - this.selectedPiece.indexOfBoardPiece)
                 }
             }
@@ -133,14 +132,13 @@ class game {
     }
 
 
-
 // resets selected piece properties
     resetSelectedPieceProperties() {
         if (this.selectedPiece.pieceId >= 0) {
             this.pieces[this.selectedPiece.pieceId].children[0].material.opacity = 1
             this.pieces[this.selectedPiece.pieceId].children[0].material.color = this.oldColor
         }
-        for (let i = 0; i < this.highlightedCells.length; i++){
+        for (let i = 0; i < this.highlightedCells.length; i++) {
             this.highlightedCells[i].material.opacity = 0
             this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
         }
@@ -158,6 +156,7 @@ class game {
         this.selectedPiece.moveTwo = false;
         this.selectedPiece.type = ''
         this.selectedPiece.moves = [];
+        this.selectedPiece.check = false
     }
 
 // gets ID and index of the board cell its on
@@ -168,10 +167,11 @@ class game {
         this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8)
         this.selectedPiece.type = this.selected.object.name
         this.selectedPiece.moveTwo = this.selected.object.parent.userData.moveTwo;
+        this.selectedPiece.check = this.selected.object.parent.userData.check
         this.calculateMoves()
     }
 
-    calculateMoves(){
+    calculateMoves() {
         switch (this.selectedPiece.type) {
             case 'Rook':
                 this.givePieceBorder(this.rook(this.turn, this.selectedPiece.indexOfBoardPiece));
@@ -192,6 +192,7 @@ class game {
                 this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo));
         }
     }
+
     pawn(turn, index, moveTwo) {
         let row = Math.floor(index / 8)
         let col = Math.floor(index % 8)
@@ -350,7 +351,7 @@ class game {
     }
 
     king(turn, index) {
-        for (let i = 0; i < this.threatCells.length; i++){
+        for (let i = 0; i < this.threatCells.length; i++) {
             this.threatCells[i].material.opacity = 0
             this.threatCells[i].material.color = {r: 0, g: 1, b: 0}
         }
@@ -456,7 +457,7 @@ class game {
             });
         }
 
-        possibleMoves = validMoves.filter(function(value) {
+        possibleMoves = validMoves.filter(function (value) {
             return !invalidMoves.includes(value);
         });
         return possibleMoves
@@ -466,11 +467,16 @@ class game {
     // gives the piece a green highlight for the user (showing its movable)
     givePieceBorder(moves) {
         let turnW = this.turn ? 1 : 0
+        let turnB = this.turn ? 0 : 1
         let threatMoves = []
         for (let i = 0; i < this.threatPositions.length; i++) {
             threatMoves.push(this.threatPositions[i] - this.selectedPiece.indexOfBoardPiece)
         }
+        console.log(this.check)
         if (this.check[turnW] && this.selectedPiece.type !== 'King') {
+            this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex)
+        }
+        if (this.threatIndex.length > 0 && this.pieces[this.threatIndex].userData.check && this.saviourPieces[2] === this.pieces[this.selectedPiece.pieceId]) {
             this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex)
         }
         else
@@ -491,8 +497,12 @@ class game {
 
     //make move
     makeMove(number) {
-        this.movesLog.push([this.selectedPiece.pieceId , number])
-        //console.log(this.movesLog)
+        let turnIndex = this.turn ? 1 : 0
+        this.movesLog.push([this.selectedPiece.pieceId, number])
+        console.log(this.movesLog)
+        if (this.saviourPieces[turnIndex].includes(this.pieces[this.selectedPiece.pieceId])) {
+            this.saviourPieces[2] = this.pieces[this.selectedPiece.pieceId];
+        }
         let previousIndex = this.selectedPiece.indexOfBoardPiece
         this.selectedPiece.indexOfBoardPiece += number
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
@@ -517,17 +527,15 @@ class game {
         }
         this.board[previousIndex] = null;
         this.board[modifiedIndex] = this.selectedPiece.pieceId;
-        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 57 && this.selectedPiece.type === 'Pawn') {
+        if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === 'Pawn') {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb"]
-        }
-        else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === 'Pawn') {
+        } else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === 'Pawn') {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
             this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb"]
-        }
-        else {
+        } else {
             if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
                 this.selectedPiece.moveTwo = false
             }
@@ -544,7 +552,7 @@ class game {
         this.checkForWin()
     }
 
-    updatePiece(){
+    updatePiece() {
         this.pieces[this.selectedPiece.pieceId].userData.pieceId = this.selectedPiece.pieceId;
         this.pieces[this.selectedPiece.pieceId].userData.indexOfBoardPiece = this.selectedPiece.indexOfBoardPiece;
         this.pieces[this.selectedPiece.pieceId].userData.row = this.selectedPiece.row;
@@ -552,7 +560,6 @@ class game {
         this.pieces[this.selectedPiece.pieceId].userData.type = this.selectedPiece.type;
         this.pieces[this.selectedPiece.pieceId].userData.moveTwo = this.selectedPiece.moveTwo;
         this.pieces[this.selectedPiece.pieceId].userData.moves = this.selectedPiece.moves;
-
     }
 
     // Checks for a win
@@ -560,20 +567,20 @@ class game {
         if (this.checkmate()) {
             if (this.turn) {
                 console.log("white win")
-/*                this.divider.style.display = "none";
-                for (let i = 0; i < whiteTurntext.length; i++) {
-                    this.whiteTurntext[i].style.color = "black";
-                    this.blackTurntext[i].style.display = "none";
-                    this.whiteTurntext[i].textContent = "WHITE WINS!";
-                }*/
+                /*                this.divider.style.display = "none";
+                                for (let i = 0; i < whiteTurntext.length; i++) {
+                                    this.whiteTurntext[i].style.color = "black";
+                                    this.blackTurntext[i].style.display = "none";
+                                    this.whiteTurntext[i].textContent = "WHITE WINS!";
+                                }*/
             } else if (!this.turn) {
                 console.log("black win")
-/*                this.divider.style.display = "none";
-                for (let i = 0; i < this.blackTurntext.length; i++) {
-                    this.blackTurntext[i].style.color = "black";
-                    this.whiteTurntext[i].style.display = "none";
-                    this.blackTurntext[i].textContent = "BLACK WINS!";
-                }*/
+                /*                this.divider.style.display = "none";
+                                for (let i = 0; i < this.blackTurntext.length; i++) {
+                                    this.blackTurntext[i].style.color = "black";
+                                    this.whiteTurntext[i].style.display = "none";
+                                    this.blackTurntext[i].textContent = "BLACK WINS!";
+                                }*/
             }
         }
         this.incr++
@@ -611,20 +618,20 @@ class game {
         }
     }
 
-    displayGrid(){
+    displayGrid() {
         console.log(this.selectedPiece.indexOfBoardPiece)
-        console.log("Check Positions: " , this.currentCheckPositions)
-        console.log("Pawn Check Positions: " , this.checkPositionsPawn)
-        console.log("Rook Check Positions: " , this.checkPositionsRook)
-        console.log("Knight Check Positions: " , this.checkPositionsKnight)
-        console.log("Bishop Check Positions: " , this.checkPositionsBishop)
-        console.log("Queen Check Positions: " , this.checkPositionsQueen)
-        for (let i = 0; i < 8; i++){
+        console.log("Check Positions: ", this.currentCheckPositions)
+        console.log("Pawn Check Positions: ", this.checkPositionsPawn)
+        console.log("Rook Check Positions: ", this.checkPositionsRook)
+        console.log("Knight Check Positions: ", this.checkPositionsKnight)
+        console.log("Bishop Check Positions: ", this.checkPositionsBishop)
+        console.log("Queen Check Positions: ", this.checkPositionsQueen)
+        for (let i = 0; i < 8; i++) {
             console.log(this.board[(0 + (i * 8))], this.board[(1 + (i * 8))], this.board[(2 + (i * 8))], this.board[(3 + (i * 8))], this.board[(4 + (i * 8))], this.board[(5 + (i * 8))], this.board[(6 + (i * 8))], this.board[(7 + (i * 8))])
         }
     }
 
-    checkablePositions(index, turn, modifier){
+    checkablePositions(index, turn, modifier) {
         let localBishop = []
         let localRook = []
         let localPawn = []
@@ -636,14 +643,14 @@ class game {
         localBishop = this.bishop(turn, index)
         localRook = this.rook(turn, index)
         localKnight = this.knight(turn, index)
-        localQueen = this.queen(turn,index)
+        localQueen = this.queen(turn, index)
 
         let checkPositions = localQueen.concat(localKnight.concat(localPawn))
 
         //cleanup checkable positions array
-        for(let i=0; i < checkPositions.length; ++i) {
-            for(let j=i+1; j < checkPositions.length; ++j) {
-                if(checkPositions[i] === checkPositions[j])
+        for (let i = 0; i < checkPositions.length; ++i) {
+            for (let j = i + 1; j < checkPositions.length; ++j) {
+                if (checkPositions[i] === checkPositions[j])
                     checkPositions.splice(j--, 1);
             }
         }
@@ -652,14 +659,14 @@ class game {
             for (let i = 0; i < checkPositions.length; i++) {
                 this.threatCells.push(this.cells[index + checkPositions[i]])
             }
-            this.checkPositionsPawn[turnW] = localPawn.map(v=> v+index)
-            this.checkPositionsBishop[turnW] = localBishop.map(v=> v+index)
-            this.checkPositionsKnight[turnW] = localKnight.map(v=> v+index)
-            this.checkPositionsRook[turnW] = localRook.map(v=> v+index)
-            this.checkPositionsQueen[turnW] = localQueen.map(v=> v+index)
+            this.checkPositionsPawn[turnW] = localPawn.map(v => v + index)
+            this.checkPositionsBishop[turnW] = localBishop.map(v => v + index)
+            this.checkPositionsKnight[turnW] = localKnight.map(v => v + index)
+            this.checkPositionsRook[turnW] = localRook.map(v => v + index)
+            this.checkPositionsQueen[turnW] = localQueen.map(v => v + index)
         }
 
-        checkPositions = checkPositions.map(v=> v+index)
+        checkPositions = checkPositions.map(v => v + index)
         return checkPositions
     }
 
@@ -710,36 +717,37 @@ class game {
                 newMoves = this.checkPawn(this.turn, pieceIndex).map(v => v + pieceIndex);
                 break;
         }
-        if(this[`checkPositions${pieceType}`] !== undefined) {
+        if (this[`checkPositions${pieceType}`] !== undefined) {
             if (newMoves.includes(this.board.indexOf(this.turn ? 27 : 3)) ||
                 this[`checkPositions${pieceType}`][turnW].includes(pieceIndex)) {
                 this.threatPositions = this.currentCheckPositions[turnB].filter(x => newMoves.includes(x));
                 console.log("check");
+                this.pieces[this.selectedPiece.pieceId].userData.check = true
                 this.check[turnB] = true;
                 this.threatIndex[turnB] = this.selectedPiece.pieceId;
             }
         }
     }
 
-    checkmate(){
+    checkmate() {
         let turn = !this.turn
         let turnIndex = turn ? 1 : 0
         this.findSaviour(turn)
         let moves = this.king(turn, this.getKingIndex(turn))
-        if (moves.length == 0 && this.saviourPieces[turnIndex].length == 0 && this.threatIndex.length > 0){
+        if (moves.length == 0 && this.saviourPieces[turnIndex].length == 0 && this.threatIndex.length > 0) {
             console.log("checkmate")
             return true
         }
         return false
     }
-    
-    initKing(){
+
+    initKing() {
         this.currentCheckPositions[1] = this.checkablePositions(3, true, 1)
         this.currentCheckPositions[0] = this.checkablePositions(59, false, 1)
         this.findSaviour(this.turn)
     }
 
-    getKingIndex(turn){
+    getKingIndex(turn) {
         let index = turn ? this.board.indexOf(3) : this.board.indexOf(27)
         return index
     }
@@ -778,12 +786,12 @@ class game {
         this.saviourPieces[turnIndex] = pieceSet;
     }
 
-    unitTest(id, move){
+    unitTest(id, move) {
         this.testPieceData(id)
         this.makeMove(move)
     }
 
-    testPieceData(index){
+    testPieceData(index) {
         let turnW = this.turn ? 1 : 0
         if (this.check[turnW]) {
             this.findSaviour(this.turn)
@@ -805,6 +813,6 @@ class game {
 
 }
 
-export{
+export {
     game
 }
