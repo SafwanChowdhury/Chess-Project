@@ -244,12 +244,31 @@ function onDocumentMouseDown(event) {
     intersectsPiece = raycaster.intersectObjects(pieces, true);
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
-    incr++
+    //comment out when not testing game states, click through moves till saved game state
+/*    incr++
     if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
+        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
 }
 
-let unitTest = [[12,16], [20, -16], [13,16], [20, -7], [4, 27], [28, -8], [4, 21], [27, -7] , [15, 16], [20,-8], [7, 16], [20, -7], [7,-3]]
+//copy array object to save game state from console
+let unitTest = [
+    [
+        12,
+        16
+    ],
+    [
+        20,
+        -16
+    ],
+    [
+        13,
+        16
+    ],
+    [
+        20,
+        -7
+    ]
+]
 
 
 let incr = -1
