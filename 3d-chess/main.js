@@ -170,7 +170,6 @@ function addPieceData(){
         if (pieces[i].userData.name === "Pawn"){
             pieces[i].userData.moveTwo = true
         }
-        pieces[i].userData.check = false
         if (i < 16){
             pieces[i].userData.side = "white"
             whitePieces.push(pieces[i])
@@ -232,42 +231,13 @@ function onDocumentMouseDown(event) {
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
     //comment out when not testing game states, click through moves till saved game state
-    incr++
+/*    incr++
     if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
+        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
 }
 
 //copy array object to save game state from console
-let unitTest = [
-    [
-        12,
-        16
-    ],
-    [
-        20,
-        -16
-    ],
-    [
-        13,
-        16
-    ],
-    [
-        20,
-        -7
-    ],
-    [
-        4,
-        27
-    ],
-    [
-        28,
-        -8
-    ],
-    [
-        8,
-        16
-    ]
-]
+let unitTest = [ ]
 
 
 let modified = []
