@@ -219,21 +219,19 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 let intersectsPiece = null
 let intersectsBoard = null
 function onDocumentMouseDown(event) {
-    menuElement.style.visibility = 'hidden';
-    var vector = new THREE.Vector3(
-        (event.clientX / window.innerWidth) * 2 - 1,
-        -(event.clientY / window.innerHeight) * 2 + 1,
-        0.5);
-    var raycaster =  new THREE.Raycaster();
-    raycaster.setFromCamera( vector, camera );
-    intersectsBoard = raycaster.intersectObjects(boardSquares);
-    intersectsPiece = raycaster.intersectObjects(pieces, true);
-    gameLogic.modified = []
-    gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
-    //comment out when not testing game states, click through moves till saved game state
-/*    incr++
-    if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
+    if (clientID[0] == gameLogic.turn ? 1 : 0) {
+        menuElement.style.visibility = 'hidden';
+        var vector = new THREE.Vector3(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            -(event.clientY / window.innerHeight) * 2 + 1,
+            0.5);
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(vector, camera);
+        intersectsBoard = raycaster.intersectObjects(boardSquares);
+        intersectsPiece = raycaster.intersectObjects(pieces, true);
+        gameLogic.modified = []
+        gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
+    }
 }
 
 //copy array object to save game state from console
@@ -324,14 +322,20 @@ let unitTest = [
 let modified = []
 let modifiedData = []
 let promotion = false
+let received = false
 let incr = -1
 function animate() {
     requestAnimationFrame(animate);
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
-        const jsonString = JSON.stringify(gameLogic.modified);
-        socket.send(jsonString);
+        console.log(modified[5])
+        if (clientID[0] == modified[5]) {
+            console.log(gameLogic.moveSend.push(clientID[0]))
+            const jsonString = JSON.stringify(gameLogic.moveSend);
+            socket.send(jsonString);
+            modified[5] = !modified[5]
+        }
         if (modified[3] !== null){
             if (modified[3] < 16) {
                 takenWhite.push(pieces[modified[3]])
@@ -346,7 +350,7 @@ function animate() {
                 pieces[modified[3]].userData.taken = true
             }
         }
-        if (modified[4] !== undefined){
+        if (modified[4] !== null){
             modifiedData[0] = modified[0]
             modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
             modifiedData[2] = pieces[modified[0]].userData.side
@@ -360,6 +364,7 @@ function animate() {
         pieces[modified[0]].position.z = coordsMap[modified[1]]
         modified = []
         gameLogic.modified = []
+        received = false
     }
     renderer.render(scene,camera);
 }
@@ -390,6 +395,7 @@ manager.onLoad = function () {
         camera.rotation.x = -1.59
         camera.rotation.y = 0.41
         camera.rotation.z = 1.63
+        socket.send("loaded")
         animate()
     }
     if (promotion){
@@ -406,18 +412,23 @@ function resize_window(camera, renderer){
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
 
-objectLoading()
-
 const socket = new WebSocket('ws://192.168.1.86:8080');
-
 socket.addEventListener('open', function(event) {
     console.log('Connected to server');
+    objectLoading()
 });
 
+let clientID = []
 socket.addEventListener('message', function(event) {
-    const jsonString = event.data;
-    const array = JSON.parse(jsonString);
-    gameLogic.modified = array
+    if (clientID.length > 0) {
+        const jsonString = event.data;
+        const array = JSON.parse(jsonString);
+        gameLogic.unitTest(array[0], array[1])
+    }
+    else{
+        clientID[0] = parseInt(event.data)
+        console.log(clientID[0])
+    }
 });
 
 socket.addEventListener('close', function(event) {

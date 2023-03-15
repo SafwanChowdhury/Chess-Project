@@ -27,17 +27,13 @@ class game {
     whiteTurntext = document.querySelectorAll(".white-turn-text");
     blackTurntext = document.querySelectorAll(".black-turn-text");
     divider = document.querySelector("#divider");
-    checkPositionsPawn = [[], []]
-    checkPositionsRook = [[], []]
-    checkPositionsBishop = [[], []]
-    checkPositionsQueen = [[], []]
-    checkPositionsKnight = [[], []]
     currentCheckPositions = [[], []]
     threatPositions = []
     threatIndex = [-1, -1] //0 is the piece that is threatening the black king therefore white piece
     check = []
     incr = 0
     movesLog = []
+    moveSend = []
 
     /*--- Player Properties ---*/
     turn = true; //1 == white, 0 == black
@@ -529,6 +525,7 @@ class game {
     makeMove(number) {
         this.movesLog.push([this.selectedPiece.pieceId, number])
         console.log(this.movesLog)
+        this.moveSend = [this.selectedPiece.pieceId, number]
         let previousIndex = this.selectedPiece.indexOfBoardPiece
         this.selectedPiece.indexOfBoardPiece += number
         this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8)
@@ -556,11 +553,11 @@ class game {
         if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === 'Pawn') {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
-            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb"]
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb", this.turn]
         } else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === 'Pawn') {
             this.selectedPiece.type = 'Queen'
             this.updatePiece();
-            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb"]
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb", this.turn]
         } else {
             if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
                 this.selectedPiece.moveTwo = false
@@ -569,7 +566,7 @@ class game {
                 this.selectedPiece.moveTwo = false
             }
             this.updatePiece();
-            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece]
+            this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn]
         }
         //console.log("PieceId" , this.selectedPiece.pieceId, " Move: " , (this.selectedPiece.indexOfBoardPiece - previousIndex))
         this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1)
@@ -636,11 +633,6 @@ class game {
     displayGrid() {
         console.log(this.selectedPiece.indexOfBoardPiece)
         console.log("Check Positions: ", this.currentCheckPositions)
-        console.log("Pawn Check Positions: ", this.checkPositionsPawn)
-        console.log("Rook Check Positions: ", this.checkPositionsRook)
-        console.log("Knight Check Positions: ", this.checkPositionsKnight)
-        console.log("Bishop Check Positions: ", this.checkPositionsBishop)
-        console.log("Queen Check Positions: ", this.checkPositionsQueen)
         console.log(this.board.map(val => val === null ? '..' : val.toString().padStart(2, ' ')).reduce((output, val, index) => {
             if (index % 16 === 0) {
                 output += '\n';
@@ -650,21 +642,13 @@ class game {
     }
 
     checkablePositions(index, turn, modifier) {
-        let localBishop
-        let localRook
         let localPawn
         let localKnight
         let localQueen
-        let turnW = this.turn ? 1 : 0
-
         localPawn = this.checkPawn(turn, index, this.board)
-        localBishop = this.bishop(turn, index, this.board)
-        localRook = this.rook(turn, index, this.board)
         localKnight = this.knight(turn, index, this.board)
         localQueen = this.queen(turn, index, this.board)
-
         let checkPositions = localQueen.concat(localKnight.concat(localPawn))
-
         //cleanup checkable positions array
         for (let i = 0; i < checkPositions.length; ++i) {
             for (let j = i + 1; j < checkPositions.length; ++j) {
@@ -672,15 +656,6 @@ class game {
                     checkPositions.splice(j--, 1);
             }
         }
-
-        if (modifier) {
-            this.checkPositionsPawn[turnW] = localPawn.map(v => v + index)
-            this.checkPositionsBishop[turnW] = localBishop.map(v => v + index)
-            this.checkPositionsKnight[turnW] = localKnight.map(v => v + index)
-            this.checkPositionsRook[turnW] = localRook.map(v => v + index)
-            this.checkPositionsQueen[turnW] = localQueen.map(v => v + index)
-        }
-
         checkPositions = checkPositions.map(v => v + index)
         return checkPositions
     }
@@ -886,6 +861,11 @@ class game {
         this.selectedPiece.type = this.pieces[index].children[0].name
         this.selectedPiece.moveTwo = this.pieces[index].userData.moveTwo;
         this.calculateMoves()
+    }
+
+    onlineUpdate(id, move){
+        this.testPieceData(id)
+        this.makeMove(move)
     }
 
 }
