@@ -9,11 +9,11 @@ wss.on('connection', function connection(ws) {
 
     console.log('Client connected');
 
-    ws.on('message', function incoming(message) {
-        console.log(`Received message: ${message}`);
-        ws.send(`"Hi from server ${clients.indexOf(ws)} ` );
-
-    });
+    ws.onmessage = function(event) {
+        const jsonString = event.data;
+        const array = JSON.parse(jsonString);
+        clients[1].send(event.data);
+    }
 
     ws.on('close', function close() {
         console.log('Client disconnected');

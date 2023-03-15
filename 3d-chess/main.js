@@ -330,6 +330,8 @@ function animate() {
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
+        const jsonString = JSON.stringify(gameLogic.modified);
+        socket.send(jsonString);
         if (modified[3] !== null){
             if (modified[3] < 16) {
                 takenWhite.push(pieces[modified[3]])
@@ -345,7 +347,6 @@ function animate() {
             }
         }
         if (modified[4] !== undefined){
-            console.log(modified)
             modifiedData[0] = modified[0]
             modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
             modifiedData[2] = pieces[modified[0]].userData.side
@@ -362,14 +363,6 @@ function animate() {
     }
     renderer.render(scene,camera);
 }
-
-window.addEventListener("keydown", function(event) {
-    if (event.code === "Space") {
-        camControls.enabled = !camControls.enabled
-        //camera.position.set(0,20,0)
-        //camera.lookAt(0,0,0)
-    }
-}, true)
 
 let onStart = false
 
@@ -419,11 +412,12 @@ const socket = new WebSocket('ws://192.168.1.86:8080');
 
 socket.addEventListener('open', function(event) {
     console.log('Connected to server');
-    socket.send('Hello, server!');
 });
 
 socket.addEventListener('message', function(event) {
-    console.log(`Received message: ${event.data}`);
+    const jsonString = event.data;
+    const array = JSON.parse(jsonString);
+    gameLogic.modified = array
 });
 
 socket.addEventListener('close', function(event) {
