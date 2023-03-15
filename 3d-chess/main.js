@@ -414,3 +414,18 @@ function resize_window(camera, renderer){
 window.addEventListener('resize',() => resize_window(camera,renderer))
 
 objectLoading()
+
+const socket = new WebSocket('ws://192.168.1.86:8080');
+
+socket.addEventListener('open', function(event) {
+    console.log('Connected to server');
+    socket.send('Hello, server!');
+});
+
+socket.addEventListener('message', function(event) {
+    console.log(`Received message: ${event.data}`);
+});
+
+socket.addEventListener('close', function(event) {
+    console.log('Disconnected from server');
+});
