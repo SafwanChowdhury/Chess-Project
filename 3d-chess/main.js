@@ -412,7 +412,7 @@ function resize_window(camera, renderer){
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
 
-const socket = new WebSocket('ws://192.168.1.86:8080');
+const socket = new WebSocket('ws://localhost:8080');
 socket.addEventListener('open', function(event) {
     console.log('Connected to server');
     objectLoading()
