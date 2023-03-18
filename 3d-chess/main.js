@@ -395,7 +395,7 @@ manager.onLoad = function () {
         camera.rotation.x = -1.59
         camera.rotation.y = 0.41
         camera.rotation.z = 1.63
-        socket.send("loaded")
+        socket.send(JSON.stringify(message));
         animate()
     }
     if (promotion){
@@ -412,7 +412,8 @@ function resize_window(camera, renderer){
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
 
-const socket = new WebSocket('ws://localhost:8080');
+const socket = new WebSocket('ws://192.168.1.88:8080');
+
 socket.addEventListener('open', function(event) {
     console.log('Connected to server');
     objectLoading()
@@ -434,3 +435,14 @@ socket.addEventListener('message', function(event) {
 socket.addEventListener('close', function(event) {
     console.log('Disconnected from server');
 });
+
+function getURLParameter(name) {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get(name);
+}
+
+const roomId = getURLParameter('roomId');
+const message = {
+    type: 'loaded',
+    room: roomId
+};
