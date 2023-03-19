@@ -4,6 +4,20 @@ const lobbyList = document.getElementById('lobby-list');
 const createLobbyButton = document.getElementById('create-lobby');
 const refreshButton = document.getElementById('refresh');
 
+// Function to send a refresh message to the server and update the lobby list every few seconds
+function autoRefresh() {
+    const message = {
+        type: 'refresh'
+    };
+    socket.send(JSON.stringify(message));
+}
+
+// Call autoRefresh() when the page loads
+window.addEventListener('load', function() {
+    autoRefresh();
+    setInterval(autoRefresh, 5000); // Refresh every 5 seconds
+});
+
 lobbyList.addEventListener('click', function(event) {
     const target = event.target;
     if (target.classList.contains('join-btn')) {
@@ -23,10 +37,7 @@ createLobbyButton.addEventListener('click', function() {
 });
 
 refreshButton.addEventListener('click', function() {
-    const message = {
-        type: 'refresh'
-    };
-    socket.send(JSON.stringify(message));
+    autoRefresh(); // Call autoRefresh() when the refresh button is clicked
 });
 
 socket.addEventListener('message', function(event) {
@@ -47,21 +58,28 @@ function joinRoom(room) {
     window.location.href = `game.html`;
 }
 
-
 function addLobby(lobbyName, players = 0) {
     const listItem = document.createElement('li');
     listItem.setAttribute('data-room', lobbyName);
     listItem.classList.add('lobby-item');
+    const joinButton = document.createElement('button');
+    joinButton.classList.add('join-btn');
+    joinButton.innerText = 'Join';
+    if (players >= 2) {
+        joinButton.style.display = 'none';
+    }
+    joinButton.addEventListener('click', function(event) {
+        joinRoom(lobbyName);
+    });
     listItem.innerHTML = `
         <div class="lobby-details">
             <h2>${lobbyName}</h2>
             <span class="players">${players} players</span>
         </div>
-        <button class="join-btn">Join</button>
     `;
+    listItem.appendChild(joinButton);
     lobbyList.appendChild(listItem);
 }
-
 
 function updateLobbyList(rooms) {
     lobbyList.innerHTML = '';
