@@ -329,11 +329,9 @@ function animate() {
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
     if (modified.length > 0){
-        console.log(modified[5])
         if (clientID[0] == modified[5]) {
-            console.log(gameLogic.moveSend.push(clientID[0]))
-            const jsonString = JSON.stringify(gameLogic.moveSend);
-            socket.send(jsonString);
+            gameLogic.moveSend.push(clientID[0])
+            sendActionToOpponent(gameLogic.moveSend)
             modified[5] = !modified[5]
         }
         if (modified[3] !== null){
@@ -395,6 +393,11 @@ manager.onLoad = function () {
         camera.rotation.x = -1.59
         camera.rotation.y = 0.41
         camera.rotation.z = 1.63
+        // Send a rejoin message to the server
+        const message = {
+            type: 'rejoin',
+            room: roomId
+        };
         socket.send(JSON.stringify(message));
         animate()
     }
@@ -416,33 +419,36 @@ const socket = new WebSocket('ws://192.168.1.88:8080');
 
 socket.addEventListener('open', function(event) {
     console.log('Connected to server');
-    objectLoading()
+    objectLoading();
 });
 
 let clientID = []
 socket.addEventListener('message', function(event) {
-    if (clientID.length > 0) {
-        const jsonString = event.data;
-        const array = JSON.parse(jsonString);
-        gameLogic.unitTest(array[0], array[1])
-    }
-    else{
-        clientID[0] = parseInt(event.data)
-        console.log(clientID[0])
+    const message = JSON.parse(event.data);
+    switch (message.type) {
+        case 'clientIndex':
+            clientID[0] = message.index
+            console.log(clientID[0])
+            break
+        case 'action':
+            gameLogic.unitTest(message.data[0], message.data[1]);
     }
 });
+
+function sendActionToOpponent(actionData) {
+    const message = {
+        type: 'action',
+        room: roomId,
+        data: actionData
+    };
+    socket.send(JSON.stringify(message));
+}
+
 
 socket.addEventListener('close', function(event) {
     console.log('Disconnected from server');
 });
 
-function getURLParameter(name) {
-    const searchParams = new URLSearchParams(window.location.search);
-    return searchParams.get(name);
-}
+const roomId = sessionStorage.getItem('roomId');
 
-const roomId = getURLParameter('roomId');
-const message = {
-    type: 'loaded',
-    room: roomId
-};
+

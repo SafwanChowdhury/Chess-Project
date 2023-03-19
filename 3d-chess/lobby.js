@@ -42,8 +42,9 @@ function joinRoom(room) {
         room: room
     };
     socket.send(JSON.stringify(message));
+    sessionStorage.setItem('roomId', room);
     // Navigate to game.html with the room ID as a URL parameter
-    window.location.href = `game.html?roomId=${encodeURIComponent(room)}`;
+    window.location.href = `game.html`;
 }
 
 

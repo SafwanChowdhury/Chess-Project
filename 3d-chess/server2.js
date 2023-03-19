@@ -24,7 +24,6 @@ wss.on('connection', function connection(ws) {
                 if (rooms[room].length < 2) {
                     rooms[room].push(ws);
                     console.log(`Client ${clients.indexOf(ws)} connected to lobby ${room}`);
-                    ws.send(JSON.stringify({ type: 'clientIndex', index: rooms[room].indexOf(ws) }));
                 } else {
                     console.log(`Lobby ${room} is full, cannot join.`);
                 }
@@ -48,12 +47,31 @@ wss.on('connection', function connection(ws) {
                 ws.send(JSON.stringify({ type: 'roomList', rooms: roomList }));
                 break;
 
-            case 'loaded':
-                console.log(rooms)
+            case 'rejoin':
+                const rejoinRoom = message.room;
+
+                if (rooms[rejoinRoom] && rooms[rejoinRoom].length < 2) {
+                    rooms[rejoinRoom].push(ws);
+                    console.log(`Client ${clients.indexOf(ws)} reconnected to lobby ${rejoinRoom}`);
+                    ws.send(JSON.stringify({ type: 'clientIndex', index: rooms[rejoinRoom].indexOf(ws) }));
+                } else {
+                    console.log(`Cannot rejoin lobby ${rejoinRoom}`);
+                }
                 break;
 
             case 'action':
-                // Your existing 'action' case logic
+                const actionRoom = message.room;
+                const actionData = message.data;
+                if (rooms[actionRoom]) {
+                    rooms[actionRoom].forEach(client => {
+                        if (client !== ws) {
+                            client.send(JSON.stringify({
+                                type: 'action',
+                                data: actionData
+                            }));
+                        }
+                    });
+                }
                 break;
         }
     });
