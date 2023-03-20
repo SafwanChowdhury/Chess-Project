@@ -5,6 +5,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {game} from "./script"
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import {mod} from "three/nodes";
 
 
@@ -355,6 +356,7 @@ function animate() {
         modified = []
         gameLogic.modified = []
         received = false
+        updateTurnOverlay();
     }
     renderer.render(scene,camera);
 }
@@ -366,13 +368,17 @@ manager.onStart = function (url, itemsLoaded, itemsTotal) {
 };
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    document.getElementById("title").innerHTML = (Math.floor((itemsLoaded / itemsTotal) * 100).toString());
-    console.log(Math.floor((itemsLoaded / itemsTotal) * 100))
+    var percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
+    document.getElementById("title").innerHTML = percentage;
+    document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
 };
 
+
 manager.onLoad = function () {
-    document.getElementById("title").innerHTML = "Loading Complete";
-    console.log('Loading complete!');
+    document.getElementById("pawn-container").classList.add("loading-finished");
+    setTimeout(function() {
+        document.getElementById("loading-screen").remove();
+    }, 2000);
     document.getElementById("title").innerHTML = "Online Chess Game";
     if (!onStart) {
         onStart = true
@@ -422,6 +428,8 @@ function initialiseGame(){
             case 'clientIndex':
                 clientID[0] = message.index
                 console.log(clientID[0])
+                updateTurnOverlay()
+                turnOverlay.hidden = false
                 break
             case 'action':
                 gameLogic.unitTest(message.data[0], message.data[1]);
@@ -433,6 +441,26 @@ function initialiseGame(){
         console.log('Disconnected from server');
     });
 }
+
+const turnOverlay = document.getElementById("turn-overlay");
+const turnText = document.getElementById("turn-text");
+
+function updateTurnOverlay() {
+    if (clientID[0] == 0) {
+        turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
+        turnText.style.color = gameLogic.turn ? "White" : "Black"
+    }
+    else {
+        turnText.textContent = gameLogic.turn ? "Your Turn" : "Black's Turn";
+        turnText.style.color = gameLogic.turn ? "White" : "Black"
+    }
+}
+
+updateTurnOverlay()
+turnOverlay.hidden = true
+// Add the turn overlay to the scene
+const turnOverlayObject = new CSS3DObject(turnOverlay);
+scene.add(turnOverlayObject);
 
 
 function sendActionToOpponent(actionData) {

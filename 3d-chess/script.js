@@ -24,9 +24,12 @@ class game {
     oldColor = {}
     oldPiece = null
     highlightedCells = []
-    whiteTurntext = document.querySelectorAll(".white-turn-text");
-    blackTurntext = document.querySelectorAll(".black-turn-text");
-    divider = document.querySelector("#divider");
+    checkText = document.getElementById("check-text");
+    checkPositionsPawn = [[], []]
+    checkPositionsRook = [[], []]
+    checkPositionsBishop = [[], []]
+    checkPositionsQueen = [[], []]
+    checkPositionsKnight = [[], []]
     currentCheckPositions = [[], []]
     threatPositions = []
     threatIndex = [-1, -1] //0 is the piece that is threatening the black king therefore white piece
@@ -588,20 +591,15 @@ class game {
         if (this.checkCheck()) {
             if (this.turn) {
                 console.log("white win")
-                /*                this.divider.style.display = "none";
-                                for (let i = 0; i < whiteTurntext.length; i++) {
-                                    this.whiteTurntext[i].style.color = "black";
-                                    this.blackTurntext[i].style.display = "none";
-                                    this.whiteTurntext[i].textContent = "WHITE WINS!";
-                                }*/
+                this.checkText.textContent = "Checkmate White Win!!!"
+                this.checkText.hidden = false
+                this.checkText.style.color = "White"
             } else if (!this.turn) {
                 console.log("black win")
-                /*                this.divider.style.display = "none";
-                                for (let i = 0; i < this.blackTurntext.length; i++) {
-                                    this.blackTurntext[i].style.color = "black";
-                                    this.whiteTurntext[i].style.display = "none";
-                                    this.blackTurntext[i].textContent = "BLACK WINS!";
-                                }*/
+                this.checkText.textContent = "Checkmate Black Win!!!"
+                this.checkText.hidden = false
+                this.checkText.style.color = "Black"
+
             }
         }
         this.incr++
@@ -616,17 +614,9 @@ class game {
         if (this.turn) {
             this.turn = false;
             this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1)
-            for (let i = 0; i < this.whiteTurntext.length; i++) {
-                this.whiteTurntext[i].style.color = "lightGrey";
-                this.blackTurntext[i].style.color = "black";
-            }
         } else {
             this.turn = true;
             this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1)
-            for (let i = 0; i < this.blackTurntext.length; i++) {
-                this.blackTurntext[i].style.color = "lightGrey";
-                this.whiteTurntext[i].style.color = "black";
-            }
         }
     }
 
@@ -642,11 +632,16 @@ class game {
     }
 
     checkablePositions(index, turn, modifier) {
+        const turnW = this.turn ? 1 : 0;
         let localPawn
         let localKnight
+        let localBishop
+        let localRook
         let localQueen
         localPawn = this.checkPawn(turn, index, this.board)
         localKnight = this.knight(turn, index, this.board)
+        localBishop = this.bishop(turn, index, this.board)
+        localRook = this.rook(turn, index, this.board)
         localQueen = this.queen(turn, index, this.board)
         let checkPositions = localQueen.concat(localKnight.concat(localPawn))
         //cleanup checkable positions array
@@ -656,6 +651,16 @@ class game {
                     checkPositions.splice(j--, 1);
             }
         }
+
+        if (modifier) {
+            this.checkPositionsPawn[turnW] = localPawn.map(v => v + index)
+            this.checkPositionsBishop[turnW] = localBishop.map(v => v + index)
+            this.checkPositionsKnight[turnW] = localKnight.map(v => v + index)
+            this.checkPositionsRook[turnW] = localRook.map(v => v + index)
+            this.checkPositionsQueen[turnW] = localQueen.map(v => v + index)
+        }
+
+
         checkPositions = checkPositions.map(v => v + index)
         return checkPositions
     }
@@ -685,6 +690,8 @@ class game {
         const turnW = this.turn ? 1 : 0;
         const turnB = this.turn ? 0 : 1;
         this.check[turnB] = false;
+        this.checkText.hidden = true
+
         let newMoves = [];
 
         const pieceType = this.selectedPiece.type;
@@ -714,22 +721,23 @@ class game {
                     return 1
                 } else {
                     console.log("check");
+                    this.checkText.textContent = "Check"
+                    this.checkText.hidden = false
                     this.check[turnB] = true;
                     this.threatIndex[turnB] = this.selectedPiece.pieceId;
+                    console.log(this.threatIndex)
+                    return (this.checkmate() ? 1 : 0)
                 }
             }
         }
-        return 0
     }
 
     checkmate() {
         let turn = !this.turn
         let turnW = turn ? 1 : 0
-        this.findSaviour(turn)
+        this.findSaviour(!turn)
         let moves = this.king(turn, this.getKingIndex(turn), this.board)
         if (moves.length === 0 && this.saviourPieces[turnW].length === 0 && this.threatIndex[turnW] > -1) {
-            console.log(this.saviourPieces[turnW])
-            console.log(this.threatIndex[turnW])
             console.log("checkmate")
             return true
         }

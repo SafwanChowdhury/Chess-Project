@@ -97,7 +97,7 @@ function createLobbiesWindow() {
             joinRoom(room);
         }
     });
-
+    autoRefresh()
     return lobbyList
 }
 
@@ -144,6 +144,7 @@ function joinRoom(room) {
         room: room
     };
     lobbiesWindow.remove();
+    menu.classList.toggle("active");
     socket.send(JSON.stringify(message));
     sessionStorage.setItem('roomId', room);
     // Dispatch the custom 'joinGame' event when the 'join-btn' is pressed
@@ -186,4 +187,10 @@ function updateLobbyList(rooms) {
         }
     }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    menu.classList.toggle("active");
+    document.getElementById("menu-glow").style.opacity = 1;
+    toggleLobbiesWindow();
+});
 
