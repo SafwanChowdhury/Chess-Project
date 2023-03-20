@@ -1,4 +1,5 @@
 import './style.css'
+import socket from './socket.js';
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
@@ -209,18 +210,12 @@ gameLogic.pieces = pieces
 
 const camControls = new OrbitControls(camera, renderer.domElement);
 
-const menuElement = document.getElementById('menu');
-const menuObject = new CSS2DObject(menuElement);
-menuObject.position.set(0, 0, 0);
-scene.add(menuObject);
-
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 
 let intersectsPiece = null
 let intersectsBoard = null
 function onDocumentMouseDown(event) {
     if (clientID[0] == gameLogic.turn ? 1 : 0) {
-        menuElement.style.visibility = 'hidden';
         var vector = new THREE.Vector3(
             (event.clientX / window.innerWidth) * 2 - 1,
             -(event.clientY / window.innerHeight) * 2 + 1,
@@ -353,9 +348,6 @@ function animate() {
             modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
             modifiedData[2] = pieces[modified[0]].userData.side
             promotion = true
-            menuObject.position.copy(pieces[modified[0]].children[0].position);
-            // show the menu
-            menuElement.style.visibility = 'visible';
             loadQueen(modified[0], modified[4], modified[2], modified[1])
         }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
@@ -393,12 +385,7 @@ manager.onLoad = function () {
         camera.rotation.x = -1.59
         camera.rotation.y = 0.41
         camera.rotation.z = 1.63
-        // Send a rejoin message to the server
-        const message = {
-            type: 'rejoin',
-            room: roomId
-        };
-        socket.send(JSON.stringify(message));
+        loaded = 1
         animate()
     }
     if (promotion){
@@ -414,26 +401,39 @@ function resize_window(camera, renderer){
 }
 
 window.addEventListener('resize',() => resize_window(camera,renderer))
-
-const socket = new WebSocket('ws://192.168.1.88:8080');
-
-socket.addEventListener('open', function(event) {
-    console.log('Connected to server');
-    objectLoading();
-});
-
+let loaded = 0
 let clientID = []
-socket.addEventListener('message', function(event) {
-    const message = JSON.parse(event.data);
-    switch (message.type) {
-        case 'clientIndex':
-            clientID[0] = message.index
-            console.log(clientID[0])
-            break
-        case 'action':
-            gameLogic.unitTest(message.data[0], message.data[1]);
+let roomId = null
+
+function initialiseGame(){
+    roomId = sessionStorage.getItem('roomId');
+
+    if (loaded){
+        const message = {
+            type: 'loaded',
+            room: roomId
+        };
+        socket.send(JSON.stringify(message));
     }
-});
+
+    socket.addEventListener('message', function(event) {
+        const message = JSON.parse(event.data);
+        switch (message.type) {
+            case 'clientIndex':
+                clientID[0] = message.index
+                console.log(clientID[0])
+                break
+            case 'action':
+                gameLogic.unitTest(message.data[0], message.data[1]);
+        }
+    });
+
+
+    socket.addEventListener('close', function(event) {
+        console.log('Disconnected from server');
+    });
+}
+
 
 function sendActionToOpponent(actionData) {
     const message = {
@@ -444,11 +444,8 @@ function sendActionToOpponent(actionData) {
     socket.send(JSON.stringify(message));
 }
 
-
-socket.addEventListener('close', function(event) {
-    console.log('Disconnected from server');
+document.addEventListener('joinGame', function() {
+    initialiseGame();
 });
 
-const roomId = sessionStorage.getItem('roomId');
-
-
+objectLoading();

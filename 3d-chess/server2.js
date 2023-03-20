@@ -47,16 +47,9 @@ wss.on('connection', function connection(ws) {
                 ws.send(JSON.stringify({ type: 'roomList', rooms: roomList }));
                 break;
 
-            case 'rejoin':
+            case 'loaded':
                 const rejoinRoom = message.room;
-
-                if (rooms[rejoinRoom] && rooms[rejoinRoom].length < 2) {
-                    rooms[rejoinRoom].push(ws);
-                    console.log(`Client ${clients.indexOf(ws)} reconnected to lobby ${rejoinRoom}`);
-                    ws.send(JSON.stringify({ type: 'clientIndex', index: rooms[rejoinRoom].indexOf(ws) }));
-                } else {
-                    console.log(`Cannot rejoin lobby ${rejoinRoom}`);
-                }
+                ws.send(JSON.stringify({ type: 'clientIndex', index: rooms[rejoinRoom].indexOf(ws) }));
                 break;
 
             case 'action':

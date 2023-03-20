@@ -11,18 +11,217 @@ body {
   overflow-x: hidden;
 }
 
-.menu {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 150px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  visibility: hidden;
-  z-index: 1;
+.burger {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
 }
+
+.burger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 5px 0;
+}
+
+.menu {
+  position: fixed;
+  top: 0px;
+  left: -100%;
+  width: 175px;
+  height: 100%;
+  background-color: rgba(28, 42, 58, 0.75);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 0 10px 10px 0px;
+  transition: all 0.4s ease-in-out;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.menu.active {
+   left: 20px;
+   transform: scale(1);
+   opacity: 1;
+ }
+
+.menu ul {
+  list-style-type: none;
+  padding: 0;
+  overflow: hidden;
+  margin-top: 50px;
+  width: inherit;
+  border-radius: inherit ;
+}
+
+.menu li {
+  background-color: rgba(28, 42, 58, 0);
+  padding: 15px;
+  margin-bottom: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.menu li:hover {
+  background-color: rgba(28, 42, 58, 0.8);
+}
+
+.menu a {
+  color: #f1c453;
+  text-decoration: none;
+  display: block;
+  font-size: 1.2rem;
+  transition: text-shadow 0.3s;
+  position: relative;
+  text-align: center;
+}
+
+.menu a:hover {
+  text-shadow: 0 0 10px #f1c453;
+}
+
+.menu.active {
+  left: 0;
+}
+
+#menu-glow {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background: transparent;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  box-shadow: 0 0 10px 5px rgba(241, 196, 83, 0.5);
+}
+
+.particle {
+  position: absolute;
+  background-color: #f1c453;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: moveParticle 1s ease-out forwards;
+}
+
+@keyframes moveParticle {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translate(-50%, -50%);
+  }
+}
+
+.signin-btn {
+  background-color: #f1c453;
+  color: #1c2a3a;
+  height: 50px;
+  padding: 10px;
+  font-weight: 700;
+  border-radius: 5px;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  border: none;
+  margin: 0px 7px 50px 7px;
+}
+
+.signin-btn:hover {
+  background-color: #ffd700;
+  box-shadow: 0 0 10px #f1c453;
+}
+
+.signin-btn:active {
+  background-color: #e6ad32;
+  box-shadow: none;
+}
+
+#lobbies-container {
+  display: none;
+}
+
+.lobby-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(241, 196, 83, 0.5);
+  border-radius: 5px;
+}
+
+.lobby-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid rgba(241, 196, 83, 0.5);
+  color: #f1c453;
+}
+
+.lobby-item:last-child {
+  border-bottom: none;
+}
+
+.lobby-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.players {
+  font-size: 0.9rem;
+}
+
+.join-btn,
+.cta-btn {
+background-color: rgba(241, 196, 83, 1);
+  color: rgba(28, 42, 58, 1);
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.join-btn:hover,
+.cta-btn:hover {
+  background-color: rgba(241, 196, 83, 0.8);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  color: #f1c453;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-button:hover {
+  color: rgba(241, 196, 83, 0.8);
+}
+
 
 header {
   background-color: #11233b;
@@ -92,70 +291,6 @@ footer {
   background-color: #11233b;
   padding: 1rem 0;
   text-align: center;
-}
-
-.lobby {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.lobby-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.lobby-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #11233b;
-  color: #f1c453;
-  padding: 1rem;
-  border-radius: 5px;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.lobby-list li:hover {
-  background-color: #1c2a3a;
-}
-
-.join-btn {
-  background-color: #f1c453;
-  color: #1c2a3a;
-  padding: 0.5rem 1rem;
-  font-weight: 700;
-  border-radius: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.join-btn:hover {
-  background-color: #ffd700;
-  box-shadow: 0 0 10px #f1c453;
-}
-
-.join-btn:active {
-  background-color: #e6ad32;
-  box-shadow: none;
 }
 
 body.wizard-chess {
@@ -245,3 +380,5 @@ p, ul {
 .about-chess ul {
   animation-delay: 0.8s;
 }
+
+

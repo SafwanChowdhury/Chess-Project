@@ -1,19 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title id="title">Vite App</title>
-  </head>
-  <body>
-    <canvas id="bg"></canvas>
-    <script type="module" src="/main.js"></script>
-    <div id="menu" class="menu">
-      <ul>
-        <li><a href="#">Option 1</a></li>
-        <li><a href="#">Option 2</a></li>
-        <li><a href="#">Option 3</a></li>
-      </ul>
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="title">Vite App</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<canvas id="bg"></canvas>
+<button id="burger" class="burger">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+<div id="menu" class="menu">
+  <div id="menu-glow"></div>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#">Lobbies</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <button id="signin" class="signin-btn">Sign In</button>
+</div>
+<div id="lobbies-container"></div>
+<script type="module" src="/menu.js"></script>
+<script src="/particle.js"></script>
+<script type="module" src="/main.js"></script>
+</body>
 </html>
