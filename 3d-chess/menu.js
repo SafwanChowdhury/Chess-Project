@@ -54,11 +54,17 @@ function createLobbiesWindow() {
     refreshButton.className = 'cta-btn';
     buttonContainer.appendChild(refreshButton);
 
-    lobbyList = document.createElement('ul');
+    const lobbyList = document.createElement('ul');
     lobbyList.className = 'lobby-list';
     lobbyList.id = 'lobby-list';
-    lobbyList.style.overflowY = 'scroll';
+    lobbyList.style.maxHeight = '500px'; // Set the max-heiht property
+    lobbyList.style.overflowY = 'scroll'; // Set the overflow-y property
     lobbyList.style.flexGrow = '1';
+    lobbyList.style.scrollbarWidth = 'thin';
+    lobbyList.style.scrollbarColor = '#F7C948 #021D3B';
+    lobbyList.style.scrollbarTrackColor = '#021D3B';
+    lobbyList.style.scrollbarFaceColor = '#F7C948';
+
     lobbiesWindow.appendChild(lobbyList);
 
     const closeButton = document.createElement('button');
@@ -69,7 +75,7 @@ function createLobbiesWindow() {
 
     document.body.appendChild(lobbiesWindow);
 
-    createLobbyButton.addEventListener('click', function() {
+    createLobbyButton.addEventListener('click', function () {
         const lobbyName = `Lobby ${lobbyList.childElementCount + 1}`;
         const message = {
             type: 'create',
@@ -79,23 +85,32 @@ function createLobbiesWindow() {
         addLobby(lobbyName); // Pass lobbyList as a parameter
     });
 
-    refreshButton.addEventListener('click', function() {
+    refreshButton.addEventListener('click', function () {
         autoRefresh(); // Call autoRefresh() when the refresh button is clicked
     });
 
-    socket.addEventListener('message', function(event) {
+    socket.addEventListener('message', function (event) {
         const message = JSON.parse(event.data);
         if (message.type === 'roomList') {
             updateLobbyList(message.rooms); // Pass lobbyList as a parameter
         }
     });
 
-    lobbyList.addEventListener('click', function(event) {
+    lobbyList.addEventListener('click', function (event) {
         const target = event.target;
         if (target.classList.contains('join-btn')) {
             const room = target.parentElement.getAttribute('data-room');
             joinRoom(room);
         }
+    });
+
+    lobbyList.addEventListener('click', function(event) {
+        const target = event.target;
+        const message = {
+            type: 'delete',
+            room: target.parentElement.getAttribute('data-room')
+        };
+        socket.send(JSON.stringify(message));
     });
     autoRefresh()
     return lobbyList
@@ -129,17 +144,21 @@ window.addEventListener('load', function() {
 });
 
 
+let clientID = null
 
 socket.addEventListener('message', function(event) {
     const message = JSON.parse(event.data);
-    if (message.type === 'roomList') {
-        updateLobbyList(message.rooms);
+    switch (message.type) {
+        case 'clientIndex':
+            clientID = message.index
+        case 'roomList':
+            updateLobbyList(message.rooms);
     }
 });
 
 function joinRoom(room) {
     const lobbiesWindow = document.getElementById('lobbies-window');
-    const message = {
+    let message = {
         type: 'join',
         room: room
     };
@@ -152,6 +171,7 @@ function joinRoom(room) {
     document.dispatchEvent(joinGameEvent);
 }
 
+
 function addLobby(lobbyName, players = 0) {
     const lobbyList = document.getElementById('lobby-list');
     const listItem = document.createElement('li');
@@ -160,9 +180,12 @@ function addLobby(lobbyName, players = 0) {
     const joinButton = document.createElement('button');
     joinButton.classList.add('join-btn');
     joinButton.innerText = 'Join';
-    if (players >= 2) {
+    if (players >= 2 || clientID == 0) {
         joinButton.style.display = 'none';
     }
+    const deleteButton = document.createElement('button');
+    deleteButton.classList.add('delete-btn');
+    deleteButton.innerText = 'Delete';
     listItem.innerHTML = `
         <div class="lobby-details">
             <h2>${lobbyName}</h2>
@@ -170,6 +193,9 @@ function addLobby(lobbyName, players = 0) {
         </div>
     `;
     listItem.appendChild(joinButton);
+    if (clientID == 0) {
+        listItem.appendChild(deleteButton);
+    }
     lobbyList.appendChild(listItem);
 }
 

@@ -40,7 +40,18 @@ function initScene() {
     const gridHelper = new THREE.GridHelper(16.9, 8, 0x000000, 0xffffff)
     scene.add(lightHelper, gridHelper)
 
-    scene.background = new THREE.TextureLoader().load('space.jpg');
+    const loader2 = new THREE.CubeTextureLoader();
+    const texture = loader2.load([
+        'skybox/right.png',
+        'skybox/left.png',
+        'skybox/top.png',
+        'skybox/bottom.png',
+        'skybox/front.png',
+        'skybox/back.png',
+    ]);
+
+
+    scene.background = texture;
 
     const moonTexture = new THREE.TextureLoader().load('moon.jpg');
     const normalTexture = new THREE.TextureLoader().load('normal.jpg');
