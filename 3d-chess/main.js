@@ -277,10 +277,16 @@ function animate() {
             promotion = true
             loadQueen(modified[0], modified[4], modified[2], modified[1])
         }
+        if (modified[6] !== null){
+            let castle = gameLogic.castle
+            pieces[castle[0]].position.x = coordsMap[castle[2]]
+            pieces[castle[0]].position.z = coordsMap[castle[1]]
+        }
         pieces[modified[0]].position.x = coordsMap[modified[2]]
         pieces[modified[0]].position.z = coordsMap[modified[1]]
         modified = []
         gameLogic.modified = []
+        gameLogic.castle = []
         received = false
         updateTurnOverlay();
     }
