@@ -1,3 +1,5 @@
+// noinspection JSUnusedLocalSymbols,JSCheckFunctionSignatures,EqualityComparisonWithCoercionJS
+
 import './style.css'
 import socket from './socket.js';
 import * as THREE from 'three';
@@ -6,8 +8,6 @@ import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {game} from "./script"
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
-import {mod} from "three/nodes";
-
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -41,7 +41,8 @@ function initScene() {
     scene.add(lightHelper, gridHelper)
 
     const loader2 = new THREE.CubeTextureLoader();
-    const texture = loader2.load([
+
+    scene.background = loader2.load([
         'skybox/right.png',
         'skybox/left.png',
         'skybox/top.png',
@@ -49,9 +50,6 @@ function initScene() {
         'skybox/front.png',
         'skybox/back.png',
     ]);
-
-
-    scene.background = texture;
 
     const moonTexture = new THREE.TextureLoader().load('moon.jpg');
     const normalTexture = new THREE.TextureLoader().load('normal.jpg');
@@ -76,15 +74,15 @@ function initScene() {
     )
 }
 function createBoardSquares() {
-    var boardSquares = [];
-    var squareSize = 2.1; // change this to adjust the size of the squares
+    let boardSquares = [];
+    let squareSize = 2.1; // change this to adjust the size of the squares
 
-    for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            var squareColor = 0x00FF00;
-            var squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
-            var squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
-            var squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let squareColor = 0x00FF00;
+            let squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
+            let squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
+            let squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
             squareMesh.position.set((j - 3.5) * squareSize, 0 , (i - 3.5) * squareSize);
             boardSquares.push(squareMesh);
         }
@@ -173,6 +171,7 @@ function addPieceData(){
     for (let i = 0; i < pieces.length; i++){
         pieces[i].userData.pieceId = i
         pieces[i].userData.taken = false
+        pieces[i].userData.hasMoved = false
         if (pieces[i].userData.pieceId < 16) {
             pieces[i].userData.indexOfBoardPiece = i
         }
@@ -209,6 +208,7 @@ function addPromotionData(){
     pieces[i].userData.taken = false
     pieces[i].userData.isQueen = true
     pieces[i].userData.side = side
+    pieces[i].userData.hasMoved = true
     promotion = false
 }
 
@@ -228,11 +228,11 @@ let intersectsPiece = null
 let intersectsBoard = null
 function onDocumentMouseDown(event) {
     if (clientID[0] == gameLogic.turn ? 1 : 0) {
-        var vector = new THREE.Vector3(
+        let vector = new THREE.Vector3(
             (event.clientX / window.innerWidth) * 2 - 1,
             -(event.clientY / window.innerHeight) * 2 + 1,
             0.5);
-        var raycaster = new THREE.Raycaster();
+        let raycaster = new THREE.Raycaster();
         raycaster.setFromCamera(vector, camera);
         intersectsBoard = raycaster.intersectObjects(boardSquares);
         intersectsPiece = raycaster.intersectObjects(pieces, true);
@@ -241,96 +241,11 @@ function onDocumentMouseDown(event) {
     }
 }
 
-//copy array object to save game state from console
-let unitTest = [
-    [
-        11,
-        16
-    ],
-    [
-        20,
-        -16
-    ],
-    [
-        11,
-        9
-    ],
-    [
-        19,
-        -16
-    ],
-    [
-        4,
-        7
-    ],
-    [
-        19,
-        -8
-    ],
-    [
-        4,
-        16
-    ],
-    [
-        26,
-        -7
-    ],
-    [
-        4,
-        4
-    ],
-    [
-        28,
-        -8
-    ],
-    [
-        4,
-        8
-    ],
-    [
-        28,
-        -9
-    ],
-    [
-        3,
-        1
-    ],
-    [
-        22,
-        -8
-    ],
-    [
-        12,
-        16
-    ],
-    [
-        22,
-        -8
-    ],
-    [
-        5,
-        35
-    ],
-    [
-        22,
-        -8
-    ],
-    [
-        3,
-        1
-    ],
-    [
-        28,
-        -40
-    ]
-]
-
 
 let modified = []
 let modifiedData = []
 let promotion = false
 let received = false
-let incr = -1
 function animate() {
     requestAnimationFrame(animate);
     camControls.enabled = gameLogic.selected === null
@@ -379,7 +294,7 @@ manager.onStart = function (url, itemsLoaded, itemsTotal) {
 };
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    var percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
+    let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
     document.getElementById("title").innerHTML = percentage;
     document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
 };
