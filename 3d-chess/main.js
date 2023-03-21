@@ -41,7 +41,6 @@ function initScene() {
     scene.add(lightHelper, gridHelper)
 
     const loader2 = new THREE.CubeTextureLoader();
-
     scene.background = loader2.load([
         'skybox/right.png',
         'skybox/left.png',
@@ -305,7 +304,6 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
     document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
 };
 
-
 manager.onLoad = function () {
     document.getElementById("pawn-container").classList.add("loading-finished");
     setTimeout(function() {
@@ -408,4 +406,4 @@ document.addEventListener('joinGame', function() {
     initialiseGame();
 });
 
-objectLoading();
+objectLoading()

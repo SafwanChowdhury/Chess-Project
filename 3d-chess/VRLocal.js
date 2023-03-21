@@ -40,7 +40,7 @@ function initScene() {
     scene.add(lightHelper, gridHelper)
 
     const loader2 = new THREE.CubeTextureLoader();
-    const texture = loader2.load([
+    scene.background = loader2.load([
         'skybox/right.png',
         'skybox/left.png',
         'skybox/top.png',
@@ -48,9 +48,6 @@ function initScene() {
         'skybox/front.png',
         'skybox/back.png',
     ]);
-
-
-    scene.background = texture;
 
     const moonTexture = new THREE.TextureLoader().load('moon.jpg');
     const normalTexture = new THREE.TextureLoader().load('normal.jpg');
@@ -75,15 +72,15 @@ function initScene() {
     )
 }
 function createBoardSquares() {
-    var boardSquares = [];
-    var squareSize = 2.1; // change this to adjust the size of the squares
+    let boardSquares = [];
+    let squareSize = 2.1; // change this to adjust the size of the squares
 
-    for (var i = 0; i < 8; i++) {
-        for (var j = 0; j < 8; j++) {
-            var squareColor = 0x00FF00;
-            var squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
-            var squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
-            var squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            let squareColor = 0x00FF00;
+            let squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
+            let squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
+            let squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
             squareMesh.position.set((j - 3.5) * squareSize, 0 , (i - 3.5) * squareSize);
             boardSquares.push(squareMesh);
         }
@@ -223,19 +220,11 @@ gameLogic.pieces = pieces
 
 const camControls = new OrbitControls(camera, renderer.domElement);
 
-const menuElement = document.getElementById('menu');
-const menuObject = new CSS2DObject(menuElement);
-menuObject.position.set(0, 0, 0);
-scene.add(menuObject);
-
-
 document.addEventListener('mousedown', onDocumentMouseDown, false);
-
 
 let intersectsPiece = null
 let intersectsBoard = null
 function onDocumentMouseDown(event) {
-    menuElement.style.visibility = 'hidden';
     var vector = new THREE.Vector3(
         (event.clientX / window.innerWidth) * 2 - 1,
         -(event.clientY / window.innerHeight) * 2 + 1,
@@ -299,12 +288,6 @@ let promotion = false
 function animate() {
     renderer.setAnimationLoop(render);
 }
-
-window.addEventListener("keydown", function(event) {
-    if (event.code === "Space") {
-        camControls.enabled = !camControls.enabled
-    }
-}, true)
 
 let onStart = false
 
