@@ -673,19 +673,14 @@ class game {
         let kingSideRook = this.turn ? 0 : 24
         let queenSideRook = this.turn ? 7 : 31
         let kingMoves = this.king(this.turn, index,this.board).map(v => v + index)
-        console.log("king: ", kingMoves)
         let rookMovesKing = this.rook(this.turn, kingSideRook,this.board).map(v => v + kingSideRook)
-        console.log("rookK: ", rookMovesKing)
         let rookMovesQueen = this.rook(this.turn,queenSideRook, this.board).map(v => v + queenSideRook)
-        console.log("rookQ: ", rookMovesQueen)
         let intersectionKing = rookMovesKing.filter(element => kingMoves.includes(element));
         let intersectionQueen = rookMovesQueen.filter(element => kingMoves.includes(element));
         if (this.pieces[kingSideRook].userData.hasMoved === false && intersectionKing.length > 0) {
-            console.log(intersectionKing)
             path.push(-1)
         }
         if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0) {
-            console.log(intersectionQueen)
             path.push(1)
         }
         path = this.kingPinning(path,index,this.turn,this.board)
