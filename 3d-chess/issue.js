@@ -176,7 +176,7 @@ function sendScreenshot(issueNumber) {
     }
     const url = `https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues/${issueNumber}/comments`;
     const headers = { 'Authorization': 'Token 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' };
-    const data = { body: `https://www.site24x7.com/tools/datauri-to-image.html  \n ${screenshotData}` };
+    const data = { body: `${screenshotData}` };
 
     fetch(url, {
         method: 'POST',
