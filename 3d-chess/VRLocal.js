@@ -356,13 +356,7 @@ function createLine(){
 }
 
 
-function takeScreenshot() {
-    const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
-    renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
-    renderer.render(scene, camera);
-    const dataURL = renderer.domElement.toDataURL('image/png');
-    sessionStorage.setItem('screenshot', dataURL);
-}
+
 
 function render() {
     //camControls.enabled = gameLogic.selected === null
@@ -633,4 +627,3 @@ function isIterable(obj) {
 
 objectLoading()
 
-export { takeScreenshot };

@@ -1,5 +1,3 @@
-// noinspection JSUnusedLocalSymbols,JSCheckFunctionSignatures,EqualityComparisonWithCoercionJS
-
 import './style.css'
 import socket from './socket.js';
 import * as THREE from 'three';
@@ -407,4 +405,14 @@ document.addEventListener('joinGame', function() {
     initialiseGame();
 });
 
+function takeScreenshot() {
+    const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
+    renderer.render(scene, camera);
+    const dataURL = renderer.domElement.toDataURL('image/png');
+    sessionStorage.setItem('screenshot', dataURL);
+}
+
 objectLoading()
+
+export { takeScreenshot };
