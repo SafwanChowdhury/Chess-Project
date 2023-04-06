@@ -1,3 +1,5 @@
+import { takeScreenshot } from './VRLocal.js';
+
 // Create the HTML structure for the popup
 function createPopup() {
     const popup = document.createElement('div');
@@ -156,12 +158,40 @@ function showPopup() {
             .then(response => response.json())
             .then(data => {
                 document.body.removeChild(popup);
+                const issueNumber = data.number; // Get the issue number from the response
+                sendScreenshot(issueNumber); // Call the new function to send the screenshot with the issue number
             })
             .catch(error => {
                 console.error(error);
             });
     });
 }
+
+function sendScreenshot(issueNumber) {
+    takeScreenshot()
+    const screenshotData = sessionStorage.getItem('screenshot');
+    if (!screenshotData) {
+        console.error('No screenshot data found');
+        return;
+    }
+    const url = `https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues/${issueNumber}/comments`;
+    const headers = { 'Authorization': 'Token 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' };
+    const data = { body: `https://www.site24x7.com/tools/datauri-to-image.html  \n ${screenshotData}` };
+
+    fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Screenshot uploaded successfully');
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
+
 
 const reportLink = document.querySelector('#menu li a#report-issue');
 reportLink.addEventListener('click', (event) => {

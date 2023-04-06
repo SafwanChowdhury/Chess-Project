@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Screenshot</title>
+</head>
+<body>
+<img id="screenshot" src="">
+<script>
+  const screenshotData = sessionStorage.getItem('screenshotData');
+  const screenshot = document.getElementById('screenshot');
+  screenshot.src = `data:image/png;base64,${screenshotData}`;
+</script>
+</body>
+</html>

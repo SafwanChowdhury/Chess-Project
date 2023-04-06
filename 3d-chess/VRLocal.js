@@ -235,51 +235,8 @@ function onDocumentMouseDown(event) {
     intersectsPiece = raycaster.intersectObjects(pieces, true);
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
-    //comment out when not testing game states, click through moves till saved game state
-/*    incr++
-    if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
 }
 
-//copy array object to save game state from console
-let unitTest = [
-    [
-        11,
-        16
-    ],
-    [
-        20,
-        -8
-    ],
-    [
-        4,
-        28
-    ],
-    [
-        20,
-        -8
-    ],
-    [
-        12,
-        8
-    ],
-    [
-        20,
-        -8
-    ],
-    [
-        5,
-        14
-    ],
-    [
-        20,
-        -9
-    ],
-    [
-        6,
-        15
-    ]
-]
 
 
 let modified = []
@@ -398,6 +355,14 @@ function createLine(){
     controller2.add( line.clone() );
 }
 
+
+function takeScreenshot() {
+    const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
+    renderer.render(scene, camera);
+    const dataURL = renderer.domElement.toDataURL('image/png');
+    sessionStorage.setItem('screenshot', dataURL);
+}
 
 function render() {
     //camControls.enabled = gameLogic.selected === null
@@ -667,3 +632,5 @@ function isIterable(obj) {
 //end Reference
 
 objectLoading()
+
+export { takeScreenshot };
