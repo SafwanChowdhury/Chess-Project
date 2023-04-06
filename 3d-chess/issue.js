@@ -141,7 +141,9 @@ function showPopup() {
     submitButton.addEventListener('click', (event) => {
         event.preventDefault();
         const title = document.getElementById('issueTitle').value;
-        const body = document.getElementById('body').value;
+        const text = document.getElementById('body').value;
+        const movesLogText = JSON.parse(sessionStorage.getItem('movesLog'));
+        const body = text + '\n Moves Log \n' + movesLogText.join('\n');
         const url = 'https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues';
         const headers = { 'Authorization': 'Token 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' };
         const data = { title: title, body: body };

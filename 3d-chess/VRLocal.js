@@ -402,6 +402,7 @@ function createLine(){
 function render() {
     //camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
+    sessionStorage.setItem('movesLog', JSON.stringify(gameLogic.movesLog));
     if (modified.length > 0){
         if (modified[3] !== null){
             if (modified[3] < 16) {

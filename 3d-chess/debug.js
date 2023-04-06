@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {game} from "./script"
+import fs from 'fs';
+import path from 'path';
 
 
 const scene = new THREE.Scene();
@@ -238,185 +240,17 @@ function onDocumentMouseDown(event) {
         gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
 }
 
-//copy array object to save game state from console
-let unitTest = [
-    [
-        13,
-        16
-    ],
-    [
-        22,
-        -16
-    ],
-    [
-        13,
-        9
-    ],
-    [
-        23,
-        -8
-    ],
-    [
-        13,
-        9
-    ],
-    [
-        30,
-        -15
-    ],
-    [
-        14,
-        16
-    ],
-    [
-        30,
-        -17
-    ],
-    [
-        15,
-        16
-    ],
-    [
-        30,
-        -15
-    ],
-    [
-        15,
-        8
-    ],
-    [
-        30,
-        -10
-    ],
-    [
-        15,
-        8
-    ],
-    [
-        31,
-        -16
-    ],
-    [
-        6,
-        17
-    ],
-    [
-        31,
-        -24
-    ],
-    [
-        7,
-        16
-    ],
-    [
-        30,
-        6
-    ],
-    [
-        4,
-        7
-    ],
-    [
-        21,
-        -16
-    ],
-    [
-        12,
-        16
-    ],
-    [
-        21,
-        -8
-    ],
-    [
-        12,
-        8
-    ],
-    [
-        19,
-        -8
-    ],
-    [
-        4,
-        18
-    ],
-    [
-        19,
-        -7
-    ],
-    [
-        4,
-        7
-    ],
-    [
-        18,
-        -16
-    ],
-    [
-        9,
-        16
-    ],
-    [
-        18,
-        -9
-    ],
-    [
-        4,
-        16
-    ],
-    [
-        27,
-        -7
-    ],
-    [
-        10,
-        8
-    ],
-    [
-        18,
-        -7
-    ],
-    [
-        2,
-        45
-    ],
-    [
-        29,
-        -14
-    ],
-    [
-        8,
-        16
-    ],
-    [
-        17,
-        -16
-    ],
-    [
-        8,
-        9
-    ],
-    [
-        16,
-        -8
-    ],
-    [
-        8,
-        7
-    ],
-    [
-        25,
-        -17
-    ],
-    [
-        0,
-        40
-    ],
-    [
-        18,
-        -8
-    ]
-]
+
+const filename = '/python_helpers/movesLog.txt'; // Replace with the name and path of your text file
+let unitTest
+
+fetch(filename)
+    .then(response => response.text())
+    .then(contents => {
+        unitTest = JSON.parse(contents);
+        console.log(unitTest);
+    })
+    .catch(error => console.error(error));
 
 let modified = []
 let modifiedData = []
@@ -426,6 +260,7 @@ function animate() {
     requestAnimationFrame(animate);
     //camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
+    sessionStorage.setItem('movesLog', JSON.stringify(gameLogic.movesLog));
     if (modified.length > 0){
         if (modified[3] !== null){
             if (modified[3] < 16) {
