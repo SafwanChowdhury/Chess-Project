@@ -249,6 +249,7 @@ function animate() {
     requestAnimationFrame(animate);
     camControls.enabled = gameLogic.selected === null
     modified = gameLogic.modified
+    sessionStorage.setItem('movesLog', JSON.stringify(gameLogic.movesLog));
     if (modified.length > 0){
         if (clientID[0] == modified[5]) {
             gameLogic.moveSend.push(clientID[0])
