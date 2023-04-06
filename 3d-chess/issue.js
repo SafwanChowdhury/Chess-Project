@@ -1,4 +1,4 @@
-import { takeScreenshot } from './VRLocal.js';
+import { takeScreenshot } from './main.js';
 
 // Create the HTML structure for the popup
 function createPopup() {
