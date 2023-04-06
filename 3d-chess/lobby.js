@@ -204,8 +204,4 @@ function updateLobbyList(rooms) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    menu.classList.toggle("active");
-    document.getElementById("menu-glow").style.opacity = 1;
-    toggleLobbiesWindow();
-});
+
