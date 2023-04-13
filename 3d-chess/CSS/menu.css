@@ -1,0 +1,142 @@
+/*menu css*/
+.burger {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.burger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
+}
+
+.menu {
+    position: fixed;
+    top: 0px;
+    left: -100%;
+    width: 175px;
+    height: 100%;
+    background-color: rgba(28, 42, 58, 0.75);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    border-radius: 0 10px 10px 0px;
+    transition: all 0.4s ease-in-out;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transform: scale(0.95);
+    opacity: 0;
+}
+
+.menu.active {
+    left: 20px;
+    transform: scale(1);
+    opacity: 1;
+}
+
+.menu ul {
+    list-style-type: none;
+    padding: 0;
+    overflow: hidden;
+    margin-top: 50px;
+    width: inherit;
+    border-radius: inherit ;
+}
+
+.menu li {
+    background-color: rgba(28, 42, 58, 0);
+    padding: 15px;
+    margin-bottom: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.menu li:hover {
+    background-color: rgba(28, 42, 58, 0.8);
+}
+
+.menu a {
+    color: #f1c453;
+    text-decoration: none;
+    display: block;
+    font-size: 1.2rem;
+    transition: text-shadow 0.3s;
+    position: relative;
+    text-align: center;
+}
+
+.menu a:hover {
+    text-shadow: 0 0 10px #f1c453;
+}
+
+.menu.active {
+    left: 0;
+}
+
+#menu-glow {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    background: transparent;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 0 10px 5px rgba(241, 196, 83, 0.5);
+}
+
+.particle {
+    position: absolute;
+    background-color: #f1c453;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: moveParticle 1s ease-out forwards;
+}
+
+@keyframes moveParticle {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.1) translate(-50%, -50%);
+    }
+}
+
+.signin-btn {
+    background-color: #f1c453;
+    color: #1c2a3a;
+    height: 50px;
+    padding: 10px;
+    font-weight: 700;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    border: none;
+    margin: 0px 7px 50px 7px;
+}
+
+.signin-btn:hover {
+    background-color: #ffd700;
+    box-shadow: 0 0 10px #f1c453;
+}
+
+.signin-btn:active {
+    background-color: #e6ad32;
+    box-shadow: none;
+}

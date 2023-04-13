@@ -1,0 +1,108 @@
+#lobbies-container {
+    display: none;
+}
+
+.lobby-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgba(241, 196, 83, 0.5);
+    border-radius: 5px;
+    max-height: 500px;
+    overflow-y: scroll;
+
+    /* Custom scrollbar styles */
+    scrollbar-width: thin;
+    scrollbar-color: #f1c453 #11233b;
+}
+
+.lobby-list::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.lobby-list::-webkit-scrollbar-track {
+    background-color: #11233b;
+    border-radius: 10px;
+}
+
+.lobby-list::-webkit-scrollbar-thumb {
+    background-color: #f1c453;
+    border-radius: 10px;
+}
+
+.lobby-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(241, 196, 83, 0.5);
+    color: #f1c453;
+}
+
+.lobby-item:last-child {
+    border-bottom: none;
+}
+
+.lobby-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.players {
+    font-size: 0.9rem;
+}
+
+.join-btn,
+.cta-btn {
+    background-color: rgba(241, 196, 83, 1);
+    color: rgba(28, 42, 58, 1);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.join-btn:hover,
+.cta-btn:hover {
+    background-color: rgba(241, 196, 83, 0.8);
+}
+
+.delete-btn,
+.cta-btn {
+    background-color: rgba(241, 196, 83, 1);
+    color: rgba(28, 42, 58, 1);
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover,
+.cta-btn:hover {
+    background-color: rgba(241, 196, 83, 0.8);
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    color: #f1c453;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-button:hover {
+    color: rgba(241, 196, 83, 0.8);
+}
+
