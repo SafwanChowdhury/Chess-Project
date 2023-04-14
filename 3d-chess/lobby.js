@@ -142,7 +142,6 @@ function joinRoom(room) {
         room: room
     };
     lobbiesWindow.remove();
-    menu.classList.toggle("active");
     socket.send(JSON.stringify(message));
     sessionStorage.setItem('roomId', room);
     // Dispatch the custom 'joinGame' event when the 'join-btn' is pressed
