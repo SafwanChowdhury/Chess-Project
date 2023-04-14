@@ -12,12 +12,22 @@
 }
 
 .issue-popup-content {
-    background-color: #fff;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(28, 42, 58, 0.75);
+    width: 100%;
+    max-width: 700px;
+    height: auto;
+    max-height: 600px;
+    border-radius: 7px;
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(15px);
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 .issue-popup-close {
@@ -28,4 +38,24 @@
     background: none;
     border: none;
     cursor: pointer;
+    color: #f1c453;
+}
+
+@media screen and (max-width: 767px) {
+    .issue-popup-content {
+        width: 90%;
+        padding: 10px;
+    }
+
+    .issue-popup-close {
+        font-size: 20px;
+        top: 5px;
+        right: 10px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .issue-popup-content {
+        width: 80%;
+    }
 }

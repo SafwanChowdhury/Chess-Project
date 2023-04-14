@@ -4,26 +4,12 @@ import { takeScreenshot } from './main.js';
 function createPopup() {
     const popup = document.createElement('div');
     popup.classList.add('issue-popup');
+
     const popupContent = document.createElement('div');
+    popupContent.classList.add('issue-popup-content');
     popupContent.addEventListener('click', (event) => {
         event.stopPropagation();
     });
-
-    popupContent.style.position = 'fixed';
-    popupContent.style.top = '50%';
-    popupContent.style.left = '50%';
-    popupContent.style.transform = 'translate(-50%, -50%)';
-    popupContent.style.backgroundColor = 'rgba(28, 42, 58, 0.75)';
-    popupContent.style.width = '100%';
-    popupContent.style.maxWidth = '700px';
-    popupContent.style.height = 'auto';
-    popupContent.style.maxHeight = '600px';
-    popupContent.style.borderRadius = '10px';
-    popupContent.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-    popupContent.style.padding = '20px';
-    popupContent.style.display = 'flex';
-    popupContent.style.flexDirection = 'column';
-    popupContent.style.overflowY = 'auto';
     popup.appendChild(popupContent);
 
     const issueHeader = document.createElement('h2');
@@ -47,7 +33,7 @@ function createPopup() {
     titleInput.type = 'text';
     titleInput.id = 'issueTitle';
     titleInput.name = 'title';
-    titleInput.style.width = '100%';
+    titleInput.style.width = '97%';
     titleInput.style.backgroundColor = '#1c2a3a';
     titleInput.style.color = '#f1c453';
     titleInput.style.border = '1px solid #f1c453';
@@ -67,7 +53,7 @@ function createPopup() {
     const bodyInput = document.createElement('textarea');
     bodyInput.id = 'body';
     bodyInput.name = 'body';
-    bodyInput.style.width = '100%';
+    bodyInput.style.width = '97%';
     bodyInput.style.height = '200px';
     bodyInput.style.backgroundColor = '#1c2a3a';
     bodyInput.style.color = '#f1c453';
@@ -193,7 +179,7 @@ function sendScreenshot(issueNumber) {
 }
 
 
-const reportLink = document.querySelector('#menu li a#report-issue');
+const reportLink = document.querySelector('nav li a#report-issue');
 reportLink.addEventListener('click', (event) => {
     event.preventDefault();
     showPopup();

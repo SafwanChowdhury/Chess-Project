@@ -2,6 +2,29 @@
     display: none;
 }
 
+.lobbies-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(28, 42, 58, 0.75);
+    width: 700px;
+    height: 600px;
+    border-radius: 7px;
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(15px);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 768px) {
+    .lobbies-window {
+        width: 90%;
+        height: 70%;
+    }
+}
+
 .lobby-list {
     list-style-type: none;
     padding: 0;
@@ -10,7 +33,6 @@
     border-radius: 5px;
     max-height: 500px;
     overflow-y: scroll;
-
     /* Custom scrollbar styles */
     scrollbar-width: thin;
     scrollbar-color: #f1c453 #11233b;
