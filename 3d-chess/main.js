@@ -1,4 +1,5 @@
-import './style.css'
+import './CSS/game.css'
+import './CSS/loading.css'
 import socket from './socket.js';
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";

@@ -15,6 +15,11 @@ body {
 header {
     background-color: #11233b;
     padding: 1rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 
 nav ul {
@@ -22,10 +27,12 @@ nav ul {
     justify-content: center;
     list-style-type: none;
     padding: 0;
+    flex-wrap: wrap;
 }
 
 nav li {
     margin: 0 1rem;
+    padding: 0.5rem;
 }
 
 nav a {
@@ -33,6 +40,7 @@ nav a {
     text-decoration: none;
     font-weight: 700;
     transition: color 0.3s;
+    font-size: 1rem;
 }
 
 nav a:hover {
@@ -80,6 +88,10 @@ footer {
     background-color: #11233b;
     padding: 1rem 0;
     text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 h2, h3 {
