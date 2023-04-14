@@ -4,15 +4,47 @@
       <meta charset="UTF-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <title id="title">Online Chess</title>
-      <link rel="stylesheet" href="CSS/base.css"/>
-      <link rel="stylesheet" href="CSS/responsive.css"/>
+      <link rel="stylesheet" href="CSS/style.css"/>
       <link rel="stylesheet" href="CSS/loading.css"/>
-      <link rel="stylesheet" href="CSS/menu2.css"/>
+      <link rel="stylesheet" href="CSS/menu.css"/>
       <link rel="stylesheet" href="CSS/lobbies.css"/>
       <link rel="stylesheet" href="CSS/issues.css"/>
       <link rel="stylesheet" href="CSS/game.css"/>
   </head>
   <body>
+      <input id="hamburger" class="hamburger" type="checkbox" />
+      <label for="hamburger" class="hamburger">
+          <i></i>
+      </label>
+      <nav class="primnav">
+          <ul>
+              <li>
+                  <a href="index.html">
+                      <svg class="icon"><use xlink:href="#icon-th-large"></use></svg> Home
+                  </a>
+              </li>
+              <li>
+                  <a href="#">
+                      <svg class="icon"><use xlink:href="#icon-lobbies"></use></svg> Lobbies
+                  </a>
+              </li>
+              <li>
+                  <a href="local.html">
+                      <svg class="icon"><use xlink:href="#icon-pawn"></use></svg> Local
+                  </a>
+              </li>
+              <li>
+                  <a href="#" id="report-issue">
+                      <svg class="icon"><use xlink:href="#icon-bug"></use></svg> Report Bug
+                  </a>
+              </li>
+              <li>
+                  <a href="about.html">
+                      <svg class="icon"><use xlink:href="#icon-about"></use></svg> About
+                  </a>
+              </li>
+          </ul>
+      </nav>
     <canvas id="bg"></canvas>
     <button id="burger" class="burger">
         <span></span>
@@ -29,42 +61,7 @@
         <div id="turn-text"></div>
         <div id="check-text"></div>
     </div>
-    <div id="menu" class="menu">
-        <div id="menu-glow"></div>
-        <input id="hamburger" class="hamburger" type="checkbox" />
-        <label for="hamburger" class="hamburger">
-            <i></i>
-        </label>
-        <nav class="primnav">
-            <ul>
-                <li>
-                    <a href="#dashboard">
-                        <svg class="icon"><use xlink:href="#icon-th-large"></use></svg> Home
-                    </a>
-                </li>
-                <li>
-                    <a href="#mail">
-                        <svg class="icon"><use xlink:href="#icon-lobbies"></use></svg> Lobbies
-                    </a>
-                </li>
-                <li>
-                    <a href="#notifications">
-                        <svg class="icon"><use xlink:href="#icon-pawn"></use></svg> Local
-                    </a>
-                </li>
-                <li>
-                    <a href="#sysadmin">
-                        <svg class="icon"><use xlink:href="#icon-bug"></use></svg> Report Bug
-                    </a>
-                </li>
-                <li>
-                    <a href="#about">
-                        <svg class="icon"><use xlink:href="#icon-about"></use></svg> About
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+    <div id="menu-glow"></div>
     <div id="lobbies-container"></div>
     <script src="/menu.js"></script>
     <script type="module" src="/lobby.js"></script>
