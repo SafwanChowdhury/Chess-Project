@@ -6,18 +6,7 @@ lobbiesButton.addEventListener('click', toggleLobbiesWindow);
 function createLobbiesWindow() {
     const lobbiesWindow = document.createElement('div');
     lobbiesWindow.id = 'lobbies-window';
-    lobbiesWindow.style.position = 'fixed';
-    lobbiesWindow.style.top = '50%';
-    lobbiesWindow.style.left = '50%';
-    lobbiesWindow.style.transform = 'translate(-50%, -50%)';
-    lobbiesWindow.style.backgroundColor = 'rgba(28, 42, 58, 0.75)';
-    lobbiesWindow.style.width = '700px';
-    lobbiesWindow.style.height = '600px';
-    lobbiesWindow.style.borderRadius = '10px';
-    lobbiesWindow.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-    lobbiesWindow.style.padding = '20px';
-    lobbiesWindow.style.display = 'flex';
-    lobbiesWindow.style.flexDirection = 'column';
+    lobbiesWindow.classList.add('lobbies-window');
 
     const lobbyHeader = document.createElement('h2');
     lobbyHeader.textContent = 'Select a Lobby';

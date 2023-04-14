@@ -42,7 +42,7 @@ function stopParticleGeneration() {
     }
 }
 
-document.querySelectorAll('.menu a').forEach((menuItem) => {
+document.querySelectorAll('nav a').forEach((menuItem) => {
     menuItem.addEventListener('mouseenter', () => {
         if (activeElement && activeElement !== menuItem) {
             clearParticles(activeElement);

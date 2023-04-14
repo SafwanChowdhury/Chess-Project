@@ -1,0 +1,60 @@
+
+/* Styles for screens larger than 768px */
+@media screen and (min-width: 768px) {
+    nav ul {
+        justify-content: flex-end;
+    }
+
+    nav li {
+        margin: 0 1.5rem;
+    }
+
+    nav a {
+        font-size: 1.1rem;
+    }
+
+    .hero h1 {
+        font-size: 4rem;
+    }
+
+    .about-container {
+        padding: 60px;
+    }
+}
+
+/* Styles for screens larger than 992px */
+@media screen and (min-width: 992px) {
+    nav ul {
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    nav li {
+        margin: 0 2rem;
+    }
+
+    nav a {
+        font-size: 1.2rem;
+    }
+
+    .hero h1 {
+        font-size: 5rem;
+    }
+
+    .about-container {
+        padding: 80px;
+    }
+}
+
+/* Styles for screens larger than 1200px */
+@media screen and (min-width: 1200px) {
+    .container {
+        max-height: 700px;
+    }
+
+    .about-container {
+        max-width: 1200px;
+    }
+}
+
