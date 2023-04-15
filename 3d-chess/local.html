@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="CSS/menu.css"/>
     <link rel="stylesheet" href="CSS/issues.css"/>
     <link rel="stylesheet" href="CSS/game.css"/>
+    <link rel="stylesheet" href="CSS/popup.css">
 </head>
 <body>
 <input id="hamburger" class="hamburger" type="checkbox"/>
@@ -65,13 +66,22 @@
 </div>
 <div id="turn-overlay">
     <div id="turn-text"></div>
-    <div id="check-text"></div>
 </div>
 <div id="lobbies-container"></div>
-<script type="module" src="/menu.js"></script>
-<script type="module" src="/issue.js"></script>
-<script src="/particle.js"></script>
-<script type="module" src="/VRLocal.js"></script>
+<div id="menu-glow"></div>
+<div id="end-screen">
+    <div id="success-box">
+        <div id="pawn">
+        </div>
+        <div class="shadow"></div>
+        <div class="message"><h1 class="alert">Checkmate!</h1><p id="check-text">White Wins!!</p></div>
+        <a class="button-box" href= "local.html"><h1 class="backdrop" style="transform: translate(15%, 0%)">continue</h1></a>
+    </div>
+</div>
+<script type="module" src="./menu.js"></script>
+<script type="module" src="./issue.js"></script>
+<script src="./particle.js"></script>
+<script type="module" src="./VRLocal.js"></script>
 
 
 <svg style="position: absolute; width: 0; height: 0;" width="0" height="0" version="1.1"

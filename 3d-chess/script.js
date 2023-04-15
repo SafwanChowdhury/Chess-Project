@@ -26,6 +26,9 @@ class game {
     oldPiece = null
     highlightedCells = []
     checkText = document.getElementById("check-text");
+    checkContainer = document.getElementById("end-screen");
+    checkPopup = document.getElementById("success-box");
+    popupPawn = document.getElementById("pawn");
     checkPositionsPawn = [[], []]
     checkPositionsRook = [[], []]
     checkPositionsBishop = [[], []]
@@ -38,7 +41,6 @@ class game {
     incr = 0
     movesLog = []
     moveSend = []
-
     /*--- Player Properties ---*/
     turn = true; //1 == white, 0 == black
     whiteScore = 16;
@@ -625,15 +627,17 @@ class game {
         if (this.checkCheck()) {
             if (this.turn) {
                 console.log("white win")
-                this.checkText.textContent = "Checkmate White Win!!!"
-                this.checkText.hidden = false
-                this.checkText.style.color = "White"
+                this.checkText.textContent = "White Win!!!"
+                this.checkPopup.hidden = false
+                this.checkContainer.style.pointerEvents = "auto"
             } else if (!this.turn) {
                 console.log("black win")
-                this.checkText.textContent = "Checkmate Black Win!!!"
-                this.checkText.hidden = false
+                this.checkText.textContent = "Black Win!!!"
                 this.checkText.style.color = "Black"
-
+                this.checkText.style.opacity = "1"
+                this.popupPawn.style.filter = "invert(10%)"
+                this.checkPopup.hidden = false
+                this.checkContainer.style.pointerEvents = "auto"
             }
         }
         this.incr++
@@ -754,8 +758,6 @@ class game {
         const turnW = this.turn ? 1 : 0;
         const turnB = this.turn ? 0 : 1;
         this.check[turnB] = false;
-        this.checkText.hidden = true
-
         let newMoves = [];
 
         const pieceType = this.selectedPiece.type;
@@ -785,8 +787,6 @@ class game {
                     return 1
                 } else {
                     console.log("check");
-                    this.checkText.textContent = "Check"
-                    this.checkText.hidden = false
                     this.check[turnB] = true;
                     this.threatIndex[turnB] = this.selectedPiece.pieceId;
                     return (this.checkmate() ? 1 : 0)
