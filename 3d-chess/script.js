@@ -1,5 +1,3 @@
-// noinspection JSUnresolvedVariable
-
 class game {
     /*----------- Game State Data ----------*/
     board = [
@@ -13,7 +11,7 @@ class game {
         24, 25, 26, 27, 28, 29, 30, 31
     ]
 
-    /*------- DOM References -------*/
+    /*------- Global Variables -------*/
     cells = []
     whitePieces = []
     blackPieces = []
@@ -62,53 +60,54 @@ class game {
     /*---------- Event Listeners ----------*/
 
 // initialize event listeners on pieces
+    // This function handles the interactions with pieces and the board.
     givePiecesEventListeners(intersectsPiece, intersectsBoard) {
-        let turnW = this.turn ? 1 : 0
-        if (this.check[turnW]) {
-            this.findSaviour(this.turn)
-        }
-        this.oldPiece = null
-        this.intersectsBoard = intersectsBoard
-        // noinspection JSUnresolvedVariable
-        if (intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16)) {
-            intersectsPiece[0].object.material.transparent = true;
-            if (this.selected) {
-                if (intersectsPiece[0] !== this.selected) {
-                    this.selected.object.material.opacity = 1
-                    this.selected.object.material.color = this.oldColor
-                    for (let i = 0; i < this.highlightedCells.length; i++) {
-                        this.highlightedCells[i].material.opacity = 0
-                        this.highlightedCells[i].material.color = {r: 0, g: 1, b: 0}
-                    }
-                }
-            }
-            if (!this.check[turnW]) {
-                intersectsPiece[0].object.material.opacity = 0.7;
-                this.selected = intersectsPiece[0]
-                this.oldColor = this.selected.object.material.color
-                this.getPlayerPieces()
-            } else {
-                if (this.saviourPieces[turnW].includes(intersectsPiece[0].object.parent)) {
-                    intersectsPiece[0].object.material.opacity = 0.7;
-                    this.selected = intersectsPiece[0]
-                    this.oldColor = this.selected.object.material.color
-                    this.getPlayerPieces()
-                } else if (intersectsPiece[0].object.userData.name === 'King') {
-                    intersectsPiece[0].object.material.opacity = 0.7;
-                    this.selected = intersectsPiece[0]
-                    this.oldColor = this.selected.object.material.color
-                    this.getPlayerPieces()
-                }
+        // Determine which player's turn it is.
+        let turnW = this.turn ? 1 : 0;
+        this.oldPiece = null;
+        this.intersectsBoard = intersectsBoard;
+
+        // Check if the piece can be selected.
+        const isValidPiece = intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16);
+
+        // If the piece is valid, update the appearance of the selected and previously selected pieces.
+        if (isValidPiece) {
+            if (this.selected && intersectsPiece[0] !== this.selected) {
+                resetSelectedAppearance(this.selected, this.highlightedCells, this.oldColor);
             }
 
-        } else if (this.selected && intersectsBoard > 0 && this.highlightedCells.includes(intersectsBoard[0].object) !== true) {
-            this.resetSelectedPieceProperties();
-        } else if (this.selected && intersectsBoard < 1) {
-            this.resetSelectedPieceProperties();
-        } else {
-            if (intersectsBoard[0] && this.selected && this.highlightedCells.includes(intersectsBoard[0].object)) {
-                this.makeMove(this.intersectsBoard[0].object.userData.index - this.selectedPiece.indexOfBoardPiece)
+            // Determine if the current piece can be selected based on the game state. player not in check
+            const canSelectPiece = !this.check[turnW] || this.saviourPieces[turnW].includes(intersectsPiece[0].object.parent) || intersectsPiece[0].object.userData.name === 'King';
+
+            // If the piece can be selected, update its appearance and retrieve the current player's pieces.
+            if (canSelectPiece) {
+                setSelectedAppearance(intersectsPiece[0], this);
+                this.getPlayerPieces();
             }
+        } else if (this.selected && (intersectsBoard < 1 || !this.highlightedCells.includes(intersectsBoard[0].object))) {
+            // Reset the appearance of the selected piece and the highlighted cells.
+            this.resetSelectedPieceProperties(this.selected, this.highlightedCells, this.oldColor)
+        } else if (intersectsBoard[0] && this.selected && this.highlightedCells.includes(intersectsBoard[0].object)) {
+            // Make a move to the selected board cell.
+            this.makeMove(this.intersectsBoard[0].object.userData.index - this.selectedPiece.indexOfBoardPiece);
+        }
+
+        // Reset the appearance of the selected piece and the highlighted cells.
+        function resetSelectedAppearance(selected, highlightedCells, oldColor) {
+            selected.object.material.opacity = 1;
+            selected.object.material.color = oldColor;
+            for (let i = 0; i < highlightedCells.length; i++) {
+                highlightedCells[i].material.opacity = 0;
+                highlightedCells[i].material.color = {r: 0, g: 1, b: 0};
+            }
+        }
+
+        // Set the appearance of the selected piece.
+        function setSelectedAppearance(piece, context) {
+            context.selected = piece;
+            context.oldColor = context.selected.object.material.color;
+            piece.object.material.transparent = true;
+            piece.object.material.opacity = 0.7;
         }
     }
 
@@ -507,14 +506,14 @@ class game {
     givePieceBorder(moves) {
         let turnW = this.turn ? 1 : 0
         let threatMoves = []
-        if (this.selectedPiece.type === 'King' && this.selectedPiece.hasMoved === false && !this.check[turnW]){
+        if (this.selectedPiece.type === 'King' && this.selectedPiece.hasMoved === false && !this.check[turnW]){ //player not in check
             moves = moves.concat(this.castling())
         }
         for (let i = 0; i < this.threatPositions.length; i++) {
             threatMoves.push(this.threatPositions[i] - this.selectedPiece.indexOfBoardPiece)
         }
-        if (this.check[turnW] && this.selectedPiece.type !== 'King') {
-            this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex[turnW])
+        if (this.check[turnW] && this.selectedPiece.type !== 'King') { //player in check
+            this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex[turnW]) //index of opponent piece threatening king
         } else if (this.selectedPiece.type !== 'King') {
             this.selectedPiece.moves = this.piecePinning(moves, this.selectedPiece.indexOfBoardPiece, this.turn, this.board)
         } else
@@ -658,19 +657,8 @@ class game {
         }
     }
 
-    displayGrid() {
-        console.log(this.selectedPiece.indexOfBoardPiece)
-        console.log("Check Positions: ", this.currentCheckPositions)
-        console.log(this.board.map(val => val === null ? '..' : val.toString().padStart(2, ' ')).reduce((output, val, index) => {
-            if (index % 16 === 0) {
-                output += '\n';
-            }
-            return output += val + ' ';
-        }, ''));
-    }
 
     castling(){
-        const turnW = this.turn ? 1 : 0;
         let moves = []
         let path = []
         let index = this.turn ? 3 : 27
@@ -699,69 +687,94 @@ class game {
         return moves
     }
 
+    // Calculates the positions that the piece on the given index can move to
+    // and returns them as an array.
+    // `turn` indicates whether it is white's turn or black's turn.
+    // `modifier` indicates whether the checkable positions should be modified.
     checkablePositions(index, turn, modifier) {
+        // `turnW` is a boolean that indicates whether it is white's turn or not.
+        // It is used to index into various arrays.
         const turnW = this.turn ? 1 : 0;
-        let localPawn
-        let localKnight
-        let localBishop
-        let localRook
-        let localQueen
-        localPawn = this.checkPawn(turn, index, this.board)
-        localKnight = this.knight(turn, index, this.board)
-        localBishop = this.bishop(turn, index, this.board)
-        localRook = this.rook(turn, index, this.board)
-        localQueen = this.queen(turn, index, this.board)
-        let checkPositions = localQueen.concat(localKnight.concat(localPawn))
-        //cleanup checkable positions array
+        // Initialize local variables to store the possible moves for each piece.
+        let localPawn;
+        let localKnight;
+        let localBishop;
+        let localRook;
+        let localQueen;
+        // Calculate the possible moves for the piece on the given index.
+        localPawn = this.checkPawn(turn, index, this.board);
+        localKnight = this.knight(turn, index, this.board);
+        localBishop = this.bishop(turn, index, this.board);
+        localRook = this.rook(turn, index, this.board);
+        localQueen = this.queen(turn, index, this.board);
+        // Combine the possible moves for all pieces into one array.
+        let checkPositions = localQueen.concat(localKnight.concat(localPawn));
+        // Remove duplicate moves.
         for (let i = 0; i < checkPositions.length; ++i) {
             for (let j = i + 1; j < checkPositions.length; ++j) {
                 if (checkPositions[i] === checkPositions[j])
                     checkPositions.splice(j--, 1);
             }
         }
-
+        // If `modifier` is true, update the check positions for each type of piece.
         if (modifier) {
-            this.checkPositionsPawn[turnW] = localPawn.map(v => v + index)
-            this.checkPositionsBishop[turnW] = localBishop.map(v => v + index)
-            this.checkPositionsKnight[turnW] = localKnight.map(v => v + index)
-            this.checkPositionsRook[turnW] = localRook.map(v => v + index)
-            this.checkPositionsQueen[turnW] = localQueen.map(v => v + index)
+            this.checkPositionsPawn[turnW] = localPawn.map(v => v + index);
+            this.checkPositionsBishop[turnW] = localBishop.map(v => v + index);
+            this.checkPositionsKnight[turnW] = localKnight.map(v => v + index);
+            this.checkPositionsRook[turnW] = localRook.map(v => v + index);
+            this.checkPositionsQueen[turnW] = localQueen.map(v => v + index);
         }
-
-
-        checkPositions = checkPositions.map(v => v + index)
-        return checkPositions
+        // Add the index to each move and return the resulting array.
+        checkPositions = checkPositions.map(v => v + index);
+        return checkPositions;
     }
 
+// Calculates the possible moves for a pawn and returns them as an array.
     checkPawn(turn, index, board) {
-        let moves = []
+        let moves = [];
+
+        // Calculate the column of the pawn.
         let col = index % 8;
+
+        // Determine the direction that the pawn moves based on `turn`.
         if (turn) { //white
             if (board[index + 7] === null && col !== 0) {
-                moves.push(7)
+                moves.push(7);
             }
             if (board[index + 9] === null && col !== 7) {
-                moves.push(9)
+                moves.push(9);
             }
         } else { //black
             if (col !== 7 && board[index - 7] === null) {
-                moves.push(-7)
+                moves.push(-7);
             }
             if (col !== 0 && board[index - 9] === null) {
-                moves.push(-9)
+                moves.push(-9);
             }
         }
-        return moves
+
+        return moves;
     }
 
+// Checks whether the current player is in check.
     checkCheck() {
-        const turnW = this.turn ? 1 : 0;
-        const turnB = this.turn ? 0 : 1;
+        //turnW is a boolean that indicates whether it is white's turn or not.
+        //It is used to index into various arrays.
+        //turnB is a boolean that indicates whether it is black's turn or not.
+        //1 = white, 0 = black
+        const turnW = this.turn ? 1 : 0; //-player
+        const turnB = !this.turn ? 1 : 0;//-opponent
+
+        // Set the opposing player's check status to false.
         this.check[turnB] = false;
+
         let newMoves = [];
 
+        // Determine the type and index of the selected piece.
         const pieceType = this.selectedPiece.type;
         const pieceIndex = this.selectedPiece.indexOfBoardPiece;
+
+        // Calculate the possible moves for the selected piece.
         switch (pieceType) {
             case 'Rook':
                 newMoves = this.rook(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
@@ -779,28 +792,37 @@ class game {
                 newMoves = this.checkPawn(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
                 break;
         }
+
+        // If the current player's piece is attacking the opposing player's king or
+        // the opposing player's king is in any of the possible moves, set the opposing
+        // player's check status to true.
         if (this[`checkPositions${pieceType}`] !== undefined) {
             if (newMoves.includes(this.board.indexOf(this.turn ? 27 : 3)) ||
                 this[`checkPositions${pieceType}`][turnW].includes(pieceIndex)) {
+                // Store the threatening positions in `threatPositions`.
                 this.threatPositions = this.currentCheckPositions[turnB].filter(x => newMoves.includes(x));
-                if (this.checkmate()) {
+                // If the opposing player is in checkmate, return 1. Otherwise, set the
+                // opposing player's check status to true, identify the threatening piece,
+                // and return 0.
+                this.check[turnB] = true;
+                this.threatIndex[turnB] = this.selectedPiece.pieceId; //set opponents threatening piece index
+                let checkmate = this.checkmate();
+                if (checkmate) {
                     return 1
                 } else {
                     console.log("check");
-                    this.check[turnB] = true;
-                    this.threatIndex[turnB] = this.selectedPiece.pieceId;
-                    return (this.checkmate() ? 1 : 0)
+                    return (checkmate ? 1 : 0)
                 }
             }
         }
     }
 
     checkmate() {
-        let turn = !this.turn
-        let turnW = turn ? 1 : 0
-        this.findSaviour(turn)
-        let moves = this.king(turn, this.getKingIndex(turn), this.board)
-        if (moves.length === 0 && this.saviourPieces[turnW].length === 0 && this.threatIndex[turnW] > -1) {
+        let oppTurn = !this.turn //opposingPlayer
+        let turnB = this.turn ? 0 : 1
+        this.findSaviour(oppTurn)
+        let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board)
+        if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
             console.log("checkmate")
             return true
         }
@@ -810,7 +832,6 @@ class game {
     initKing() {
         this.currentCheckPositions[1] = this.checkablePositions(3, true, 1)
         this.currentCheckPositions[0] = this.checkablePositions(59, false, 1)
-        this.findSaviour(this.turn)
     }
 
     getKingIndex(turn) {
@@ -878,7 +899,7 @@ class game {
 
         // check if start and end are on the same diagonal
         if (dx === dy) {
-            const inc = (end > start) ? rowSize + 1 : rowSize - 1;
+            const inc = (start % rowSize < end % rowSize) ? rowSize + 1 : rowSize - 1;
             const diff = end - start;
             const steps = Math.abs(diff / inc);
             const sign = Math.sign(diff);
@@ -901,9 +922,6 @@ class game {
 
     testPieceData(index) {
         let turnW = this.turn ? 1 : 0
-        if (this.check[turnW]) {
-            this.findSaviour(this.turn)
-        }
         if (this.turn) {
             this.playerPieces = this.whitePieces;
         } else {
