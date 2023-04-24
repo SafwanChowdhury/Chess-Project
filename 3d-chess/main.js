@@ -375,11 +375,11 @@ const box = document.getElementById("success-box");
 function updateTurnOverlay() {
     if (clientID[0] == 0) {
         turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
-        turnText.style.color = gameLogic.turn ? "White" : "Black"
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
     }
     else {
         turnText.textContent = gameLogic.turn ? "Your Turn" : "Black's Turn";
-        turnText.style.color = gameLogic.turn ? "White" : "Black"
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
     }
 }
 
