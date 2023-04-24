@@ -798,7 +798,7 @@ class game {
     checkmate() {
         let turn = !this.turn
         let turnW = turn ? 1 : 0
-        this.findSaviour(!turn)
+        this.findSaviour(turn)
         let moves = this.king(turn, this.getKingIndex(turn), this.board)
         if (moves.length === 0 && this.saviourPieces[turnW].length === 0 && this.threatIndex[turnW] > -1) {
             console.log("checkmate")
@@ -843,7 +843,7 @@ class game {
                     newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
                     break;
                 default:
-                    newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+                    newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
             }
             if (newPositions.some(element => threatPath.includes(element))) {
                 pieceSet.push(piece);
