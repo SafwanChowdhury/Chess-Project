@@ -845,8 +845,28 @@ class game {
         const pieces = turn ? this.whitePieces : this.blackPieces;
         const pieceSet = [];
         let threatPath = []
-        if (this.threatIndex[turnW] > -1) {
-            threatPath = this.findPath(this.board.indexOf(turn ? 3 : 27), this.board.indexOf(this.threatIndex[turnW]))
+        let path = []
+        let threatPiece = this.pieces[this.threatIndex[turnW]]
+        switch (threatPiece.userData.name) {
+            case 'Rook':
+                path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+                threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
+                break;
+            case 'Knight':
+                path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+                threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
+                break;
+            case 'Bishop':
+                path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+                threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
+                break;
+            case 'Queen':
+                path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+                threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
+                break;
+            default:
+                path = this.pawn(turn, threatPiece.userData.indexOfBoardPiece, threatPiece.userData.moveTwo, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+                threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
         }
         pieces.forEach((piece) => {
             let newPositions
@@ -873,47 +893,6 @@ class game {
         this.saviourPieces[turnW] = pieceSet;
     }
 
-    findPath(start, end) {
-        const rowSize = 8; // assuming an 8x8 board
-        const dx = Math.abs((start % rowSize) - (end % rowSize));
-        const dy = Math.abs(Math.floor(start / rowSize) - Math.floor(end / rowSize));
-
-        // check if start and end are the same or out of bounds
-        if (start === end || start < 0 || start > 63 || end < 0 || end > 63) {
-            return [];
-        }
-
-        // check if start and end are on the same row or column
-        if (dx === 0 || dy === 0) {
-            const inc = (dx === 0) ? rowSize : 1;
-            const diff = end - start;
-            const steps = Math.abs(diff / inc);
-            const sign = Math.sign(diff);
-            const path = [];
-            for (let i = 0; i <= steps; i++) { // changed condition to include end index
-                const idx = start + sign * i * inc;
-                path.push(idx);
-            }
-            return path.slice(1);
-        }
-
-        // check if start and end are on the same diagonal
-        if (dx === dy) {
-            const inc = (start % rowSize < end % rowSize) ? rowSize + 1 : rowSize - 1;
-            const diff = end - start;
-            const steps = Math.abs(diff / inc);
-            const sign = Math.sign(diff);
-            const path = [];
-            for (let i = 0; i <= steps; i++) { // changed condition to include end index
-                const idx = start + sign * i * inc;
-                path.push(idx);
-            }
-            return path.slice(1);
-        }
-
-        // otherwise, no path exists
-        return [];
-    }
 
     unitTest(id, move) {
         this.testPieceData(id)
