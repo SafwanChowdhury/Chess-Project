@@ -663,8 +663,8 @@ class game {
 			}
 		}
 		if (this.check[turnW] === true) {
-			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.opacity = 0;
-			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.color = {r: 0, g: 1, b: 0};
+			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.opacity = 0;
+			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.color = {r: 0, g: 1, b: 0};
 		}
 		this.incr++;
 		this.resetSelectedPieceProperties();
