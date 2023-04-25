@@ -233,9 +233,9 @@ function onDocumentMouseDown(event) {
     gameLogic.modified = []
     gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard)
     //comment out when not testing game states, click through moves till saved game state
-/*    incr++
+    incr++
     if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])*/
+        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
 }
 
 
@@ -275,7 +275,6 @@ function animate() {
             }
         }
         if (modified[4] !== null){
-            console.log(modified)
             modifiedData[0] = modified[0]
             modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece
             modifiedData[2] = pieces[modified[0]].userData.side
