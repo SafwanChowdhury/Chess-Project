@@ -69,7 +69,7 @@ class game {
 
 		// Check if the piece can be selected.
 		const isValidPiece = intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16);
-
+		console.log(this.intersectsBoard);
 		// If the piece is valid, update the appearance of the selected and previously selected pieces.
 		if (isValidPiece) {
 			if (this.selected && intersectsPiece[0] !== this.selected) {
@@ -645,7 +645,8 @@ class game {
 
 	// Checks for a win
 	checkForWin() {
-		if (this.checkCheck()) {
+		let turnW = this.turn ? 1 : 0;
+		if (this.checkCheck(this.turn)) {
 			if (this.turn) {
 				console.log("white win");
 				this.checkText.textContent = "White Win!!!";
@@ -661,6 +662,10 @@ class game {
 				this.checkContainer.style.pointerEvents = "auto";
 			}
 		}
+		if (this.check[turnW] === true) {
+			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.opacity = 0;
+			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.color = {r: 0, g: 1, b: 0};
+		}
 		this.incr++;
 		this.resetSelectedPieceProperties();
 		this.changePlayer();
@@ -668,7 +673,6 @@ class game {
 
 	// Switches players turn
 	changePlayer() {
-		//this.displayGrid()
 		this.incr++;
 		if (this.turn) {
 			this.turn = false;
@@ -778,13 +782,13 @@ class game {
 	}
 
 	// Checks whether the current player is in check.
-	checkCheck() {
+	checkCheck(turn) {
 		//turnW is a boolean that indicates whether it is white's turn or not.
 		//It is used to index into various arrays.
 		//turnB is a boolean that indicates whether it is black's turn or not.
 		//1 = white, 0 = black
-		const turnW = this.turn ? 1 : 0; //-player
-		const turnB = !this.turn ? 1 : 0;//-opponent
+		const turnW = turn ? 1 : 0; //-player
+		const turnB = !turn ? 1 : 0;//-opponent
 
 		// Set the opposing player's check status to false.
 		this.check[turnB] = false;
@@ -797,16 +801,16 @@ class game {
 		// Calculate the possible future moves for the selected piece.
 		switch (pieceType) {
 		case "Rook":
-			newMoves = this.rook(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
+			newMoves = this.rook(turn, pieceIndex, this.board).map(v => v + pieceIndex);
 			break;
 		case "Knight":
-			newMoves = this.knight(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
+			newMoves = this.knight(turn, pieceIndex, this.board).map(v => v + pieceIndex);
 			break;
 		case "Bishop":
-			newMoves = this.bishop(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
+			newMoves = this.bishop(turn, pieceIndex, this.board).map(v => v + pieceIndex);
 			break;
 		case "Queen":
-			newMoves = this.queen(this.turn, pieceIndex, this.board).map(v => v + pieceIndex);
+			newMoves = this.queen(turn, pieceIndex, this.board).map(v => v + pieceIndex);
 			break;
 		default:
 			//bug identified in moveTwo, some cases moveTwo needs to be 1 where a piece can move two and put king in check
@@ -829,19 +833,21 @@ class game {
 				// and return 0.
 				this.check[turnB] = true;
 				this.threatIndex[turnB] = this.selectedPiece.pieceId; //set opponents threatening piece index
-				let checkmate = this.checkmate();
+				let checkmate = this.checkmate(turn);
 				if (checkmate) {
 					return 1;
 				} else {
 					console.log("check");
+					this.cells[this.board.indexOf(turn ? 27 : 3)].material.opacity = 1;
+					this.cells[this.board.indexOf(turn ? 27 : 3)].material.color = {r: 1, g: 0, b: 0};
 					return (checkmate ? 1 : 0);
 				}
 			}
 		}
 	}
 
-	checkmate() {
-		let oppTurn = !this.turn; //opposingPlayer
+	checkmate(turn) {
+		let oppTurn = !turn; //opposingPlayer
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
