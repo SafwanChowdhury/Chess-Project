@@ -172,7 +172,7 @@ class game {
 			this.givePieceBorder(this.queen(this.turn, this.selectedPiece.indexOfBoardPiece, this.board));
 			break;
 		case "King":
-			this.givePieceBorder(this.king(this.turn, this.selectedPiece.indexOfBoardPiece, this.board));
+			this.givePieceBorder(this.king(this.turn, this.selectedPiece.indexOfBoardPiece, this.board, true));
 			break;
 		default:
 			this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo, this.board));
@@ -332,7 +332,7 @@ class game {
 		return moves;
 	}
 
-	king(turn, index, board) {
+	king(turn, index, board, modifier) {
 		let col = Math.floor(index % 8);
 		let moves = [-9, -8, -7, -1, 1, 7, 8, 9];
 		let validMoves = [];
@@ -352,11 +352,15 @@ class game {
 				continue;
 			}
 			if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
-			} else {
+			}
+			else {
 				validMoves.push(moves[i]);
 			}
 		}
-		return this.kingPinning(validMoves, index, turn, board);
+		if (modifier) {
+			return this.kingPinning(validMoves, index, turn, board);
+		}
+		return validMoves;
 	}
 
 	kingPinning(validMoves, index, turn, board) {
@@ -378,17 +382,35 @@ class game {
 
 			// check if new king position is under threat
 			let kingUnderThreat = false;
-			for (let j = 0; j < this.piecesIndex[1 - turnB].length; j++) {
-				let pieceIndex = this.piecesIndex[1 - turnB][j];
-				if (this.pieces[pieceIndex].userData.moves) {
-					let threatMoves = this.pieces[pieceIndex].userData.moves.slice();
-					if (threatMoves !== undefined) {
-						threatMoves = threatMoves.map(v => v + newBoard.indexOf(pieceIndex));
-						if (threatMoves.includes(newKingPos)) {
-							kingUnderThreat = true;
-							break;
-						}
-					}
+			for (let j = 0; j < this.piecesIndex[turnW].length; j++) {
+				let pieceId = this.piecesIndex[turnW][j];
+				let pieceType = this.pieces[pieceId].userData.name;
+				let pieceIndex = this.pieces[pieceId].userData.indexOfBoardPiece;
+				let newMoves;
+				switch (pieceType) {
+					case "Rook":
+						newMoves = this.rook(!turn, pieceIndex, newBoard);
+						break;
+					case "Knight":
+						newMoves = this.knight(!turn, pieceIndex, newBoard);
+						break;
+					case "Bishop":
+						newMoves = this.bishop(!turn, pieceIndex, newBoard);
+						break;
+					case "Queen":
+						newMoves = this.queen(!turn, pieceIndex, newBoard);
+						break;
+					case "King":
+						newMoves = this.king(!turn, pieceIndex, newBoard,false);
+						break;
+					default:
+						newMoves = this.checkPawn(!turn, pieceIndex,newBoard);
+						break;
+				}
+				let threatMoves = newMoves.map(v => v + newBoard.indexOf(pieceId));
+				if (threatMoves.includes(newKingPos)) {
+					kingUnderThreat = true;
+					break;
 				}
 			}
 
@@ -406,7 +428,6 @@ class game {
 			//for each validmove position, check each pieces moves from that position, giving you all possible check positions of the new space
 			//using the new space see if a valid piece exists in any of the checkable positions
 			//if a threatable piece exists do not allow movement into that position
-
 			localPawn.forEach(pawnIndex => {
 				if (newBoard[pawnIndex] && this.pieces[newBoard[pawnIndex]].userData.name === "Pawn" && this.piecesIndex[turnW].includes(newBoard[pawnIndex])) {
 					invalidMoves.push(validMoves[i]);
@@ -559,6 +580,7 @@ class game {
 	changeData(previousIndex, modifiedIndex, removePiece, castling) {
 		if (removePiece) {
 			this.oldPiece = this.board[modifiedIndex];
+			this.piecesIndex[this.turn ? 1 : 0].splice(this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece), 1);
 			if (this.turn && this.selectedPiece.pieceId < 16) {
 				this.blackScore--;
 			}
@@ -604,7 +626,7 @@ class game {
 
 		}
 		//console.log("PieceId" , this.selectedPiece.pieceId, " Move: " , (this.selectedPiece.indexOfBoardPiece - previousIndex))
-		this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1);
+		this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 		this.checkForWin();
 	}
 
@@ -654,10 +676,10 @@ class game {
 		this.incr++;
 		if (this.turn) {
 			this.turn = false;
-			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1);
+			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 		} else {
 			this.turn = true;
-			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1);
+			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 		}
 	}
 
@@ -668,7 +690,7 @@ class game {
 		let index = this.turn ? 3 : 27;
 		let kingSideRook = this.turn ? 0 : 24;
 		let queenSideRook = this.turn ? 7 : 31;
-		let kingMoves = this.king(this.turn, index,this.board).map(v => v + index);
+		let kingMoves = this.king(this.turn, index,this.board, true).map(v => v + index);
 		let rookMovesKing = this.rook(this.turn, kingSideRook,this.board).map(v => v + kingSideRook);
 		let rookMovesQueen = this.rook(this.turn,queenSideRook, this.board).map(v => v + queenSideRook);
 		let intersectionKing = rookMovesKing.filter(element => kingMoves.includes(element));
@@ -695,10 +717,10 @@ class game {
 	// and returns them as an array.
 	// `turn` indicates whether it is white's turn or black's turn.
 	// `modifier` indicates whether the checkable positions should be modified.
-	checkablePositions(index, turn, modifier) {
+	checkablePositions(index, turn, modifier, board) {
 		// `turnW` is a boolean that indicates whether it is white's turn or not.
 		// It is used to index into various arrays.
-		const turnW = this.turn ? 1 : 0;
+		const turnW = turn ? 1 : 0;
 		// Initialize local variables to store the possible moves for each piece.
 		let localPawn;
 		let localKnight;
@@ -706,11 +728,11 @@ class game {
 		let localRook;
 		let localQueen;
 		// Calculate the possible moves for the piece on the given index.
-		localPawn = this.checkPawn(turn, index, this.board);
-		localKnight = this.knight(turn, index, this.board);
-		localBishop = this.bishop(turn, index, this.board);
-		localRook = this.rook(turn, index, this.board);
-		localQueen = this.queen(turn, index, this.board);
+		localPawn = this.checkPawn(turn, index, board);
+		localKnight = this.knight(turn, index, board);
+		localBishop = this.bishop(turn, index, board);
+		localRook = this.rook(turn, index, board);
+		localQueen = this.queen(turn, index, board);
 		// Combine the possible moves for all pieces into one array.
 		let checkPositions = localQueen.concat(localKnight.concat(localPawn));
 		// Remove duplicate moves.
@@ -740,7 +762,6 @@ class game {
 		// Calculate the column of the pawn.
 		let col = index % 8;
 
-		// Determine the direction that the pawn moves based on `turn`.
 		if (turn) { //white
 			if (board[index + 7] === null && col !== 0) {
 				moves.push(7);
@@ -777,8 +798,7 @@ class game {
 		// Determine the type and index of the selected piece.
 		const pieceType = this.selectedPiece.type;
 		const pieceIndex = this.selectedPiece.indexOfBoardPiece;
-
-		// Calculate the possible moves for the selected piece.
+		// Calculate the possible future moves for the selected piece.
 		switch (pieceType) {
 		case "Rook":
 			newMoves = this.rook(turn, pieceIndex, this.board).map(v => v + pieceIndex);
@@ -793,7 +813,10 @@ class game {
 			newMoves = this.queen(turn, pieceIndex, this.board).map(v => v + pieceIndex);
 			break;
 		default:
-			newMoves = this.checkPawn(turn, pieceIndex, this.board).map(v => v + pieceIndex);
+			//bug identified in moveTwo, some cases moveTwo needs to be 1 where a piece can move two and put king in check
+			// a temporary fix is to set moveTwo to 0
+			//this however still does not correctly pin the king
+			newMoves = this.pawn(this.turn, pieceIndex,0, this.board).map(v => v + pieceIndex);
 			break;
 		}
 
@@ -801,8 +824,8 @@ class game {
 		// the opposing player's king is in any of the possible moves, set the opposing
 		// player's check status to true.
 		if (this[`checkPositions${pieceType}`] !== undefined) {
-			if (newMoves.includes(this.board.indexOf(turn ? 27 : 3)) ||
-                this[`checkPositions${pieceType}`][turnW].includes(pieceIndex)) {
+			if (newMoves.includes(this.board.indexOf(this.turn ? 27 : 3)) ||
+                this[`checkPositions${pieceType}`][turnB].includes(pieceIndex)) {
 				// Store the threatening positions in `threatPositions`.
 				this.threatPositions = this.currentCheckPositions[turnB].filter(x => newMoves.includes(x));
 				// If the opposing player is in checkmate, return 1. Otherwise, set the
@@ -827,7 +850,8 @@ class game {
 		let oppTurn = !turn; //opposingPlayer
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
-		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board);
+		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
+		console.log("moves", moves, this.saviourPieces[turnB], this.threatIndex[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -836,8 +860,8 @@ class game {
 	}
 
 	initKing() {
-		this.currentCheckPositions[1] = this.checkablePositions(3, true, 1);
-		this.currentCheckPositions[0] = this.checkablePositions(59, false, 1);
+		this.currentCheckPositions[1] = this.checkablePositions(3, true, 1, this.board);
+		this.currentCheckPositions[0] = this.checkablePositions(59, false, 1, this.board);
 	}
 
 	getKingIndex(turn) {
