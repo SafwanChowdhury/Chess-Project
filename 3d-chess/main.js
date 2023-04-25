@@ -203,6 +203,7 @@ function addPromotionData(){
 	pieces[i].userData.isQueen = true;
 	pieces[i].userData.side = side;
 	pieces[i].userData.hasMoved = true;
+	console.log(pieces[i].userData);
 	promotion = false;
 }
 
@@ -291,22 +292,26 @@ function animate() {
 let onStart = false;
 
 manager.onStart = function (url, itemsLoaded, itemsTotal) {
-	document.getElementById("title").innerHTML = "Loading";
+	if (!onStart) {
+		document.getElementById("title").innerHTML = "Loading";
+	}
 };
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-	let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
-	document.getElementById("title").innerHTML = percentage;
-	document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
-};
+	if (!onStart) {
+		let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
+		document.getElementById("title").innerHTML = percentage;
+		document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
+	}
+}
 
 manager.onLoad = function () {
-	document.getElementById("pawn-container").classList.add("loading-finished");
-	setTimeout(function() {
-		document.getElementById("loading-screen").remove();
-	}, 2000);
-	document.getElementById("title").innerHTML = "Online Chess Game";
 	if (!onStart) {
+		document.getElementById("pawn-container").classList.add("loading-finished");
+		setTimeout(function() {
+			document.getElementById("loading-screen").remove();
+		}, 2000);
+		document.getElementById("title").innerHTML = "Online Chess Game";
 		onStart = true;
 		initScene();
 		addPieceData();

@@ -280,9 +280,6 @@ function animate() {
 			modifiedData[1] = pieces[modified[0]].userData.indexOfBoardPiece;
 			modifiedData[2] = pieces[modified[0]].userData.side;
 			promotion = true;
-			menuObject.position.copy(pieces[modified[0]].children[0].position);
-			// show the menu
-			menuElement.style.visibility = "visible";
 			loadQueen(modified[0], modified[4], modified[2], modified[1]);
 		}
 		if (modified[6] !== null){

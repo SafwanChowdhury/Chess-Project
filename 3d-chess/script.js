@@ -69,7 +69,7 @@ class game {
 
 		// Check if the piece can be selected.
 		const isValidPiece = intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16);
-
+		console.log(this.intersectsBoard);
 		// If the piece is valid, update the appearance of the selected and previously selected pieces.
 		if (isValidPiece) {
 			if (this.selected && intersectsPiece[0] !== this.selected) {
