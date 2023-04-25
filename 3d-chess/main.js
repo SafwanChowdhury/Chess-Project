@@ -1,6 +1,6 @@
-// noinspection JSUnusedLocalSymbols,JSCheckFunctionSignatures,EqualityComparisonWithCoercionJS
-
-import './style.css'
+import './CSS/game.css'
+import './CSS/loading.css'
+import './CSS/popup.css'
 import socket from './socket.js';
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
@@ -34,11 +34,6 @@ function initScene() {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
     scene.add(ambientLight)
-
-
-    const lightHelper = new THREE.PointLightHelper(pointLight2)
-    const gridHelper = new THREE.GridHelper(16.9, 8, 0x000000, 0xffffff)
-    scene.add(lightHelper, gridHelper)
 
     const loader2 = new THREE.CubeTextureLoader();
     scene.background = loader2.load([
@@ -375,20 +370,23 @@ function initialiseGame(){
 
 const turnOverlay = document.getElementById("turn-overlay");
 const turnText = document.getElementById("turn-text");
-
+const popup = document.getElementById("end-screen");
+const box = document.getElementById("success-box");
 function updateTurnOverlay() {
     if (clientID[0] == 0) {
         turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
-        turnText.style.color = gameLogic.turn ? "White" : "Black"
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
     }
     else {
         turnText.textContent = gameLogic.turn ? "Your Turn" : "Black's Turn";
-        turnText.style.color = gameLogic.turn ? "White" : "Black"
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
     }
 }
 
 updateTurnOverlay()
 turnOverlay.hidden = true
+popup.style.pointerEvents = "none";
+box.hidden = true;
 // Add the turn overlay to the scene
 const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
@@ -407,4 +405,14 @@ document.addEventListener('joinGame', function() {
     initialiseGame();
 });
 
+function takeScreenshot() {
+    const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
+    renderer.render(scene, camera);
+    const dataURL = renderer.domElement.toDataURL('image/png');
+    sessionStorage.setItem('screenshot', dataURL);
+}
+
 objectLoading()
+
+export { takeScreenshot };

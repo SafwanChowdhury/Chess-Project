@@ -1,5 +1,5 @@
-const burger = document.getElementById("burger");
-const menu = document.getElementById("menu");
+const burger = document.getElementById("hamburger");
+const menu = document.getElementById("primnav");
 
 
 burger.addEventListener("click", () => {

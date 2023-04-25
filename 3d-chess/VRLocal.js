@@ -1,4 +1,6 @@
-import './style.css'
+import './CSS/game.css'
+import './CSS/loading.css'
+import './CSS/popup.css'
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
@@ -6,6 +8,7 @@ import {game} from "./script"
 import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+import {CSS3DObject} from "three/addons/renderers/CSS3DRenderer.js";
 
 
 const scene = new THREE.Scene();
@@ -33,11 +36,6 @@ function initScene() {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
     scene.add(ambientLight)
-
-
-    const lightHelper = new THREE.PointLightHelper(pointLight2)
-    const gridHelper = new THREE.GridHelper(16.9, 8, 0x000000, 0xffffff)
-    scene.add(lightHelper, gridHelper)
 
     const loader2 = new THREE.CubeTextureLoader();
     scene.background = loader2.load([
@@ -254,17 +252,19 @@ manager.onStart = function (url, itemsLoaded, itemsTotal) {
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
     let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
-    document.getElementById("title").innerHTML = percentage;
-    document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
+    if (!onStart) {
+        document.getElementById("title").innerHTML = percentage;
+        document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
+    }
 };
 
 manager.onLoad = function () {
-    document.getElementById("pawn-container").classList.add("loading-finished");
-    setTimeout(function() {
-        document.getElementById("loading-screen").remove();
-    }, 2000);
-    document.getElementById("title").innerHTML = "Online Chess Game";
     if (!onStart) {
+        document.getElementById("pawn-container").classList.add("loading-finished");
+        setTimeout(function() {
+            document.getElementById("loading-screen").remove();
+        }, 2000);
+        document.getElementById("title").innerHTML = "Online Chess Game";
         onStart = true
         initScene()
         addPieceData()
@@ -356,13 +356,7 @@ function createLine(){
 }
 
 
-function takeScreenshot() {
-    const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
-    renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
-    renderer.render(scene, camera);
-    const dataURL = renderer.domElement.toDataURL('image/png');
-    sessionStorage.setItem('screenshot', dataURL);
-}
+
 
 function render() {
     //camControls.enabled = gameLogic.selected === null
@@ -404,6 +398,7 @@ function render() {
         modified = []
         gameLogic.modified = []
         gameLogic.castle = []
+        updateTurnOverlay();
     }
     if (renderer.xr.isPresenting) {
         cleanIntersected();
@@ -628,9 +623,34 @@ function isIterable(obj) {
     }
     return typeof obj[Symbol.iterator] === "function";
 }
-
 //end Reference
+
+const turnOverlay = document.getElementById("turn-overlay");
+const turnText = document.getElementById("turn-text");
+const popup = document.getElementById("end-screen");
+const box = document.getElementById("success-box");
+
+function updateTurnOverlay() {
+    if (gameLogic.turn) {
+        turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
+    }
+    else {
+        turnText.textContent = gameLogic.turn ? "Your Turn" : "Black's Turn";
+        turnText.style.color = gameLogic.turn ? "White" : "Grey"
+    }
+}
+
+updateTurnOverlay()
+turnOverlay.hidden = false
+popup.style.pointerEvents = "none";
+box.hidden = true;
+// Add the turn overlay to the scene
+const turnOverlayObject = new CSS3DObject(turnOverlay);
+scene.add(turnOverlayObject);
+
+
+
 
 objectLoading()
 
-export { takeScreenshot };

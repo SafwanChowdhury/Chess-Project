@@ -1,4 +1,5 @@
-import './style.css'
+import './CSS/game.css'
+import './CSS/loading.css'
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
