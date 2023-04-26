@@ -358,112 +358,12 @@ class game {
 			}
 		}
 		if (modifier) {
-			return this.kingPinning(validMoves, index, turn, board);
+			return this.pinningCheck(validMoves, index, turn, board, true);
 		}
 		return validMoves;
 	}
 
-	kingPinning(validMoves, index, turn, board) {
-		let turnW = turn ? 1 : 0;
-		let turnB = turn ? 0 : 1;
-		let kingIndex = turn ? 3 : 27;
-		let localBishop = [];
-		let localRook = [];
-		let localPawn = [];
-		let localKnight = [];
-		let localQueen = [];
-		let possibleMoves;
-		let invalidMoves = [];
-		for (let i = 0; i < validMoves.length; i++) {
-			let newBoard = board.slice();
-			newBoard[index] = null;
-			newBoard[index + validMoves[i]] = kingIndex;
-			let newKingPos = index + validMoves[i];
-
-			// check if new king position is under threat
-			let kingUnderThreat = false;
-			for (let j = 0; j < this.piecesIndex[turnW].length; j++) {
-				let pieceId = this.piecesIndex[turnW][j];
-				let pieceType = this.pieces[pieceId].userData.name;
-				let pieceIndex = this.pieces[pieceId].userData.indexOfBoardPiece;
-				let newMoves;
-				switch (pieceType) {
-					case "Rook":
-						newMoves = this.rook(!turn, pieceIndex, newBoard);
-						break;
-					case "Knight":
-						newMoves = this.knight(!turn, pieceIndex, newBoard);
-						break;
-					case "Bishop":
-						newMoves = this.bishop(!turn, pieceIndex, newBoard);
-						break;
-					case "Queen":
-						newMoves = this.queen(!turn, pieceIndex, newBoard);
-						break;
-					case "King":
-						newMoves = this.king(!turn, pieceIndex, newBoard,false);
-						break;
-					default:
-						newMoves = this.checkPawn(!turn, pieceIndex,newBoard);
-						break;
-				}
-				let threatMoves = newMoves.map(v => v + newBoard.indexOf(pieceId));
-				if (threatMoves.includes(newKingPos)) {
-					kingUnderThreat = true;
-					break;
-				}
-			}
-
-			if (kingUnderThreat) {
-				// add invalid move if king is under threat
-				invalidMoves.push(validMoves[i]);
-				continue; // skip remaining checks for this move
-			}
-
-			localPawn = this.checkPawn(turn, index + validMoves[i], newBoard).map(v => v + index + validMoves[i]);
-			localBishop = this.bishop(turn, index + validMoves[i], newBoard).map(v => v + index + validMoves[i]);
-			localRook = this.rook(turn, index + validMoves[i], newBoard).map(v => v + index + validMoves[i]);
-			localKnight = this.knight(turn, index + validMoves[i], newBoard).map(v => v + index + validMoves[i]);
-			localQueen = this.queen(turn, index + validMoves[i], newBoard).map(v => v + index + validMoves[i]);
-			//for each validmove position, check each pieces moves from that position, giving you all possible check positions of the new space
-			//using the new space see if a valid piece exists in any of the checkable positions
-			//if a threatable piece exists do not allow movement into that position
-			localPawn.forEach(pawnIndex => {
-				if (newBoard[pawnIndex] && this.pieces[newBoard[pawnIndex]].userData.name === "Pawn" && this.piecesIndex[turnW].includes(newBoard[pawnIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localBishop.forEach(bishopIndex => {
-				if (newBoard[bishopIndex] && this.pieces[newBoard[bishopIndex]].userData.name === "Bishop" && this.piecesIndex[turnW].includes(newBoard[bishopIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localRook.forEach(rookIndex => {
-				if (newBoard[rookIndex] && this.pieces[newBoard[rookIndex]].userData.name === "Rook" && this.piecesIndex[turnW].includes(newBoard[rookIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localKnight.forEach(knightIndex => {
-				if (newBoard[knightIndex] && this.pieces[newBoard[knightIndex]].userData.name === "Knight" && this.piecesIndex[turnW].includes(newBoard[knightIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localQueen.forEach(queenIndex => {
-				if (newBoard[queenIndex] && this.pieces[newBoard[queenIndex]].userData.name === "Queen" && this.piecesIndex[turnW].includes(newBoard[queenIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-		}
-
-		possibleMoves = validMoves.filter(function (value) {
-			return !invalidMoves.includes(value);
-		});
-		return possibleMoves;
-
-	}
-
-
-	piecePinning(validMoves, index, turn, board) {
+	pinningCheck(validMoves, index, turn, board, isKingMove) {
 		let turnW = turn ? 1 : 0;
 		let kingIndex = turn ? 3 : 27;
 		let localBishop = [];
@@ -473,46 +373,33 @@ class game {
 		let localQueen = [];
 		let possibleMoves;
 		let invalidMoves = [];
-		let kingPos;
+		let kingPos = isKingMove ? index : board.indexOf(kingIndex);
+
 		for (let i = 0; i < validMoves.length; i++) {
 			let newBoard = board.slice();
 			newBoard[index] = null;
-			kingPos = board.indexOf(kingIndex);
-			newBoard[index + validMoves[i]] = this.selectedPiece.pieceId;
+			newBoard[index + validMoves[i]] = isKingMove ? kingIndex : this.selectedPiece.pieceId;
+
+			if (isKingMove) {
+				kingPos = index + validMoves[i];
+			}
 
 			localPawn = this.checkPawn(turn, kingPos, newBoard).map(v => v + kingPos);
 			localBishop = this.bishop(turn, kingPos, newBoard).map(v => v + kingPos);
 			localRook = this.rook(turn, kingPos, newBoard).map(v => v + kingPos);
 			localKnight = this.knight(turn, kingPos, newBoard).map(v => v + kingPos);
 			localQueen = this.queen(turn, kingPos, newBoard).map(v => v + kingPos);
-			//for each validmove position, check each pieces moves from that position, giving you all possible check positions of the new space
-			//using the new space see if a valid piece exists in any of the checkable positions
-			//if a threatable piece exists do not allow movement into that position
 
-			localPawn.forEach(pawnIndex => {
-				if (newBoard[pawnIndex] && this.pieces[newBoard[pawnIndex]].userData.name === "Pawn" && this.piecesIndex[turnW].includes(newBoard[pawnIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localBishop.forEach(bishopIndex => {
-				if (newBoard[bishopIndex] && this.pieces[newBoard[bishopIndex]].userData.name === "Bishop" && this.piecesIndex[turnW].includes(newBoard[bishopIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localRook.forEach(rookIndex => {
-				if (newBoard[rookIndex] && this.pieces[newBoard[rookIndex]].userData.name === "Rook" && this.piecesIndex[turnW].includes(newBoard[rookIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localKnight.forEach(knightIndex => {
-				if (newBoard[knightIndex] && this.pieces[newBoard[knightIndex]].userData.name === "Knight" && this.piecesIndex[turnW].includes(newBoard[knightIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
-			});
-			localQueen.forEach(queenIndex => {
-				if (newBoard[queenIndex] && this.pieces[newBoard[queenIndex]].userData.name === "Queen" && this.piecesIndex[turnW].includes(newBoard[queenIndex])) {
-					invalidMoves.push(validMoves[i]);
-				}
+			// Check for threats on the king
+			[localPawn, localBishop, localRook, localKnight, localQueen].forEach(localMoves => {
+				localMoves.forEach(moveIndex => {
+					if (newBoard[moveIndex] && this.piecesIndex[turnW].includes(newBoard[moveIndex])) {
+						let pieceName = this.pieces[newBoard[moveIndex]].userData.name;
+						if ((isKingMove && pieceName !== "King") || (!isKingMove && pieceName !== this.selectedPiece.pieceName)) {
+							invalidMoves.push(validMoves[i]);
+						}
+					}
+				});
 			});
 		}
 
@@ -520,7 +407,6 @@ class game {
 			return !invalidMoves.includes(value);
 		});
 		return possibleMoves;
-
 	}
 
 	// gives the piece a green highlight for the user (showing its movable)
@@ -536,7 +422,7 @@ class game {
 		if (this.check[turnW] && this.selectedPiece.type !== "King") { //player in check
 			this.selectedPiece.moves = moves.filter(x => threatMoves.includes(x) || this.board[x + this.selectedPiece.indexOfBoardPiece] == this.threatIndex[turnW]); //index of opponent piece threatening king
 		} else if (this.selectedPiece.type !== "King") {
-			this.selectedPiece.moves = this.piecePinning(moves, this.selectedPiece.indexOfBoardPiece, this.turn, this.board);
+			this.selectedPiece.moves = this.pinningCheck(moves, this.selectedPiece.indexOfBoardPiece, this.turn, this.board, false);
 		} else
 			this.selectedPiece.moves = moves;
 		if (this.selectedPiece.moves.length > 0) {
@@ -701,14 +587,14 @@ class game {
 		if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0) {
 			path.push(1);
 		}
-		path = this.kingPinning(path,index,this.turn,this.board);
+		path = this.pinningCheck(path,index,this.turn,this.board, true);
 		if (path.includes(1)){
 			moves.push(2);
 		}
 		if (path.includes(-1)){
 			moves.push(-2);
 		}
-		moves = this.kingPinning(moves,index,this.turn,this.board);
+		moves = this.pinningCheck(moves,index,this.turn,this.board,true);
 
 		return moves;
 	}

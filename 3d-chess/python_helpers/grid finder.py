@@ -6,6 +6,7 @@ class GridWindow(tk.Frame):
         self.master = master
         self.grid_cells = []
         self.selected_cell = None
+        self.predefined_numbers = [-9, -8, -7, -1, 1, 7, 8, 9]
         self.create_widgets()
 
     def create_widgets(self):
@@ -33,11 +34,13 @@ class GridWindow(tk.Frame):
                 for col in range(8):
                     current_index = row * 8 + col
                     distance = current_index - selected_index
+                    
                     if current_index == selected_index:
-                        self.grid_cells[row][col].config(text='x')
+                        self.grid_cells[row][col].config(bg='red', text='x')
+                    elif distance in self.predefined_numbers:
+                        self.grid_cells[row][col].config(bg='yellow', text=str(distance))
                     else:
-                        self.grid_cells[row][col].config(text=str(distance))
-
+                        self.grid_cells[row][col].config(bg='white', text=str(distance))
 
     def get_selected_indexes(self):
         for row in range(8):
