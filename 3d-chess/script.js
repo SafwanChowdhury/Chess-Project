@@ -66,10 +66,8 @@ class game {
 		let turnW = this.turn ? 1 : 0;
 		this.oldPiece = null;
 		this.intersectsBoard = intersectsBoard;
-
 		// Check if the piece can be selected.
 		const isValidPiece = intersectsPiece.length > 0 && intersectsPiece[0].object.parent.userData.taken !== true && (this.turn ? intersectsPiece[0].object.parent.userData.pieceId < 16 : intersectsPiece[0].object.parent.userData.pieceId >= 16);
-		console.log(this.intersectsBoard);
 		// If the piece is valid, update the appearance of the selected and previously selected pieces.
 		if (isValidPiece) {
 			if (this.selected && intersectsPiece[0] !== this.selected) {
@@ -78,7 +76,6 @@ class game {
 
 			// Determine if the current piece can be selected based on the game state. player not in check
 			const canSelectPiece = !this.check[turnW] || this.saviourPieces[turnW].includes(intersectsPiece[0].object.parent) || intersectsPiece[0].object.userData.name === "King";
-
 			// If the piece can be selected, update its appearance and retrieve the current player's pieces.
 			if (canSelectPiece) {
 				setSelectedAppearance(intersectsPiece[0], this);
@@ -400,7 +397,7 @@ class game {
 					newMoves = this.king(!turn, pieceIndex, newBoard,false);
 					break;
 				default:
-					newMoves = this.checkPawn(!turn, pieceIndex,newBoard);
+					newMoves = this.checkPawnAlt(turn, pieceIndex,newBoard);
 					break;
 				}
 				let threatMoves = newMoves.map(v => v + newBoard.indexOf(pieceId));
@@ -454,6 +451,7 @@ class game {
 		possibleMoves = validMoves.filter(function (value) {
 			return !invalidMoves.includes(value);
 		});
+		console.log(possibleMoves)
 		return possibleMoves;
 
 	}
@@ -583,6 +581,7 @@ class game {
 			if (this.turn === false && this.selectedPiece.pieceId >= 16) {
 				this.whiteScore--;
 			}
+			this.pieces[this.oldPiece].userData.taken = true;
 		}
 		this.board[previousIndex] = null;
 		this.board[modifiedIndex] = this.selectedPiece.pieceId;
@@ -669,6 +668,7 @@ class game {
 
 	// Switches players turn
 	changePlayer() {
+		let turnB = !this.turn ? 1 : 0;
 		this.incr++;
 		if (this.turn) {
 			this.turn = false;
@@ -777,6 +777,31 @@ class game {
 		return moves;
 	}
 
+	checkPawnAlt(turn, index, board) {
+		let moves = [];
+
+		// Calculate the column of the pawn.
+		let col = index % 8;
+
+		if (turn) { //white
+			if (board[index + 7] === null && col !== 7) {
+				moves.push(-7);
+			}
+			if (board[index + 9] === null && col !== 0) {
+				moves.push(-9);
+			}
+		} else { //black
+			if (col !== 0 && board[index - 7] === null) {
+				moves.push(7);
+			}
+			if (col !== 7 && board[index - 9] === null) {
+				moves.push(9);
+			}
+		}
+
+		return moves;
+	}
+
 	// Checks whether the current player is in check.
 	checkCheck(turn) {
 		//turnW is a boolean that indicates whether it is white's turn or not.
@@ -846,7 +871,7 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
-		console.log("moves", moves, this.saviourPieces[turnB], this.threatIndex[turnB]);
+		console.log("moves: ", moves, " saviour: ", this.saviourPieces[turnB], " threat: ", this.threatIndex[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -868,51 +893,54 @@ class game {
 	findSaviour(turn) {
 		let turnW = turn ? 1 : 0;
 		const pieces = turn ? this.whitePieces : this.blackPieces;
+		console.log(pieces)
 		const pieceSet = [];
 		let threatPath = [];
 		let path = [];
 		let threatPiece = this.pieces[this.threatIndex[turnW]];
 		switch (threatPiece.userData.name) {
-		case "Rook":
-			path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-			threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
-			break;
-		case "Knight":
-			path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-			threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
-			break;
-		case "Bishop":
-			path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-			threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
-			break;
-		case "Queen":
-			path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-			threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
-			break;
-		default:
-			path = this.pawn(turn, threatPiece.userData.indexOfBoardPiece, threatPiece.userData.moveTwo, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-			threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
-		}
-		pieces.forEach((piece) => {
-			let newPositions;
-			switch (piece.userData.name) {
 			case "Rook":
-				newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+				threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
 				break;
 			case "Knight":
-				newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+				threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
 				break;
 			case "Bishop":
-				newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+				threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
 				break;
 			case "Queen":
-				newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+				threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
 				break;
 			default:
-				newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-			}
-			if (newPositions.some(element => threatPath.includes(element))) {
-				pieceSet.push(piece);
+				path = this.checkPawn(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+				threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
+		}
+		pieces.forEach((piece) => {
+			if (piece.userData.taken !== true) {
+				let newPositions;
+				switch (piece.userData.name) {
+					case "Rook":
+						newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+						break;
+					case "Knight":
+						newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+						break;
+					case "Bishop":
+						newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+						break;
+					case "Queen":
+						newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+						break;
+					default:
+						newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				}
+				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
+					pieceSet.push(piece);
+				}
 			}
 		});
 		this.saviourPieces[turnW] = pieceSet;
