@@ -451,7 +451,6 @@ class game {
 		possibleMoves = validMoves.filter(function (value) {
 			return !invalidMoves.includes(value);
 		});
-		console.log(possibleMoves)
 		return possibleMoves;
 
 	}
@@ -871,7 +870,6 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
-		console.log("moves: ", moves, " saviour: ", this.saviourPieces[turnB], " threat: ", this.threatIndex[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -893,7 +891,6 @@ class game {
 	findSaviour(turn) {
 		let turnW = turn ? 1 : 0;
 		const pieces = turn ? this.whitePieces : this.blackPieces;
-		console.log(pieces)
 		const pieceSet = [];
 		let threatPath = [];
 		let path = [];
