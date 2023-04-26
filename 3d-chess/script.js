@@ -26,6 +26,7 @@ class game {
 	checkText = document.getElementById("check-text");
 	checkContainer = document.getElementById("end-screen");
 	checkPopup = document.getElementById("success-box");
+	popupAlert = document.getElementById("alert-text");
 	popupPawn = document.getElementById("pawn");
 	checkPositionsPawn = [[], []];
 	checkPositionsRook = [[], []];
@@ -580,6 +581,12 @@ class game {
 			if (this.turn === false && this.selectedPiece.pieceId >= 16) {
 				this.whiteScore--;
 			}
+			if (this.turn){
+				this.blackPieces.splice(this.blackPieces.indexOf(this.oldPiece), 1);
+			}
+			else{
+				this.whitePieces.splice(this.whitePieces.indexOf(this.oldPiece), 1);
+			}
 			this.pieces[this.oldPiece].userData.taken = true;
 		}
 		this.board[previousIndex] = null;
@@ -640,7 +647,8 @@ class game {
 	// Checks for a win
 	checkForWin() {
 		let turnW = this.turn ? 1 : 0;
-		if (this.checkCheck(this.turn)) {
+		let check = this.checkCheck(this.turn)
+		if (check === 1) {
 			if (this.turn) {
 				console.log("white win");
 				this.checkText.textContent = "White Win!!!";
@@ -655,6 +663,14 @@ class game {
 				this.checkPopup.hidden = false;
 				this.checkContainer.style.pointerEvents = "auto";
 			}
+		}
+		else if(check === 2){
+			console.log("Stalemate");
+			this.popupAlert.textContent = "Stalemate";
+			this.checkText.textContent = "Game is a Draw";
+			this.popupPawn.style.filter = 'invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)';
+			this.checkPopup.hidden = false;
+			this.checkContainer.style.pointerEvents = "auto";
 		}
 		if (this.check[turnW] === true) {
 			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.opacity = 0;
@@ -861,6 +877,9 @@ class game {
 					this.cells[this.board.indexOf(turn ? 27 : 3)].material.color = {r: 1, g: 0, b: 0};
 					return (checkmate ? 1 : 0);
 				}
+			}
+			else if ((this.king(!turn, this.getKingIndex(!turn), this.board, true).length < 1) && ((this.turn && this.blackPieces.length < 2) || (!this.turn && this.whitePieces.length < 2))) {
+				return 2;
 			}
 		}
 	}

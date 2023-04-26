@@ -1,9 +1,12 @@
 import "./CSS/game.css";
 import "./CSS/loading.css";
+import "./CSS/popup.css";
+
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {game} from "./script";
+import {CSS3DObject} from "three/addons/renderers/CSS3DRenderer.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -290,6 +293,7 @@ function animate() {
 		modified = [];
 		gameLogic.modified = [];
 		gameLogic.castle = [];
+		updateTurnOverlay();
 	}
 	renderer.render(scene, camera);
 }
@@ -336,6 +340,31 @@ function resize_window(camera, renderer){
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.setPixelRatio(window.devicePixelRatio);
 }
+
+const turnOverlay = document.getElementById("turn-overlay");
+const turnText = document.getElementById("turn-text");
+const popup = document.getElementById("end-screen");
+const box = document.getElementById("success-box");
+
+function updateTurnOverlay() {
+	if (gameLogic.turn) {
+		turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
+		turnText.style.color = gameLogic.turn ? "White" : "Grey";
+	}
+	else {
+		turnText.textContent = gameLogic.turn ? "Your Turn" : "Black's Turn";
+		turnText.style.color = gameLogic.turn ? "White" : "Grey";
+	}
+}
+
+updateTurnOverlay();
+turnOverlay.hidden = false;
+popup.style.pointerEvents = "none";
+box.hidden = true;
+// Add the turn overlay to the scene
+const turnOverlayObject = new CSS3DObject(turnOverlay);
+scene.add(turnOverlayObject);
+
 
 window.addEventListener("resize",() => resize_window(camera,renderer));
 
