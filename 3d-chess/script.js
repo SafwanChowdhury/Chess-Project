@@ -229,10 +229,6 @@ class game {
 		let maxOffset = 7 * (turn ? 8 : 1);
 		for (let i = 1; i <= maxOffset; i++) {
 			let offset = i * direction;
-			let newRow = row + (turn ? offset / 8 : 0);
-			let newCol = col + (turn ? 0 : offset);
-			if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
-			}
 			let piece = board[index + offset];
 			if (piece !== null) {
 				if (turn && piece >= 16 || !turn && piece < 16) {
@@ -270,7 +266,8 @@ class game {
 				continue;
 			}
 			if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
-			} else {
+			}
+			else {
 				validMoves.push(moves[i]);
 			}
 		}
@@ -365,7 +362,6 @@ class game {
 
 	kingPinning(validMoves, index, turn, board) {
 		let turnW = turn ? 1 : 0;
-		let turnB = turn ? 0 : 1;
 		let kingIndex = turn ? 3 : 27;
 		let localBishop = [];
 		let localRook = [];
@@ -388,24 +384,24 @@ class game {
 				let pieceIndex = this.pieces[pieceId].userData.indexOfBoardPiece;
 				let newMoves;
 				switch (pieceType) {
-					case "Rook":
-						newMoves = this.rook(!turn, pieceIndex, newBoard);
-						break;
-					case "Knight":
-						newMoves = this.knight(!turn, pieceIndex, newBoard);
-						break;
-					case "Bishop":
-						newMoves = this.bishop(!turn, pieceIndex, newBoard);
-						break;
-					case "Queen":
-						newMoves = this.queen(!turn, pieceIndex, newBoard);
-						break;
-					case "King":
-						newMoves = this.king(!turn, pieceIndex, newBoard,false);
-						break;
-					default:
-						newMoves = this.checkPawn(!turn, pieceIndex,newBoard);
-						break;
+				case "Rook":
+					newMoves = this.rook(!turn, pieceIndex, newBoard);
+					break;
+				case "Knight":
+					newMoves = this.knight(!turn, pieceIndex, newBoard);
+					break;
+				case "Bishop":
+					newMoves = this.bishop(!turn, pieceIndex, newBoard);
+					break;
+				case "Queen":
+					newMoves = this.queen(!turn, pieceIndex, newBoard);
+					break;
+				case "King":
+					newMoves = this.king(!turn, pieceIndex, newBoard,false);
+					break;
+				default:
+					newMoves = this.checkPawn(!turn, pieceIndex,newBoard);
+					break;
 				}
 				let threatMoves = newMoves.map(v => v + newBoard.indexOf(pieceId));
 				if (threatMoves.includes(newKingPos)) {
@@ -787,7 +783,6 @@ class game {
 		//It is used to index into various arrays.
 		//turnB is a boolean that indicates whether it is black's turn or not.
 		//1 = white, 0 = black
-		const turnW = turn ? 1 : 0; //-player
 		const turnB = !turn ? 1 : 0;//-opponent
 
 		// Set the opposing player's check status to false.
@@ -930,7 +925,6 @@ class game {
 	}
 
 	testPieceData(index) {
-		let turnW = this.turn ? 1 : 0;
 		if (this.turn) {
 			this.playerPieces = this.whitePieces;
 		} else {
