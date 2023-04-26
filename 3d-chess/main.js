@@ -257,13 +257,11 @@ function animate() {
 				takenWhite.push(pieces[modified[3]]);
 				pieces[modified[3]].position.x = -takenMap[initArray[takenWhite.indexOf(pieces[modified[3]])].y];
 				pieces[modified[3]].position.z = coordsMap[initArray[takenWhite.indexOf(pieces[modified[3]])].x];
-				pieces[modified[3]].userData.taken = true;
 			}
 			else if (modified[3] >= 16){
 				takenBlack.push(pieces[modified[3]]);
 				pieces[modified[3]].position.x = takenMap[initArray[takenBlack.indexOf(pieces[modified[3]])].y];
 				pieces[modified[3]].position.z = -coordsMap[initArray[takenBlack.indexOf(pieces[modified[3]])].x];
-				pieces[modified[3]].userData.taken = true;
 			}
 		}
 		if (modified[4] !== null){
