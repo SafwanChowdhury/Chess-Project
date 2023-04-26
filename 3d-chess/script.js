@@ -229,10 +229,6 @@ class game {
 		let maxOffset = 7 * (turn ? 8 : 1);
 		for (let i = 1; i <= maxOffset; i++) {
 			let offset = i * direction;
-			let newRow = row + (turn ? offset / 8 : 0);
-			let newCol = col + (turn ? 0 : offset);
-			if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) {
-			}
 			let piece = board[index + offset];
 			if (piece !== null) {
 				if (turn && piece >= 16 || !turn && piece < 16) {
@@ -270,7 +266,8 @@ class game {
 				continue;
 			}
 			if ((turn && destinationPiece < 16 && destinationPiece !== null) || (!turn && destinationPiece >= 16)) {
-			} else {
+			}
+			else {
 				validMoves.push(moves[i]);
 			}
 		}
@@ -379,7 +376,6 @@ class game {
 			let newBoard = board.slice();
 			newBoard[index] = null;
 			newBoard[index + validMoves[i]] = isKingMove ? kingIndex : this.selectedPiece.pieceId;
-
 			if (isKingMove) {
 				kingPos = index + validMoves[i];
 			}
@@ -549,8 +545,8 @@ class game {
 			}
 		}
 		if (this.check[turnW] === true) {
-			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.opacity = 0;
-			this.cells[this.board.indexOf(this.turn ? 27 : 3)].material.color = {r: 0, g: 1, b: 0};
+			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.opacity = 0;
+			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.color = {r: 0, g: 1, b: 0};
 		}
 		this.incr++;
 		this.resetSelectedPieceProperties();
@@ -673,7 +669,6 @@ class game {
 		//It is used to index into various arrays.
 		//turnB is a boolean that indicates whether it is black's turn or not.
 		//1 = white, 0 = black
-		const turnW = turn ? 1 : 0; //-player
 		const turnB = !turn ? 1 : 0;//-opponent
 
 		// Set the opposing player's check status to false.
@@ -816,7 +811,6 @@ class game {
 	}
 
 	testPieceData(index) {
-		let turnW = this.turn ? 1 : 0;
 		if (this.turn) {
 			this.playerPieces = this.whitePieces;
 		} else {
