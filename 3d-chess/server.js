@@ -16,16 +16,20 @@ wss.on("connection", function connection(ws) {
 		switch (message.type) {
 		case "join":
 			const room = message.room;
-
 			if (!rooms[room]) {
 				rooms[room] = [];
 			}
-
 			if (rooms[room].length < 2) {
 				rooms[room].push(ws);
 				console.log(`Client ${clients.indexOf(ws)} connected to lobby ${room}`);
 			} else {
 				console.log(`Lobby ${room} is full, cannot join.`);
+			}
+			if (rooms[room].length === 2) {
+				console.log(rooms[room].length)
+				rooms[room].forEach(client => {
+					client.send(JSON.stringify({ type: "start" }));
+				});
 			}
 			break;
 

@@ -18,7 +18,8 @@ const renderer = new THREE.WebGLRenderer({
 function initScene() {
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize( window.innerWidth, window.innerHeight);
-	camera.position.set(0 , 0, 20);
+	camera.position.set(8, 18.3, -0.1369);
+	camera.rotation.set(-1.578, 0.41, 1.589);
 
 	const pointLight = new THREE.PointLight(0xffffff, 0.5);
 	pointLight.position.set(0, 15, 0);
@@ -236,14 +237,67 @@ function onDocumentMouseDown(event) {
 	}
 }
 
-
 let modified = [];
 let modifiedData = [];
 let promotion = false;
 let received = false;
+let connected = false;
+let cameraMoved = false;
+
+
 function animate() {
 	requestAnimationFrame(animate);
 	camControls.enabled = gameLogic.selected === null;
+	if (connected && cameraMoved === false){
+		if (clientID[0]){
+			if (camera.position.x > 0.20) {
+				camera.position.x = camera.position.x - 0.1
+			}
+			if (camera.position.y > 16.3) {
+				camera.position.y = camera.position.y - (1 / 39)
+			}
+			if (camera.position.z > -11.5) {
+				camera.position.z = camera.position.z - (17 / 120)
+			}
+			if (camera.rotation.x > -2.1845696263287486) {
+				camera.rotation.x = camera.rotation.x - (0.58918/78)
+			}
+			if (camera.rotation.y > -0.009568585566868008) {
+				camera.rotation.y = camera.rotation.y - (0.42157/78)
+			}
+			if (camera.rotation.z < 3.128012569910931) {
+				camera.rotation.z = camera.rotation.z + (1.49589/78)
+			}
+			else{
+				cameraMoved = true;
+				camControls.enabled = true;
+			}
+		}
+		else {
+			if (camera.position.x > -0.10) {
+				camera.position.x = camera.position.x - 0.1
+			}
+			if (camera.position.y > 16.3) {
+				camera.position.y = camera.position.y - (1 / 39)
+			}
+			if (camera.position.z < 11.5) {
+				camera.position.z = camera.position.z + (17 / 120)
+			}
+			if (camera.rotation.x < -0.9289476942162901) {
+				camera.rotation.x = camera.rotation.x + (0.66644/78)
+			}
+			if (camera.rotation.y > 0.009568585566868008) {
+				camera.rotation.y = camera.rotation.y - (0.41201282561550545/78)
+			}
+			if (camera.rotation.z > -0.007967086578719378) {
+				camera.rotation.z = camera.rotation.z - (1.62416/78)
+			}
+			else{
+				cameraMoved = true;
+				camControls.enabled = true;
+			}
+		}
+	}
 	modified = gameLogic.modified;
 	sessionStorage.setItem("movesLog", JSON.stringify(gameLogic.movesLog));
 	if (modified.length > 0){
@@ -314,12 +368,6 @@ manager.onLoad = function () {
 		initScene();
 		addPieceData();
 		gameLogic.initKing();
-		camera.position.x = 8;
-		camera.position.y = 18.3;
-		camera.position.z = -0.45;
-		camera.rotation.x = -1.59;
-		camera.rotation.y = 0.41;
-		camera.rotation.z = 1.63;
 		loaded = 1;
 		animate();
 	}
@@ -359,6 +407,12 @@ function initialiseGame(){
 			console.log(clientID[0]);
 			updateTurnOverlay();
 			turnOverlay.hidden = false;
+			break;
+		case "start":
+			camera.position.set(8, 18.3, -0.1369);
+			camera.rotation.set(-1.578, 0.41, 1.589);
+			camControls.enabled = false;
+			connected = true;
 			break;
 		case "action":
 			gameLogic.unitTest(message.data[0], message.data[1]);
@@ -415,6 +469,13 @@ function takeScreenshot() {
 	const dataURL = renderer.domElement.toDataURL("image/png");
 	sessionStorage.setItem("screenshot", dataURL);
 }
+
+document.addEventListener('keydown', (event) => {
+	if (event.code === 'Space') {
+		console.log('Camera position:', camera.position);
+		console.log('Camera rotation:', camera.rotation);
+	}
+});
 
 objectLoading();
 

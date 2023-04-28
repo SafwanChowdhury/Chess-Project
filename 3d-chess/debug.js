@@ -100,6 +100,7 @@ let whitePieces = [];
 let blackPieces = [];
 let takenWhite = [];
 let takenBlack = [];
+let startTime, endTime;
 
 const objArray = [
 	"models/wRookR.glb",
@@ -136,8 +137,15 @@ const objArray = [
 	"models/bRookL.glb"
 ];
 
+let lenObj = objArray.length;
 const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
 const takenMap = [11.56, 13.66];
+const initArray = [
+	{x: 0, y: 0} , {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 4, y: 0}, {x: 5, y: 0}, {x: 6, y: 0}, {x: 7, y: 0},
+	{x: 0, y: 1} , {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1},
+	{x: 0, y: 6} , {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6}, {x: 6, y: 6}, {x: 7, y: 6},
+	{x: 0, y: 7} , {x: 1, y: 7}, {x: 2, y: 7}, {x: 3, y: 7}, {x: 4, y: 7}, {x: 5, y: 7}, {x: 6, y: 7}, {x: 7, y: 7}
+];
 
 const manager = new THREE.LoadingManager();
 function loadObject(i, obj, x1, z1) {
@@ -149,17 +157,8 @@ function loadObject(i, obj, x1, z1) {
 		scene.add(pieces[i]);
 	});
 }
-
-let lenObj = objArray.length;
-
-const initArray = [
-	{x: 0, y: 0} , {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 4, y: 0}, {x: 5, y: 0}, {x: 6, y: 0}, {x: 7, y: 0},
-	{x: 0, y: 1} , {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1},
-	{x: 0, y: 6} , {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6}, {x: 6, y: 6}, {x: 7, y: 6},
-	{x: 0, y: 7} , {x: 1, y: 7}, {x: 2, y: 7}, {x: 3, y: 7}, {x: 4, y: 7}, {x: 5, y: 7}, {x: 6, y: 7}, {x: 7, y: 7}
-];
-
 function objectLoading(){
+	startTime = new Date();
 	for (let i = 0; i < lenObj; i++) {
 		loadObject(i, objArray[i], initArray[i].x, initArray[i].y);
 	}
@@ -327,6 +326,9 @@ manager.onLoad = function () {
 		camera.rotation.x = -1.59;
 		camera.rotation.y = 0.41;
 		camera.rotation.z = 1.63;
+		endTime = new Date();
+		const timeTaken = (endTime - startTime) / 1000; // divide by 1000 to get time in seconds
+		console.log(`Time taken: ${timeTaken}s`);
 		animate();
 	}
 	if (promotion){
@@ -364,7 +366,6 @@ box.hidden = true;
 // Add the turn overlay to the scene
 const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
-
 
 window.addEventListener("resize",() => resize_window(camera,renderer));
 
