@@ -125,14 +125,14 @@ const standard = [
 ];
 
 const wizard = [
-    "models/wizard/wRookR.glb",
-    "models/wizard/wKnightR.glb",
-    "models/wizard/wBishopR.glb",
+    "models/wizard/wRook.glb",
+    "models/wizard/wKnight.glb",
+    "models/wizard/wBishop.glb",
     "models/wizard/wKing.glb",
     "models/wizard/wQueen.glb",
-    "models/wizard/wBishopL.glb",
-    "models/wizard/wKnightL.glb",
-    "models/wizard/wRookL.glb",
+    "models/wizard/wBishop.glb",
+    "models/wizard/wKnight.glb",
+    "models/wizard/wRook.glb",
     "models/wizard/wPawn.glb",
     "models/wizard/wPawn.glb",
     "models/wizard/wPawn.glb",
@@ -149,14 +149,14 @@ const wizard = [
     "models/wizard/wPawn.glb",
     "models/wizard/wPawn.glb",
     "models/wizard/wPawn.glb",
-    "models/wizard/wRookR.glb",
-    "models/wizard/wKnightR.glb",
-    "models/wizard/wBishopR.glb",
+    "models/wizard/wRook.glb",
+    "models/wizard/wKnight.glb",
+    "models/wizard/wBishop.glb",
     "models/wizard/wKing.glb",
     "models/wizard/wQueen.glb",
-    "models/wizard/wBishopL.glb",
-    "models/wizard/wKnightL.glb",
-    "models/wizard/wRookL.glb"
+    "models/wizard/wBishop.glb",
+    "models/wizard/wKnight.glb",
+    "models/wizard/wRook.glb"
 ];
 
 const objArray = standard;
