@@ -698,29 +698,39 @@ class game {
 	castling(){
 		let moves = [];
 		let path = [];
-		let index = this.turn ? 3 : 27;
+		let index = this.turn ? 3 : 59;
 		let kingSideRook = this.turn ? 0 : 24;
+		let kingSideRookI = this.turn ? 0 : 56;
 		let queenSideRook = this.turn ? 7 : 31;
-		let kingMoves = this.king(this.turn, index,this.board, true).map(v => v + index);
-		let rookMovesKing = this.rook(this.turn, kingSideRook,this.board).map(v => v + kingSideRook);
-		let rookMovesQueen = this.rook(this.turn,queenSideRook, this.board).map(v => v + queenSideRook);
+		let queenSideRookI = this.turn ? 7 : 63;
+		let kingMoves = this.king(this.turn, index, this.board, true).map(v => v + index);
+		let rookMovesKing = this.rook(this.turn, kingSideRookI,this.board).map(v => v + kingSideRookI);
+		let rookMovesQueen = this.rook(this.turn,queenSideRookI, this.board).map(v => v + queenSideRookI);
 		let intersectionKing = rookMovesKing.filter(element => kingMoves.includes(element));
 		let intersectionQueen = rookMovesQueen.filter(element => kingMoves.includes(element));
-		if (this.pieces[kingSideRook].userData.hasMoved === false && intersectionKing.length > 0) {
+		console.log("king", kingMoves)
+		console.log("rookK", rookMovesKing)
+		console.log("rookQ", rookMovesQueen)
+		console.log("hasMovedKingside", this.pieces[kingSideRook].userData.hasMoved)
+		console.log("hasMovedQueenside", this.pieces[queenSideRook].userData.hasMoved)
+		if (this.pieces[kingSideRook].userData.hasMoved === false && intersectionKing.length > 0 && this.pieces[kingSideRook].userData.taken === false) {
 			path.push(-1);
 		}
-		if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0) {
+		if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0 && this.pieces[queenSideRook].userData.taken === false) {
 			path.push(1);
 		}
+		console.log("preP", path)
 		path = this.kingPinning(path,index,this.turn,this.board);
+		console.log("postP", path)
 		if (path.includes(1)){
 			moves.push(2);
 		}
 		if (path.includes(-1)){
 			moves.push(-2);
 		}
+		console.log("preM", moves)
 		moves = this.kingPinning(moves,index,this.turn,this.board);
-
+		console.log("postM", moves)
 		return moves;
 	}
 
