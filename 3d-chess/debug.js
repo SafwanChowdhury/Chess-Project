@@ -1,169 +1,11 @@
 import "./CSS/game.css";
 import "./CSS/loading.css";
 import "./CSS/popup.css";
-
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {game} from "./script";
 import {CSS3DObject} from "three/addons/renderers/CSS3DRenderer.js";
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({
-	canvas: document.querySelector("#bg"),
-});
-
-function initScene() {
-	renderer.setPixelRatio(window.devicePixelRatio);
-	renderer.setSize( window.innerWidth, window.innerHeight);
-	camera.position.set(0 , 0, 20);
-
-	const pointLight = new THREE.PointLight(0xffffff, 0.5);
-	pointLight.position.set(0, 15, 0);
-	scene.add(pointLight);
-
-	const pointLight2 = new THREE.PointLight(0xffffff, 0.2);
-	pointLight2.position.set(0, 15, 20);
-	scene.add(pointLight2);
-
-	const pointLight3 = new THREE.PointLight(0xffffff, 0.2);
-	pointLight3.position.set(0, 15, -20);
-	scene.add(pointLight3);
-
-	const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-	scene.add(ambientLight);
-
-
-	const lightHelper = new THREE.PointLightHelper(pointLight2);
-	const gridHelper = new THREE.GridHelper(16.9, 8, 0x000000, 0xffffff);
-	scene.add(lightHelper, gridHelper);
-
-	const loader2 = new THREE.CubeTextureLoader();
-	scene.background = loader2.load([
-		"skybox/right.png",
-		"skybox/left.png",
-		"skybox/top.png",
-		"skybox/bottom.png",
-		"skybox/front.png",
-		"skybox/back.png",
-	]);
-
-	const moonTexture = new THREE.TextureLoader().load("moon.jpg");
-	const normalTexture = new THREE.TextureLoader().load("normal.jpg");
-
-	const moon = new THREE.Mesh(
-		new THREE.SphereGeometry(3, 32, 32),
-		new THREE.MeshStandardMaterial({
-			map: moonTexture,
-			normalMap: normalTexture
-		})
-	);
-
-	scene.add(moon);
-	moon.position.set(0, 25, 0);
-
-	const loader = new GLTFLoader();
-	loader.load(
-		"models/ChessBoard.glb",
-		function (gltf) {
-			scene.add(gltf.scene);
-		}
-	);
-}
-function createBoardSquares() {
-	let boardSquares = [];
-	let squareSize = 2.1; // change this to adjust the size of the squares
-
-	for (let i = 0; i < 8; i++) {
-		for (let j = 0; j < 8; j++) {
-			let squareColor = 0x00FF00;
-			let squareGeometry = new THREE.BoxGeometry(squareSize, 0.05, squareSize);
-			let squareMaterial = new THREE.MeshLambertMaterial({ color: squareColor, transparent: true, opacity: 0 });
-			let squareMesh = new THREE.Mesh(squareGeometry, squareMaterial);
-			squareMesh.position.set((j - 3.5) * squareSize, 0 , (i - 3.5) * squareSize);
-			boardSquares.push(squareMesh);
-		}
-	}
-
-	return boardSquares;
-}
-
-const boardSquares = createBoardSquares();
-for (let i = 0; i < boardSquares.length; i++) {
-	boardSquares[i].userData.index = i;
-	scene.add(boardSquares[i]);
-}
-
-let pieces = [];
-let whitePieces = [];
-let blackPieces = [];
-let takenWhite = [];
-let takenBlack = [];
-
-const objArray = [
-	"models/wRookR.glb",
-	"models/wKnightR.glb",
-	"models/wBishopR.glb",
-	"models/wKing.glb",
-	"models/wQueen.glb",
-	"models/wBishopL.glb",
-	"models/wKnightL.glb",
-	"models/wRookL.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/wPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bPawn.glb",
-	"models/bRookR.glb",
-	"models/bKnightR.glb",
-	"models/bBishopR.glb",
-	"models/bKing.glb",
-	"models/bQueen.glb",
-	"models/bBishopL.glb",
-	"models/bKnightL.glb",
-	"models/bRookL.glb"
-];
-
-const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
-const takenMap = [11.56, 13.66];
-
-const manager = new THREE.LoadingManager();
-function loadObject(i, obj, x1, z1) {
-	const loader = new GLTFLoader(manager);
-	loader.load(obj, function(gltf){
-		pieces[i] = gltf.scene;
-		pieces[i].position.x = coordsMap[x1];
-		pieces[i].position.z = coordsMap[z1];
-		scene.add(pieces[i]);
-	});
-}
-
-let lenObj = objArray.length;
-
-const initArray = [
-	{x: 0, y: 0} , {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 4, y: 0}, {x: 5, y: 0}, {x: 6, y: 0}, {x: 7, y: 0},
-	{x: 0, y: 1} , {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1},
-	{x: 0, y: 6} , {x: 1, y: 6}, {x: 2, y: 6}, {x: 3, y: 6}, {x: 4, y: 6}, {x: 5, y: 6}, {x: 6, y: 6}, {x: 7, y: 6},
-	{x: 0, y: 7} , {x: 1, y: 7}, {x: 2, y: 7}, {x: 3, y: 7}, {x: 4, y: 7}, {x: 5, y: 7}, {x: 6, y: 7}, {x: 7, y: 7}
-];
-
-function objectLoading(){
-	for (let i = 0; i < lenObj; i++) {
-		loadObject(i, objArray[i], initArray[i].x, initArray[i].y);
-	}
-}
+import {initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,objectLoading,manager} from "./scene.js";
 
 function addPieceData(){
 	for (let i = 0; i < pieces.length; i++){
@@ -189,11 +31,6 @@ function addPieceData(){
 			blackPieces.push(pieces[i]);
 		}
 	}
-}
-
-function loadQueen(i, obj, x1, z1){
-	scene.remove(pieces[i]);
-	loadObject(i, obj, x1, z1);
 }
 
 function addPromotionData(){
@@ -334,13 +171,6 @@ manager.onLoad = function () {
 	}
 };
 
-function resize_window(camera, renderer){
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	renderer.setPixelRatio(window.devicePixelRatio);
-}
-
 const turnOverlay = document.getElementById("turn-overlay");
 const turnText = document.getElementById("turn-text");
 const popup = document.getElementById("end-screen");
@@ -365,7 +195,5 @@ box.hidden = true;
 const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
 
-
-window.addEventListener("resize",() => resize_window(camera,renderer));
 
 objectLoading();
