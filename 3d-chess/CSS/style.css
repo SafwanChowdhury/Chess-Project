@@ -1,0 +1,36 @@
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #1c2a3a;
+    color: #f1c453;
+    overflow-x: hidden;
+}
+
+.cta-btn {
+    display: inline-block;
+    background-color: #f1c453;
+    color: #1c2a3a;
+    padding: 0.8rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.cta-btn:hover {
+    background-color: #ffd700;
+    box-shadow: 0 0 10px #f1c453;
+}
+
+.cta-btn:active {
+    background-color: #e6ad32;
+    box-shadow: none;
+}
+

@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://192.168.1.88:8080');
+const socket = new WebSocket("ws://84.65.247.37:8080");
 
 export default socket;
 
