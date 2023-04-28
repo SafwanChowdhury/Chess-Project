@@ -167,6 +167,7 @@ const wizard = [
 let objArray;
 
 function updateScene(){
+    console.log("update scene called")
     if (sessionStorage.getItem("selectedMode") !== null || sessionStorage.getItem("whitePiecesColor") !== null || sessionStorage.getItem("blackPiecesColor") !== null) {
         if (sessionStorage.getItem("selectedMode") === "Wizard") {
             objArray = wizard;
@@ -196,7 +197,6 @@ function updateScene(){
         }
     }
     else{
-        console.log("HI")
         objArray = standard;
         whiteColor = 0xffffff;
         blackColor = 0x868686;

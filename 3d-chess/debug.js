@@ -195,5 +195,3 @@ box.hidden = true;
 const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
 
-
-updateScene();

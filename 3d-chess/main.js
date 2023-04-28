@@ -305,6 +305,5 @@ function takeScreenshot() {
 }
 
 
-updateScene();
 
 export { takeScreenshot };

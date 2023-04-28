@@ -1,4 +1,3 @@
-import {updateScene} from "./scene.js";
 // Create the HTML structure for the settings popup
 function createSettingsPopup() {
     const popup = document.createElement("div");
@@ -99,7 +98,6 @@ function createSettingsPopup() {
         confirmButton.style.boxShadow = "none";
     });
     confirmButton.addEventListener("click", () => {
-        updateScene();
         location.reload();
     });
     container.appendChild(confirmButton);
