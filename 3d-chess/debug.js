@@ -5,7 +5,7 @@ import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {game} from "./script";
 import {CSS3DObject} from "three/addons/renderers/CSS3DRenderer.js";
-import {initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,objectLoading,manager} from "./scene.js";
+import {updateScene,initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
 
 function addPieceData(){
 	for (let i = 0; i < pieces.length; i++){
@@ -196,4 +196,4 @@ const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
 
 
-objectLoading();
+updateScene();

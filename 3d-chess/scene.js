@@ -5,6 +5,12 @@ const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.inner
 const renderer = new THREE.WebGLRenderer({
     canvas: document.querySelector("#bg"),
 });
+let whiteColor,blackColor, nightMode;
+let pointLight = new THREE.PointLight(0xffffff, 0.5);
+let pointLight2 = new THREE.PointLight(0xffffff, 0.2);
+let pointLight3 = new THREE.PointLight(0xffffff, 0.2);
+let ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+
 
 function initScene() {
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -12,19 +18,12 @@ function initScene() {
     camera.position.set(8, 18.3, -0.1369);
     camera.rotation.set(-1.578, 0.41, 1.589);
 
-    const pointLight = new THREE.PointLight(0xffffff, 0.5);
     pointLight.position.set(0, 15, 0);
     scene.add(pointLight);
-
-    const pointLight2 = new THREE.PointLight(0xffffff, 0.2);
     pointLight2.position.set(0, 15, 20);
     scene.add(pointLight2);
-
-    const pointLight3 = new THREE.PointLight(0xffffff, 0.2);
     pointLight3.position.set(0, 15, -20);
     scene.add(pointLight3);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
 
     const loader2 = new THREE.CubeTextureLoader();
@@ -50,11 +49,17 @@ function initScene() {
 
     scene.add(moon);
     moon.position.set(0, 25, 0);
-
+    let board
     const loader = new GLTFLoader();
     loader.load(
         "models/ChessBoard.glb",
         function (gltf) {
+            board = gltf.scene;
+            if (nightMode) {
+                board.children[0].children[1].material.emissive.setHex(0xffffff)
+                board.children[0].children[1].material.emissiveIntensity = 0.5;
+
+            }
             scene.add(gltf.scene);
         }
     );
@@ -159,7 +164,46 @@ const wizard = [
     "models/wizard/wRook.glb"
 ];
 
-const objArray = standard;
+let objArray;
+
+function updateScene(){
+    if (sessionStorage.getItem("selectedMode") !== null || sessionStorage.getItem("whitePiecesColor") !== null || sessionStorage.getItem("blackPiecesColor") !== null) {
+        if (sessionStorage.getItem("selectedMode") === "Wizard") {
+            objArray = wizard;
+            nightMode = false;
+        } else if (sessionStorage.getItem("selectedMode") === "Night") {
+            pointLight.intensity = 0.2;
+            pointLight2.intensity = 0;
+            pointLight3.intensity = 0;
+            ambientLight.intensity = 0.2;
+            objArray = standard;
+            nightMode = true;
+        } else {
+            objArray = standard;
+            nightMode = false;
+        }
+        if (sessionStorage.getItem("whitePiecesColor") !== null) {
+            whiteColor = "0x" + sessionStorage.getItem("whitePiecesColor").substring(1); // removes the "#" character and adds "0x" to the beginning
+        }
+        else{
+            whiteColor = 0xffffff;
+        }
+        if (sessionStorage.getItem("blackPiecesColor") !== null) {
+            blackColor = "0x" + sessionStorage.getItem("blackPiecesColor").substring(1); // removes the "#" character and adds "0x" to the beginning
+        }
+        else{
+            blackColor = 0x868686;
+        }
+    }
+    else{
+        console.log("HI")
+        objArray = standard;
+        whiteColor = 0xffffff;
+        blackColor = 0x868686;
+        nightMode = false;
+    }
+    objectLoading()
+}
 const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
 const takenMap = [11.56, 13.66];
 
@@ -172,14 +216,32 @@ function loadObject(i, obj, x1, z1, rot) {
         pieces[i].position.z = coordsMap[z1];
         if (rot) {
             pieces[i].rotation.y =  Math.PI;
-            pieces[i].children[0].material.color.setHex(0x363636)
+            if (nightMode){
+                pieces[i].children[0].material.color.setHex(0xffffff)
+                pieces[i].children[0].material.emissive.setHex(blackColor)
+                pieces[i].children[0].material.emissiveIntensity = 0.6;
+                pieces[i].children[0].material.opacity = 0.6;
+                pieces[i].children[0].material.transparent = true;
+            }
+            else {
+                pieces[i].children[0].material.color.setHex(blackColor)
+            }
+        }
+        else{
+            if (nightMode){
+                pieces[i].children[0].material.color.setHex(0xffffff)
+                pieces[i].children[0].material.emissive.setHex(whiteColor)
+                pieces[i].children[0].material.emissiveIntensity = 0.6;
+                pieces[i].children[0].material.opacity = 0.6;
+                pieces[i].children[0].material.transparent = true;
+            }
+            else {
+                pieces[i].children[0].material.color.setHex(whiteColor)
+            }
         }
         scene.add(pieces[i]);
     });
 }
-
-let lenObj = objArray.length;
-
 const initArray = [
     {x: 0, y: 0} , {x: 1, y: 0}, {x: 2, y: 0}, {x: 3, y: 0}, {x: 4, y: 0}, {x: 5, y: 0}, {x: 6, y: 0}, {x: 7, y: 0},
     {x: 0, y: 1} , {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1},
@@ -188,6 +250,7 @@ const initArray = [
 ];
 
 function objectLoading(){
+    let lenObj = objArray.length;
     for (let i = 0; i < lenObj; i++) {
         if (i > 15){
             loadObject(i, objArray[i], initArray[i].x, initArray[i].y, true);
@@ -217,4 +280,5 @@ function resize_window(camera, renderer){
 window.addEventListener("resize",() => resize_window(camera,renderer));
 
 
-export {initScene, pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,objectLoading,manager};
+
+export {updateScene,initScene, pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager};
