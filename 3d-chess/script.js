@@ -560,24 +560,24 @@ class game {
 	moveConvert(id, type, move){
 		let prefix = "";
 		switch(type) {
-			case "King":
-				prefix = "K";
-				break;
-			case "Queen":
-				prefix = "Q";
-				break;
-			case "Rook":
-				prefix = "R";
-				break;
-			case "Bishop":
-				prefix = "B";
-				break;
-			case "Knight":
-				prefix = "N";
-				break;
-			default:
-				prefix = "";
-				break;
+		case "King":
+			prefix = "K";
+			break;
+		case "Queen":
+			prefix = "Q";
+			break;
+		case "Rook":
+			prefix = "R";
+			break;
+		case "Bishop":
+			prefix = "B";
+			break;
+		case "Knight":
+			prefix = "N";
+			break;
+		default:
+			prefix = "";
+			break;
 		}
 		let piece = this.pieces[id];
 		let newIndex = piece.userData.indexOfBoardPiece + move;
@@ -589,11 +589,11 @@ class game {
 		let number = 8 - newRow;
 		let moveString = prefix + letter + number;
 		console.log(moveString);
-		let moveColor = this.turn ? 'white' : 'black';
-		let moveElement = document.createElement('div');
+		let moveColor = this.turn ? "white" : "black";
+		let moveElement = document.createElement("div");
 		moveElement.textContent = moveString;
 		moveElement.classList.add(moveColor);
-		document.getElementById('last-moves').appendChild(moveElement);
+		document.getElementById("last-moves").appendChild(moveElement);
 		this.lastMoves.push(moveString);
 		if (this.lastMoves.length > 36) {
 			let removedMove = this.lastMoves.shift();
@@ -605,7 +605,7 @@ class game {
 	}
 	//make move
 	makeMove(number) {
-		this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number)
+		this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number);
 		this.movesLog.push([this.selectedPiece.pieceId, number]);
 		console.log(this.movesLog);
 		this.moveSend = [this.selectedPiece.pieceId, number];
@@ -665,11 +665,11 @@ class game {
 		}
 		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
 			this.continue = false;
-			this.promotion()
+			this.promotion();
 		}
 		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
 			this.continue = false;
-			this.promotion()
+			this.promotion();
 		}
 		else {
 			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
@@ -688,7 +688,7 @@ class game {
 
 
 	promotion(){
-		console.log(this.clientID, this.turn)
+		console.log(this.clientID, this.turn);
 		if (this.clientID !== null && this.clientID != this.turn){
 			if (this.promotedPiece === "Queen"){
 				this.selectedPiece.type = "Queen";
@@ -708,16 +708,16 @@ class game {
 			}
 		}
 		else {
-			const menu = document.getElementById('floating-menu');
+			const menu = document.getElementById("floating-menu");
 			// Get the 2D screen position of the selected object
 			const screenPosition = this.toScreenPosition(this.selected.object, camera);
 			// Set the position of the menu and show it
 			menu.style.left = `${screenPosition.x}px`;
 			menu.style.top = `${screenPosition.y}px`;
-			menu.style.display = 'block';
-			document.getElementById('option-1').addEventListener('click', () => {
+			menu.style.display = "block";
+			document.getElementById("option-1").addEventListener("click", () => {
 				this.selectedPiece.type = "Queen";
-				this.promoted = "Queen"
+				this.promoted = "Queen";
 				this.updatePiece();
 				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[4], this.turn, null];
 				this.closeFloatingMenu();
@@ -725,9 +725,9 @@ class game {
 				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 				this.checkForWin();
 			});
-			document.getElementById('option-2').addEventListener('click', () => {
+			document.getElementById("option-2").addEventListener("click", () => {
 				this.selectedPiece.type = "Knight";
-				this.promoted = "Knight"
+				this.promoted = "Knight";
 				this.updatePiece();
 				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[1], this.turn, null];
 				this.closeFloatingMenu();
@@ -738,12 +738,12 @@ class game {
 		}
 	}
 	closeFloatingMenu() {
-		const menu = document.getElementById('floating-menu');
-		menu.style.display = 'none';
+		const menu = document.getElementById("floating-menu");
+		menu.style.display = "none";
 	}
 	toScreenPosition(obj, camera) {
 		const vector = new THREE.Vector3();
-		const canvas = document.querySelector('canvas');
+		const canvas = document.querySelector("canvas");
 
 		obj.updateMatrixWorld();
 		vector.setFromMatrixPosition(obj.matrixWorld);
@@ -774,7 +774,7 @@ class game {
 	// Checks for a win
 	checkForWin() {
 		let turnW = this.turn ? 1 : 0;
-		let check = this.checkCheck(this.turn)
+		let check = this.checkCheck(this.turn);
 		if (check === 1) {
 			if (this.turn) {
 				console.log("white win");
@@ -797,7 +797,7 @@ class game {
 			console.log("Stalemate");
 			this.popupAlert.textContent = "Stalemate";
 			this.checkText.textContent = "Game is a Draw";
-			this.popupPawn.style.filter = 'invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)';
+			this.popupPawn.style.filter = "invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)";
 			this.checkPopup.hidden = false;
 			this.checkContainer.style.pointerEvents = "auto";
 			endGame();
@@ -1046,44 +1046,44 @@ class game {
 		let path = [];
 		let threatPiece = this.pieces[this.threatIndex[turnW]];
 		switch (threatPiece.userData.name) {
-			case "Rook":
-				path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
-				break;
-			case "Knight":
-				path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
-				break;
-			case "Bishop":
-				path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
-				break;
-			case "Queen":
-				path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
-				break;
-			default:
-				path = this.checkPawn(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
+		case "Rook":
+			path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
+			break;
+		case "Knight":
+			path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
+			break;
+		case "Bishop":
+			path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
+			break;
+		case "Queen":
+			path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
+			break;
+		default:
+			path = this.checkPawn(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
 		}
 		pieces.forEach((piece) => {
 			if (piece.userData.taken !== true) {
 				let newPositions;
 				switch (piece.userData.name) {
-					case "Rook":
-						newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Knight":
-						newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Bishop":
-						newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Queen":
-						newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					default:
-						newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				case "Rook":
+					newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Knight":
+					newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Bishop":
+					newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Queen":
+					newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				default:
+					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);

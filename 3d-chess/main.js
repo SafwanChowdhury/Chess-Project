@@ -93,22 +93,22 @@ function animate() {
 	if (connected && cameraMoved === false){
 		if (clientID[0]){
 			if (camera.position.x > 0.20) {
-				camera.position.x = camera.position.x - 0.1
+				camera.position.x = camera.position.x - 0.1;
 			}
 			if (camera.position.y > 16.3) {
-				camera.position.y = camera.position.y - (1 / 39)
+				camera.position.y = camera.position.y - (1 / 39);
 			}
 			if (camera.position.z > -11.5) {
-				camera.position.z = camera.position.z - (17 / 120)
+				camera.position.z = camera.position.z - (17 / 120);
 			}
 			if (camera.rotation.x > -2.1845696263287486) {
-				camera.rotation.x = camera.rotation.x - (0.58918/78)
+				camera.rotation.x = camera.rotation.x - (0.58918/78);
 			}
 			if (camera.rotation.y > -0.009568585566868008) {
-				camera.rotation.y = camera.rotation.y - (0.42157/78)
+				camera.rotation.y = camera.rotation.y - (0.42157/78);
 			}
 			if (camera.rotation.z < 3.128012569910931) {
-				camera.rotation.z = camera.rotation.z + (1.49589/78)
+				camera.rotation.z = camera.rotation.z + (1.49589/78);
 			}
 			else{
 				cameraMoved = true;
@@ -117,22 +117,22 @@ function animate() {
 		}
 		else {
 			if (camera.position.x > -0.10) {
-				camera.position.x = camera.position.x - 0.1
+				camera.position.x = camera.position.x - 0.1;
 			}
 			if (camera.position.y > 16.3) {
-				camera.position.y = camera.position.y - (1 / 39)
+				camera.position.y = camera.position.y - (1 / 39);
 			}
 			if (camera.position.z < 11.5) {
-				camera.position.z = camera.position.z + (17 / 120)
+				camera.position.z = camera.position.z + (17 / 120);
 			}
 			if (camera.rotation.x < -0.9289476942162901) {
-				camera.rotation.x = camera.rotation.x + (0.66644/78)
+				camera.rotation.x = camera.rotation.x + (0.66644/78);
 			}
 			if (camera.rotation.y > 0.009568585566868008) {
-				camera.rotation.y = camera.rotation.y - (0.41201282561550545/78)
+				camera.rotation.y = camera.rotation.y - (0.41201282561550545/78);
 			}
 			if (camera.rotation.z > -0.007967086578719378) {
-				camera.rotation.z = camera.rotation.z - (1.62416/78)
+				camera.rotation.z = camera.rotation.z - (1.62416/78);
 			}
 			else{
 				cameraMoved = true;
@@ -202,7 +202,7 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 		document.getElementById("title").innerHTML = percentage;
 		document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
 	}
-}
+};
 
 manager.onLoad = function () {
 	if (!onStart) {
@@ -258,11 +258,11 @@ function initialiseGame(){
 			console.log("Opponent disconnected");
 			gameLogic.popupAlert.textContent = "Forfeit!!";
 			gameLogic.checkText.textContent = "Opponent Disconnected";
-			gameLogic.popupPawn.style.filter = 'invert(50%) sepia(100%) saturate(500%) hue-rotate(350deg)';
+			gameLogic.popupPawn.style.filter = "invert(50%) sepia(100%) saturate(500%) hue-rotate(350deg)";
 			gameLogic.checkPopup.hidden = false;
 			gameLogic.checkContainer.style.pointerEvents = "auto";
 			if (gameLogic.movesLog.length > 2) {
-				endGame()
+				endGame();
 			}
 			break;
 		case "action":
