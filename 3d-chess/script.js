@@ -54,6 +54,14 @@ class game {
 	vr = false;
 	promoted = "";
 	promotedPiece = null;
+	enpassantAvailable = [false,false];
+	enpassantCol = 0;
+	enpassantRow = 0;
+	enpassantIndex = 0;
+	enpassantMove = 0;
+	enpassantId = 0;
+
+
 	/*--- selected piece properties ---*/
 	selectedPiece = {
 		pieceId: -1,
@@ -164,6 +172,7 @@ class game {
 	}
 
 	calculateMoves() {
+		console.log(this.turn ? "White" : "Black", this.enpassantAvailable[this.turn ? 1 : 0])
 		switch (this.selectedPiece.type) {
 		case "Rook":
 			this.givePieceBorder(this.rook(this.turn, this.selectedPiece.indexOfBoardPiece, this.board));
@@ -217,6 +226,12 @@ class game {
 			}
 			if (board[index - 9] < 16 && col !== 0 && board[index - 9] !== null) {
 				moves.push(-9);
+			}
+		}
+		if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
+			if (this.selectedPiece.row === this.enpassantRow) {
+				moves.push(this.enpassantIndex - index);
+				this.enpassantMove = this.enpassantIndex - index
 			}
 		}
 		return moves;
@@ -622,15 +637,26 @@ class game {
 		this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8);
 		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null)
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling);
+		else if (number === this.enpassantMove && this.selectedPiece.type === "Pawn"){
+			let enpassant = this.enpassantIndex;
+			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling, enpassant);
+		}
 		else
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, false, castling);
 	}
 
 	// Changes the board states data on the back end
 
-	changeData(previousIndex, modifiedIndex, removePiece, castling) {
+	changeData(previousIndex, modifiedIndex, removePiece, castling , enpassant){
 		if (removePiece) {
-			this.oldPiece = this.board[modifiedIndex];
+			if (enpassant !== undefined){
+				this.oldPiece = this.board.indexOf(this.enpassantId);
+				console.log(this.oldPiece);
+				console.log(enpassant + (this.turn ? -8 : 8))
+			}
+			else {
+				this.oldPiece = this.board[modifiedIndex];
+			}
 			this.piecesIndex[this.turn ? 1 : 0].splice(this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece), 1);
 			if (this.turn && this.selectedPiece.pieceId < 16) {
 				this.blackScore--;
@@ -638,10 +664,9 @@ class game {
 			if (this.turn === false && this.selectedPiece.pieceId >= 16) {
 				this.whiteScore--;
 			}
-			if (this.turn){
+			if (this.turn) {
 				this.blackPieces.splice(this.blackPieces.indexOf(this.oldPiece), 1);
-			}
-			else{
+			} else {
 				this.whitePieces.splice(this.whitePieces.indexOf(this.oldPiece), 1);
 			}
 			this.pieces[this.oldPiece].userData.taken = true;
@@ -674,9 +699,21 @@ class game {
 		else {
 			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
 				this.selectedPiece.moveTwo = false;
+				this.enpassantAvailable[!this.turn ? 1 : 0] = true;
+				this.enpassantCol = this.selectedPiece.col;
+				this.enpassantRow = this.selectedPiece.row;
+				this.enpassantIndex = this.selectedPiece.indexOfBoardPiece - 8;
+				this.enpassantId = this.selectedPiece.pieceId;
+				console.log(this.enpassantCol)
 			}
-			if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+			if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
 				this.selectedPiece.moveTwo = false;
+				this.enpassantAvailable[!this.turn ? 1 : 0] = true;
+				this.enpassantCol = this.selectedPiece.col;
+				this.enpassantRow = this.selectedPiece.row;
+				this.enpassantIndex = this.selectedPiece.indexOfBoardPiece + 8;
+				this.enpassantId = this.selectedPiece.pieceId;
+				console.log(this.enpassantCol)
 			}
 			this.updatePiece();
 			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
@@ -816,9 +853,13 @@ class game {
 		let turnB = !this.turn ? 1 : 0;
 		this.incr++;
 		if (this.turn) {
+			this.enpassantAvailable[this.turn ? 1 : 0] = false;
+			console.log("post: " , this.enpassantAvailable[this.turn ? 1 : 0]);
 			this.turn = false;
 			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 		} else {
+			this.enpassantAvailable[this.turn ? 1 : 0] = false;
+			console.log("post: " , this.enpassantAvailable[this.turn ? 1 : 0]);
 			this.turn = true;
 			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 		}
