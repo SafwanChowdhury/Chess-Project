@@ -74,9 +74,11 @@ function onDocumentMouseDown(event) {
 		gameLogic.modified = [];
 		gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
 		//comment out when not testing game states, click through moves till saved game state
-		incr++;
-		if (incr < unitTest.length)
-			gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1]);
+		if (unitTest.length > 0) {
+			incr++;
+			if (incr < unitTest.length)
+				gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1]);
+		}
 	}
 }
 
@@ -90,7 +92,10 @@ fetch(filename)
 		unitTest = JSON.parse(contents);
 		console.log(unitTest);
 	})
-	.catch(error => console.error(error));
+	.catch(error => {
+		console.error(error)
+		unitTest = [];
+	});
 
 let modified = [];
 let modifiedData = [];
