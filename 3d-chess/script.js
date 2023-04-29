@@ -760,6 +760,22 @@ class game {
 				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
 				this.checkForWin();
 			}
+			else if (this.promotedPiece === "Rook") {
+				this.selectedPiece.type = "Rook";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[0], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+			else if (this.promotedPiece === "Bishop") {
+				this.selectedPiece.type = "Bishop";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[2], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
 			else{
 				this.selectedPiece.type = "Knight";
 				this.updatePiece();
@@ -788,6 +804,26 @@ class game {
 				this.checkForWin();
 			});
 			document.getElementById("option-2").addEventListener("click", () => {
+				this.selectedPiece.type = "Rook";
+				this.promoted = "Rook";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[0], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById("option-3").addEventListener("click", () => {
+				this.selectedPiece.type = "Bishop";
+				this.promoted = "Bishop";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[2], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById("option-4").addEventListener("click", () => {
 				this.selectedPiece.type = "Knight";
 				this.promoted = "Knight";
 				this.updatePiece();

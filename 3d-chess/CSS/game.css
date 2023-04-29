@@ -92,7 +92,7 @@
     overflow-y: auto;
 }
 
-#option-1, #option-2 {
+#option-1, #option-2 , #option-3 , #option-4 {
     display: block;
     width: 100%;
     margin: 10px 0;
@@ -110,12 +110,12 @@
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-#option-1:hover, #option-2:hover {
+#option-1:hover, #option-2:hover , #option-3:hover, #option-4:hover{
     background-color: #ffd700;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-#option-1:active, #option-2:active {
+#option-1:active, #option-2:active, #option-3:active, #option-4:active {
     background-color: #e6ad32;
     box-shadow: none;
 }
