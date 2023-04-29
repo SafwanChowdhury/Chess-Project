@@ -571,8 +571,9 @@ class game {
 
 	lastMoves = [];
 
-	moveConvert(id, type, move){
+	moveConvert(id, type, move, remove, castling, enpassant){
 		let prefix = "";
+		let suffix = "";
 		switch(type) {
 		case "King":
 			prefix = "K";
@@ -593,6 +594,18 @@ class game {
 			prefix = "";
 			break;
 		}
+		if (remove) {
+			prefix += "x";
+		}
+		if (castling !== null) {
+			prefix = "O-O";
+			if (castling) {
+				prefix += "-O";
+			}
+		}
+		if (enpassant) {
+			suffix = " e.p.";
+		}
 		let piece = this.pieces[id];
 		let newIndex = piece.userData.indexOfBoardPiece + move;
 		let newRow = Math.floor(newIndex / 8);
@@ -601,7 +614,13 @@ class game {
 		newCol = 7 - newCol;
 		let letter = String.fromCharCode(97 + newCol);
 		let number = 8 - newRow;
-		let moveString = prefix + letter + number;
+		let moveString = "";
+		if (castling === null) {
+			moveString = prefix + letter + number + suffix;
+		}
+		else{
+			moveString = prefix;
+		}
 		console.log(moveString);
 		let moveColor = this.turn ? "white" : "black";
 		let moveElement = document.createElement("div");
@@ -619,7 +638,6 @@ class game {
 	}
 	//make move
 	makeMove(number) {
-		this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number);
 		this.movesLog.push([this.selectedPiece.pieceId, number]);
 		console.log(this.movesLog);
 		this.moveSend = [this.selectedPiece.pieceId, number];
@@ -634,14 +652,19 @@ class game {
 		this.selectedPiece.indexOfBoardPiece += number;
 		this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8);
 		this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8);
-		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null)
+		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null) {
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling);
+		}
 		else if (number === this.enpassantMove && this.selectedPiece.type === "Pawn"){
 			let enpassant = this.enpassantIndex;
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, false, true);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling, enpassant);
 		}
-		else
+		else {
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number,false, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, false, castling);
+		}
 	}
 
 	// Changes the board states data on the back end
