@@ -9,5 +9,4 @@ burger.addEventListener("click", () => {
 	document.getElementById("menu-glow").style.opacity = menu.classList[1] == "active" ? 1 : 0;
 });
 
-
 updateScene();

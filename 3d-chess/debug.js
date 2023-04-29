@@ -101,8 +101,32 @@ let modified = [];
 let modifiedData = [];
 let promotion = false;
 let incr = -1;
+
+/*const pointToPanAround = new THREE.Vector3(0, 0, 0);
+const radius = 17;
+// Set the desired camera height
+const cameraHeight = 4;
+
+// Set the initial camera position
+camera.position.set(radius, cameraHeight, 0);
+camera.lookAt(pointToPanAround);
+// Set up the animation loop
+let angle = 0;
+const speed = 0.01; // Controls the speed of the panning animation*/
+
+
 function animate() {
 	requestAnimationFrame(animate);
+	/*// Update the camera position based on the angle and radius
+	camera.position.x = pointToPanAround.x + radius * Math.cos(angle);
+	camera.position.y = cameraHeight;
+	camera.position.z = pointToPanAround.z + radius * Math.sin(angle);
+
+	// Increment the angle to pan the camera
+	angle += speed;
+
+	// Make the camera look at the point to pan around
+	camera.lookAt(pointToPanAround);*/
 	//camControls.enabled = gameLogic.selected === null
 	modified = gameLogic.modified;
 	sessionStorage.setItem("movesLog", JSON.stringify(gameLogic.movesLog));
