@@ -6,7 +6,7 @@ let clients = [];
 let rooms = {};
 let once = 0;
 let counter = 0;
-
+console.log("Server started on port 8080");
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
 
@@ -42,6 +42,7 @@ wss.on("connection", function connection(ws) {
 					console.log(`Lobby ${newRoomName} already exists.`);
 				}
 				break;
+
 			case "delete":
 				const existingRoomName = message.roomName;
 				if (rooms[existingRoomName]) {
@@ -49,6 +50,7 @@ wss.on("connection", function connection(ws) {
 					console.log(`Lobby ${existingRoomName} Deleted.`);
 				}
 				break;
+
 			case "refresh":
 				const roomList = Object.keys(rooms).map(room => ({
 					name: room,
@@ -65,6 +67,7 @@ wss.on("connection", function connection(ws) {
 			case "action":
 				const actionRoom = message.room;
 				const actionData = message.data;
+				console.log(actionData)
 				if (rooms[actionRoom]) {
 					rooms[actionRoom].forEach(client => {
 						if (client !== ws) {
@@ -87,11 +90,20 @@ wss.on("connection", function connection(ws) {
 			return client !== ws;
 		});
 
-		// Remove the client from rooms
+		// Remove the client from rooms and send a disconnect message to the partner
 		for (const room in rooms) {
-			rooms[room] = rooms[room].filter(function(client) {
-				return client !== ws;
-			});
+			const roomIndex = rooms[room].indexOf(ws);
+			if (roomIndex !== -1) {
+				// Send a disconnect message to the remaining clients in the room
+				rooms[room].forEach(client => {
+					if (client !== ws) {
+						client.send(JSON.stringify({ type: "disconnect" }));
+					}
+				});
+
+				// Remove the disconnected client from the room
+				rooms[room].splice(roomIndex, 1);
+			}
 		}
 	});
 });

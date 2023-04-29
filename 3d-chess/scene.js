@@ -167,7 +167,6 @@ const wizard = [
 let objArray;
 
 function updateScene(){
-    console.log("update scene called")
     if (sessionStorage.getItem("selectedMode") !== null || sessionStorage.getItem("whitePiecesColor") !== null || sessionStorage.getItem("blackPiecesColor") !== null) {
         if (sessionStorage.getItem("selectedMode") === "Wizard") {
             objArray = wizard;
@@ -281,4 +280,4 @@ window.addEventListener("resize",() => resize_window(camera,renderer));
 
 
 
-export {updateScene,initScene, pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager};
+export {updateScene,initScene, objArray, pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager};

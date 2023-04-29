@@ -3,10 +3,11 @@ import "./CSS/loading.css";
 import "./CSS/popup.css";
 import socket from "./socket.js";
 import * as THREE from "three";
+import { endGame } from "./issue.js";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {game} from "./script";
 import { CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
-import {updateScene,initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
+import {initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
 function addPieceData(){
 	for (let i = 0; i < pieces.length; i++){
 		pieces[i].userData.pieceId = i;
@@ -44,7 +45,6 @@ function addPromotionData(){
 	pieces[i].userData.isQueen = true;
 	pieces[i].userData.side = side;
 	pieces[i].userData.hasMoved = true;
-	console.log(pieces[i].userData);
 	promotion = false;
 }
 
@@ -63,17 +63,19 @@ document.addEventListener("mousedown", onDocumentMouseDown, false);
 let intersectsPiece = null;
 let intersectsBoard = null;
 function onDocumentMouseDown(event) {
-	if (clientID[0] == gameLogic.turn ? 1 : 0) {
-		let vector = new THREE.Vector3(
-			(event.clientX / window.innerWidth) * 2 - 1,
-			-(event.clientY / window.innerHeight) * 2 + 1,
-			0.5);
-		let raycaster = new THREE.Raycaster();
-		raycaster.setFromCamera(vector, camera);
-		intersectsBoard = raycaster.intersectObjects(boardSquares);
-		intersectsPiece = raycaster.intersectObjects(pieces, true);
-		gameLogic.modified = [];
-		gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+	if (gameLogic.continue) {
+		if (clientID[0] == gameLogic.turn ? 1 : 0) {
+			let vector = new THREE.Vector3(
+				(event.clientX / window.innerWidth) * 2 - 1,
+				-(event.clientY / window.innerHeight) * 2 + 1,
+				0.5);
+			let raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera(vector, camera);
+			intersectsBoard = raycaster.intersectObjects(boardSquares);
+			intersectsPiece = raycaster.intersectObjects(pieces, true);
+			gameLogic.modified = [];
+			gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+		}
 	}
 }
 
@@ -143,6 +145,9 @@ function animate() {
 	if (modified.length > 0){
 		if (clientID[0] == modified[5]) {
 			gameLogic.moveSend.push(clientID[0]);
+			if (modified[4] !== null) {
+				gameLogic.moveSend.push(gameLogic.promoted);
+			}
 			sendActionToOpponent(gameLogic.moveSend);
 			modified[5] = !modified[5];
 		}
@@ -239,6 +244,7 @@ function initialiseGame(){
 		case "clientIndex":
 			clientID[0] = message.index;
 			console.log(clientID[0]);
+			gameLogic.clientID = clientID[0];
 			updateTurnOverlay();
 			turnOverlay.hidden = false;
 			break;
@@ -248,14 +254,26 @@ function initialiseGame(){
 			camControls.enabled = false;
 			connected = true;
 			break;
+		case "disconnect":
+			console.log("Opponent disconnected");
+			gameLogic.popupAlert.textContent = "Forfeit!!";
+			gameLogic.checkText.textContent = "Opponent Disconnected";
+			gameLogic.popupPawn.style.filter = 'invert(50%) sepia(100%) saturate(500%) hue-rotate(350deg)';
+			gameLogic.checkPopup.hidden = false;
+			gameLogic.checkContainer.style.pointerEvents = "auto";
+			if (gameLogic.movesLog.length > 2) {
+				endGame()
+			}
+			break;
 		case "action":
-			gameLogic.unitTest(message.data[0], message.data[1]);
+			gameLogic.unitTest(message.data[0], message.data[1], message.data[3]);
 		}
 	});
 
 
 	socket.addEventListener("close", function(event) {
 		console.log("Disconnected from server");
+		location.reload();
 	});
 }
 

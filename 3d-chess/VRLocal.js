@@ -64,16 +64,18 @@ document.addEventListener("mousedown", onDocumentMouseDown, false);
 let intersectsPiece = null;
 let intersectsBoard = null;
 function onDocumentMouseDown(event) {
-	var vector = new THREE.Vector3(
-		(event.clientX / window.innerWidth) * 2 - 1,
-		-(event.clientY / window.innerHeight) * 2 + 1,
-		0.5);
-	var raycaster =  new THREE.Raycaster();
-	raycaster.setFromCamera( vector, camera );
-	intersectsBoard = raycaster.intersectObjects(boardSquares);
-	intersectsPiece = raycaster.intersectObjects(pieces, true);
-	gameLogic.modified = [];
-	gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+	if (gameLogic.continue) {
+		var vector = new THREE.Vector3(
+			(event.clientX / window.innerWidth) * 2 - 1,
+			-(event.clientY / window.innerHeight) * 2 + 1,
+			0.5);
+		var raycaster = new THREE.Raycaster();
+		raycaster.setFromCamera(vector, camera);
+		intersectsBoard = raycaster.intersectObjects(boardSquares);
+		intersectsPiece = raycaster.intersectObjects(pieces, true);
+		gameLogic.modified = [];
+		gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+	}
 }
 
 
@@ -228,6 +230,7 @@ function render() {
 		updateTurnOverlay();
 	}
 	if (renderer.xr.isPresenting) {
+		gameLogic.vr = true;
 		cleanIntersected();
 
 		intersectObjects( controller1 );

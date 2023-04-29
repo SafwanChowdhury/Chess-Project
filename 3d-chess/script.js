@@ -1,3 +1,7 @@
+import {camera, objArray} from "./scene.js";
+import {endGame} from "./issue.js";
+import * as THREE from "three";
+
 class game {
 	/*----------- Game State Data ----------*/
 	board = [
@@ -45,7 +49,11 @@ class game {
 	whiteScore = 16;
 	blackScore = 16;
 	playerPieces;
-
+	continue = true;
+	clientID = null;
+	vr = false;
+	promoted = "";
+	promotedPiece = null;
 	/*--- selected piece properties ---*/
 	selectedPiece = {
 		pieceId: -1,
@@ -547,8 +555,57 @@ class game {
 		}
 	}
 
+	lastMoves = [];
+
+	moveConvert(id, type, move){
+		let prefix = "";
+		switch(type) {
+			case "King":
+				prefix = "K";
+				break;
+			case "Queen":
+				prefix = "Q";
+				break;
+			case "Rook":
+				prefix = "R";
+				break;
+			case "Bishop":
+				prefix = "B";
+				break;
+			case "Knight":
+				prefix = "N";
+				break;
+			default:
+				prefix = "";
+				break;
+		}
+		let piece = this.pieces[id];
+		let newIndex = piece.userData.indexOfBoardPiece + move;
+		let newRow = Math.floor(newIndex / 8);
+		let newCol = Math.floor(newIndex % 8);
+		newRow = 7 - newRow;
+		newCol = 7 - newCol;
+		let letter = String.fromCharCode(97 + newCol);
+		let number = 8 - newRow;
+		let moveString = prefix + letter + number;
+		console.log(moveString);
+		let moveColor = this.turn ? 'white' : 'black';
+		let moveElement = document.createElement('div');
+		moveElement.textContent = moveString;
+		moveElement.classList.add(moveColor);
+		document.getElementById('last-moves').appendChild(moveElement);
+		this.lastMoves.push(moveString);
+		if (this.lastMoves.length > 36) {
+			let removedMove = this.lastMoves.shift();
+			let removedElement = document.querySelector(`#last-moves div.${moveColor}:nth-child(1)`);
+			if (removedElement) {
+				removedElement.remove();
+			}
+		}
+	}
 	//make move
 	makeMove(number) {
+		this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number)
 		this.movesLog.push([this.selectedPiece.pieceId, number]);
 		console.log(this.movesLog);
 		this.moveSend = [this.selectedPiece.pieceId, number];
@@ -591,26 +648,6 @@ class game {
 		}
 		this.board[previousIndex] = null;
 		this.board[modifiedIndex] = this.selectedPiece.pieceId;
-		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
-			this.selectedPiece.type = "Queen";
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb", this.turn, null];
-		}
-		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
-			this.selectedPiece.type = "Queen";
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb", this.turn, null];
-		}
-		else {
-			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
-				this.selectedPiece.moveTwo = false;
-			}
-			if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
-				this.selectedPiece.moveTwo = false;
-			}
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
-		}
 		if (castling === false){
 			this.castle = [this.turn ? 0 : 24, this.turn ? 0 : 7,  2];
 			this.board[this.turn ? 0 : 56] = null;
@@ -626,9 +663,99 @@ class game {
 			this.pieces[this.turn ? 7 : 31].userData.hasMoved = true;
 
 		}
-		//console.log("PieceId" , this.selectedPiece.pieceId, " Move: " , (this.selectedPiece.indexOfBoardPiece - previousIndex))
-		this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
-		this.checkForWin();
+		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
+			this.continue = false;
+			this.promotion()
+		}
+		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
+			this.continue = false;
+			this.promotion()
+		}
+		else {
+			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
+				this.selectedPiece.moveTwo = false;
+			}
+			if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+				this.selectedPiece.moveTwo = false;
+			}
+			this.updatePiece();
+			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
+			this.continue = true;
+			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+			this.checkForWin();
+		}
+	}
+
+
+	promotion(){
+		console.log(this.clientID, this.turn)
+		if (this.clientID !== null && this.clientID != this.turn){
+			if (this.promotedPiece === "Queen"){
+				this.selectedPiece.type = "Queen";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[4], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+			else{
+				this.selectedPiece.type = "Knight";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[1], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+		}
+		else {
+			const menu = document.getElementById('floating-menu');
+			// Get the 2D screen position of the selected object
+			const screenPosition = this.toScreenPosition(this.selected.object, camera);
+			// Set the position of the menu and show it
+			menu.style.left = `${screenPosition.x}px`;
+			menu.style.top = `${screenPosition.y}px`;
+			menu.style.display = 'block';
+			document.getElementById('option-1').addEventListener('click', () => {
+				this.selectedPiece.type = "Queen";
+				this.promoted = "Queen"
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[4], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById('option-2').addEventListener('click', () => {
+				this.selectedPiece.type = "Knight";
+				this.promoted = "Knight"
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[1], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+		}
+	}
+	closeFloatingMenu() {
+		const menu = document.getElementById('floating-menu');
+		menu.style.display = 'none';
+	}
+	toScreenPosition(obj, camera) {
+		const vector = new THREE.Vector3();
+		const canvas = document.querySelector('canvas');
+
+		obj.updateMatrixWorld();
+		vector.setFromMatrixPosition(obj.matrixWorld);
+		vector.project(camera);
+
+		const widthHalf = canvas.clientWidth / 2;
+		const heightHalf = canvas.clientHeight / 2;
+
+		vector.x = (vector.x * widthHalf) + widthHalf;
+		vector.y = -(vector.y * heightHalf) + heightHalf;
+
+		return { x: vector.x, y: vector.y };
 	}
 
 	updatePiece() {
@@ -654,6 +781,7 @@ class game {
 				this.checkText.textContent = "White Win!!!";
 				this.checkPopup.hidden = false;
 				this.checkContainer.style.pointerEvents = "auto";
+				endGame();
 			} else if (!this.turn) {
 				console.log("black win");
 				this.checkText.textContent = "Black Win!!!";
@@ -662,6 +790,7 @@ class game {
 				this.popupPawn.style.filter = "invert(10%)";
 				this.checkPopup.hidden = false;
 				this.checkContainer.style.pointerEvents = "auto";
+				endGame();
 			}
 		}
 		else if(check === 2){
@@ -671,6 +800,7 @@ class game {
 			this.popupPawn.style.filter = 'invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)';
 			this.checkPopup.hidden = false;
 			this.checkContainer.style.pointerEvents = "auto";
+			endGame();
 		}
 		if (this.check[turnW] === true) {
 			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.opacity = 0;
@@ -708,29 +838,20 @@ class game {
 		let rookMovesQueen = this.rook(this.turn,queenSideRookI, this.board).map(v => v + queenSideRookI);
 		let intersectionKing = rookMovesKing.filter(element => kingMoves.includes(element));
 		let intersectionQueen = rookMovesQueen.filter(element => kingMoves.includes(element));
-		console.log("king", kingMoves)
-		console.log("rookK", rookMovesKing)
-		console.log("rookQ", rookMovesQueen)
-		console.log("hasMovedKingside", this.pieces[kingSideRook].userData.hasMoved)
-		console.log("hasMovedQueenside", this.pieces[queenSideRook].userData.hasMoved)
 		if (this.pieces[kingSideRook].userData.hasMoved === false && intersectionKing.length > 0 && this.pieces[kingSideRook].userData.taken === false) {
 			path.push(-1);
 		}
 		if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0 && this.pieces[queenSideRook].userData.taken === false) {
 			path.push(1);
 		}
-		console.log("preP", path)
 		path = this.kingPinning(path,index,this.turn,this.board);
-		console.log("postP", path)
 		if (path.includes(1)){
 			moves.push(2);
 		}
 		if (path.includes(-1)){
 			moves.push(-2);
 		}
-		console.log("preM", moves)
 		moves = this.kingPinning(moves,index,this.turn,this.board);
-		console.log("postM", moves)
 		return moves;
 	}
 
@@ -973,7 +1094,8 @@ class game {
 	}
 
 
-	unitTest(id, move) {
+	unitTest(id, move, promotedPiece) {
+		this.promotedPiece = promotedPiece;
 		this.testPieceData(id);
 		this.makeMove(move);
 	}
