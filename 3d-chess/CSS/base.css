@@ -80,6 +80,11 @@ footer {
     right: 0;
 }
 
+footer a {
+    color: inherit; /* Use the color of the parent element */
+    text-decoration: none; /* Remove the underline */
+}
+
 h2, h3 {
     font-family: 'Cinzel', serif;
     font-weight: 700;
