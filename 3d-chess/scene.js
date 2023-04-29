@@ -10,7 +10,7 @@ let pointLight = new THREE.PointLight(0xffffff, 0.5);
 let pointLight2 = new THREE.PointLight(0xffffff, 0.2);
 let pointLight3 = new THREE.PointLight(0xffffff, 0.2);
 let ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-
+let backgroundBrightness = 1;
 
 function initScene() {
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -35,6 +35,9 @@ function initScene() {
 		"skybox/front.png",
 		"skybox/back.png",
 	]);
+
+	scene.backgroundIntensity = backgroundBrightness;
+
 
 	const moonTexture = new THREE.TextureLoader().load("moon.jpg");
 	const normalTexture = new THREE.TextureLoader().load("normal.jpg");
@@ -176,6 +179,7 @@ function updateScene(){
 			pointLight2.intensity = 0;
 			pointLight3.intensity = 0;
 			ambientLight.intensity = 0.2;
+			backgroundBrightness = 0.5
 			objArray = standard;
 			nightMode = true;
 		} else {
@@ -219,7 +223,7 @@ function loadObject(i, obj, x1, z1, rot) {
 				pieces[i].children[0].material.color.setHex(0xffffff);
 				pieces[i].children[0].material.emissive.setHex(blackColor);
 				pieces[i].children[0].material.emissiveIntensity = 0.6;
-				pieces[i].children[0].material.opacity = 0.6;
+				pieces[i].children[0].material.opacity = 0.65;
 				pieces[i].children[0].material.transparent = true;
 			}
 			else {
@@ -231,7 +235,7 @@ function loadObject(i, obj, x1, z1, rot) {
 				pieces[i].children[0].material.color.setHex(0xffffff);
 				pieces[i].children[0].material.emissive.setHex(whiteColor);
 				pieces[i].children[0].material.emissiveIntensity = 0.6;
-				pieces[i].children[0].material.opacity = 0.6;
+				pieces[i].children[0].material.opacity = 0.65;
 				pieces[i].children[0].material.transparent = true;
 			}
 			else {
