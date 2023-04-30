@@ -189,11 +189,11 @@ class game {
 			this.givePieceBorder(this.king(this.turn, this.selectedPiece.indexOfBoardPiece, this.board, true));
 			break;
 		default:
-			this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo, this.board));
+			this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo, this.board, true));
 		}
 	}
 
-	pawn(turn, index, moveTwo, board) {
+	pawn(turn, index, moveTwo, board, modifier) {
 		let col = Math.floor(index % 8);
 		let moves = [];
 		if (turn) { //white
@@ -227,10 +227,12 @@ class game {
 				moves.push(-9);
 			}
 		}
-		if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
-			if (this.selectedPiece.row === this.enpassantRow) {
-				moves.push(this.enpassantIndex - index);
-				this.enpassantMove = this.enpassantIndex - index
+		if (modifier === true) {
+			if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
+				if (this.selectedPiece.row === this.enpassantRow) {
+					moves.push(this.enpassantIndex - index);
+					this.enpassantMove = this.enpassantIndex - index
+				}
 			}
 		}
 		return moves;
@@ -470,7 +472,6 @@ class game {
 				}
 			});
 		}
-
 		possibleMoves = validMoves.filter(function (value) {
 			return !invalidMoves.includes(value);
 		});
@@ -1026,20 +1027,19 @@ class game {
 
 		// Calculate the column of the pawn.
 		let col = index % 8;
-
 		if (turn) { //white
-			if (board[index + 7] === null && col !== 7) {
+			if ((board[index - 7] === null || board[index - 7] === 3 ) && col !== 0) {
 				moves.push(-7);
 			}
-			if (board[index + 9] === null && col !== 0) {
+			if ((board[index - 9] === null || board[index - 9] === 3 ) && col !== 7) {
 				moves.push(-9);
 			}
 		} else { //black
-			if (col !== 0 && board[index - 7] === null) {
-				moves.push(7);
-			}
-			if (col !== 7 && board[index - 9] === null) {
+			if (col !== 7 && (board[index + 9] === null || board[index + 9] === 27)) {
 				moves.push(9);
+			}
+			if (col !== 0 && (board[index + 7] === null || board[index + 7] === 27)) {
+				moves.push(7);
 			}
 		}
 
@@ -1080,7 +1080,7 @@ class game {
 			//bug identified in moveTwo, some cases moveTwo needs to be 1 where a piece can move two and put king in check
 			// a temporary fix is to set moveTwo to 0
 			//this however still does not correctly pin the king
-			newMoves = this.pawn(this.turn, pieceIndex,0, this.board).map(v => v + pieceIndex);
+			newMoves = this.pawn(this.turn, pieceIndex,0, this.board, false).map(v => v + pieceIndex);
 			break;
 		}
 
@@ -1121,26 +1121,31 @@ class game {
 			switch (piece.userData.name) {
 				case 'Rook':
 					newMoves = this.rook(turn, piece.userData.indexOfBoardPiece, this.board)
+					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
 					if (newMoves !== undefined)
 						newPositions = newPositions.concat(newMoves);
 					break;
 				case 'Knight':
 					newMoves = this.knight(turn, piece.userData.indexOfBoardPiece, this.board);
+					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
 					if (newMoves !== undefined)
 						newPositions = newPositions.concat(newMoves);
 					break;
 				case 'Bishop':
 					newMoves = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board);
+					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
 					if (newMoves !== undefined)
 						newPositions = newPositions.concat(newMoves);
 					break;
 				case 'Queen':
 					newMoves = this.queen(turn, piece.userData.indexOfBoardPiece, this.board);
+					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
 					if (newMoves !== undefined)
 						newPositions = newPositions.concat(newMoves);
 					break;
 				case 'Pawn':
-					newMoves = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board);
+					newMoves = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board, false);
+					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
 					if (newMoves !== undefined)
 						newPositions = newPositions.concat(newMoves);
 					break;
@@ -1160,6 +1165,7 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
+		console.log(this.saviourPieces[turnB])
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -1223,13 +1229,15 @@ class game {
 					newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
 					break;
 				default:
-					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board, false).map(v => v + piece.userData.indexOfBoardPiece);
+					console.log(newPositions, piece.userData.indexOfBoardPiece)
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);
 				}
 			}
 		});
+		console.log(pieceSet)
 		this.saviourPieces[turnW] = pieceSet;
 	}
 
