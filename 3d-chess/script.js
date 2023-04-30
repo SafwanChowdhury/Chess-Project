@@ -1,6 +1,8 @@
-import {camera, objArray} from "./scene.js";
+import {camera, objArray, updateScene} from "./scene.js";
 import {endGame} from "./issue.js";
 import * as THREE from "three";
+
+updateScene();
 
 class game {
 	/*----------- Game State Data ----------*/

@@ -98,14 +98,14 @@ let takenWhite = [];
 let takenBlack = [];
 
 const standard = [
-	"models/wRookR.glb",
-	"models/wKnightR.glb",
-	"models/wBishopR.glb",
+	"models/wRook.glb",
+	"models/wKnight.glb",
+	"models/wBishop.glb",
 	"models/wKing.glb",
 	"models/wQueen.glb",
-	"models/wBishopL.glb",
-	"models/wKnightL.glb",
-	"models/wRookL.glb",
+	"models/wBishop.glb",
+	"models/wKnight.glb",
+	"models/wRook.glb",
 	"models/wPawn.glb",
 	"models/wPawn.glb",
 	"models/wPawn.glb",
@@ -122,14 +122,14 @@ const standard = [
 	"models/wPawn.glb",
 	"models/wPawn.glb",
 	"models/wPawn.glb",
-	"models/wRookR.glb",
-	"models/wKnightR.glb",
-	"models/wBishopR.glb",
+	"models/wRook.glb",
+	"models/wKnight.glb",
+	"models/wBishop.glb",
 	"models/wKing.glb",
 	"models/wQueen.glb",
-	"models/wBishopL.glb",
-	"models/wKnightL.glb",
-	"models/wRookL.glb"
+	"models/wBishop.glb",
+	"models/wKnight.glb",
+	"models/wRook.glb"
 ];
 
 const wizard = [
