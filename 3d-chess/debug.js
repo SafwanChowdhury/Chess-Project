@@ -93,7 +93,7 @@ fetch(filename)
 		console.log(unitTest);
 	})
 	.catch(error => {
-		console.error(error)
+		console.error(error);
 		unitTest = [];
 	});
 

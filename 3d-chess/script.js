@@ -233,7 +233,7 @@ class game {
 			if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
 				if (this.selectedPiece.row === this.enpassantRow) {
 					moves.push(this.enpassantIndex - index);
-					this.enpassantMove = this.enpassantIndex - index
+					this.enpassantMove = this.enpassantIndex - index;
 				}
 			}
 		}
@@ -632,7 +632,6 @@ class game {
 		document.getElementById("last-moves").appendChild(moveElement);
 		this.lastMoves.push(moveString);
 		if (this.lastMoves.length > 36) {
-			let removedMove = this.lastMoves.shift();
 			let removedElement = document.querySelector(`#last-moves div.${moveColor}:nth-child(1)`);
 			if (removedElement) {
 				removedElement.remove();
@@ -680,7 +679,7 @@ class game {
 			else {
 				this.oldPiece = this.board[modifiedIndex];
 			}
-			let removeID = this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece)
+			let removeID = this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece);
 			this.piecesIndex[this.turn ? 1 : 0].splice(this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece), 1);
 			if (this.turn && this.selectedPiece.pieceId < 16) {
 				this.blackScore--;
@@ -1117,47 +1116,47 @@ class game {
 
 	stalemate(turn){
 		const pieces = turn ? this.whitePieces : this.blackPieces;
-		let newPositions = []
+		let newPositions = [];
 		pieces.forEach((piece) => {
-			let newMoves
+			let newMoves;
 			switch (piece.userData.name) {
-				case 'Rook':
-					newMoves = this.rook(turn, piece.userData.indexOfBoardPiece, this.board)
-					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
-				case 'Knight':
-					newMoves = this.knight(turn, piece.userData.indexOfBoardPiece, this.board);
-					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
-				case 'Bishop':
-					newMoves = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board);
-					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
-				case 'Queen':
-					newMoves = this.queen(turn, piece.userData.indexOfBoardPiece, this.board);
-					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
-				case 'Pawn':
-					newMoves = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board, false);
-					newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board)
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
-				case 'King':
-					newMoves = this.king(turn, piece.userData.indexOfBoardPiece, this.board, true);
-					if (newMoves !== undefined)
-						newPositions = newPositions.concat(newMoves);
-					break;
+			case "Rook":
+				newMoves = this.rook(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Knight":
+				newMoves = this.knight(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Bishop":
+				newMoves = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Queen":
+				newMoves = this.queen(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Pawn":
+				newMoves = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board, false);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "King":
+				newMoves = this.king(turn, piece.userData.indexOfBoardPiece, this.board, true);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
 			}
-		})
+		});
 		return newPositions.length === 0;
 
 	}
@@ -1167,7 +1166,7 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
-		console.log(this.saviourPieces[turnB])
+		console.log(this.saviourPieces[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -1232,14 +1231,14 @@ class game {
 					break;
 				default:
 					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board, false).map(v => v + piece.userData.indexOfBoardPiece);
-					console.log(newPositions, piece.userData.indexOfBoardPiece)
+					console.log(newPositions, piece.userData.indexOfBoardPiece);
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);
 				}
 			}
 		});
-		console.log(pieceSet)
+		console.log(pieceSet);
 		this.saviourPieces[turnW] = pieceSet;
 	}
 

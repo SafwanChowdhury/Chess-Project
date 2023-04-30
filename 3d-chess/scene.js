@@ -179,7 +179,7 @@ function updateScene(){
 			pointLight2.intensity = 0;
 			pointLight3.intensity = 0;
 			ambientLight.intensity = 0.2;
-			backgroundBrightness = 0.5
+			backgroundBrightness = 0.5;
 			objArray = standard;
 			nightMode = true;
 		} else {
