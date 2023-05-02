@@ -130,6 +130,7 @@ socket.addEventListener("message", function(event) {
 	switch (message.type) {
 	case "clientIndex":
 		clientID = message.index;
+		break;
 	case "roomList":
 		updateLobbyList(message.rooms);
 	}

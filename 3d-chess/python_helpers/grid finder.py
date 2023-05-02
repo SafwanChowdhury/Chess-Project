@@ -6,7 +6,7 @@ class GridWindow(tk.Frame):
         self.master = master
         self.grid_cells = []
         self.selected_cell = None
-        self.predefined_numbers = [-9, -8, -7, -1, 1, 7, 8, 9]
+        self.predefined_numbers = []
         self.create_widgets()
 
     def create_widgets(self):

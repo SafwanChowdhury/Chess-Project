@@ -324,7 +324,7 @@ function cleanIntersected() {
 	}
 }
 
-//https://codepen.io/jason-buchheim/pen/zYqYGXM?editors=0010 - modified and refactored
+//https://codepen.io/jason-buchheim/pen/zYqYGXM?editors=0010 (Buchheim, 2023) - modified and refactored
 var dolly;
 var cameraVector = new THREE.Vector3(); // create once and reuse it!
 // a variable to store the values from the last polling of the gamepads

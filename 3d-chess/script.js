@@ -1,12 +1,16 @@
+//https://levelup.gitconnected.com/creating-a-board-game-checkers-with-javascript-ecd562f985c2 (Branco, 2020)
+//used as inspiration and a very early template. Most legacy code no longer exists in the current version of the game.
+
+
 import {camera, objArray, updateScene} from "./scene.js";
 import {endGame} from "./issue.js";
 import * as THREE from "three";
 
 updateScene();
 
-class game {
+class game { //game class
 	/*----------- Game State Data ----------*/
-	board = [
+	board = [ //board array
 		0, 1, 2, 3, 4, 5, 6, 7,
 		8, 9, 10, 11, 12, 13, 14, 15,
 		null, null, null, null, null, null, null, null,
@@ -129,7 +133,7 @@ class game {
 
 	/*---------- Logic ----------*/
 
-	getPlayerPieces() {
+	getPlayerPieces() { //gets the current player's pieces
 		if (this.turn) {
 			this.playerPieces = this.whitePieces;
 		} else {
@@ -140,7 +144,7 @@ class game {
 
 
 	// resets selected piece properties
-	resetSelectedPieceProperties() {
+	resetSelectedPieceProperties() { //resets the selected piece properties
 		if (this.selectedPiece.pieceId >= 0) {
 			this.pieces[this.selectedPiece.pieceId].children[0].material.opacity = 1;
 			this.pieces[this.selectedPiece.pieceId].children[0].material.color = this.oldColor;
@@ -161,7 +165,7 @@ class game {
 		this.selectedPiece.hasMoved = false;
 	}
 
-	// gets ID and index of the board cell its on
+	// gets the selected piece properties
 	getSelectedPiece() {
 		this.selectedPiece.pieceId = this.selected.object.parent.userData.pieceId;
 		this.selectedPiece.indexOfBoardPiece = this.selected.object.parent.userData.indexOfBoardPiece;
@@ -173,7 +177,7 @@ class game {
 		this.calculateMoves();
 	}
 
-	calculateMoves() {
+	calculateMoves() { //switch statement to calculate moves for each piece
 		switch (this.selectedPiece.type) {
 		case "Rook":
 			this.givePieceBorder(this.rook(this.turn, this.selectedPiece.indexOfBoardPiece, this.board));
@@ -195,7 +199,7 @@ class game {
 		}
 	}
 
-	pawn(turn, index, moveTwo, board, modifier) {
+	pawn(turn, index, moveTwo, board, modifier) { //calculates moves for pawn
 		let col = Math.floor(index % 8);
 		let moves = [];
 		if (turn) { //white
@@ -229,7 +233,7 @@ class game {
 				moves.push(-9);
 			}
 		}
-		if (modifier === true) {
+		if (modifier === true) { //checks for enpassant
 			if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
 				if (this.selectedPiece.row === this.enpassantRow) {
 					moves.push(this.enpassantIndex - index);
@@ -240,13 +244,13 @@ class game {
 		return moves;
 	}
 
-	rook(turn, index, board) {
+	rook(turn, index, board) { //calculates moves for rook
 		let rowMove = this.getMovesInDirection(1, turn, board, index).concat(this.getMovesInDirection(-1, turn, board, index));
 		let colMove = this.getMovesInDirection(8, turn, board, index).concat(this.getMovesInDirection(-8, turn, board, index));
-		return rowMove.concat(colMove);
+		return rowMove.concat(colMove); //returns all possible moves
 	}
 
-	getMovesInDirection(direction, turn, board, index) {
+	getMovesInDirection(direction, turn, board, index) { //calculates moves in a direction
 		let row = Math.floor(index / 8);
 		let col = Math.floor(index % 8);
 		let moves = [];
@@ -269,7 +273,7 @@ class game {
 	}
 
 
-	knight(turn, index, board) {
+	knight(turn, index, board) { //calculates moves for knight
 		let col = Math.floor(index % 8);
 		let moves = [-17, -15, -10, -6, 6, 10, 15, 17];
 		let validMoves = [];
@@ -296,10 +300,10 @@ class game {
 			}
 		}
 		moves = validMoves;
-		return moves;
+		return moves; //returns all possible moves
 	}
 
-	bishop(turn, index, board) {
+	bishop(turn, index, board) { //calculates moves for bishop
 		let possibleMoves = [];
 		let moves = [];
 
@@ -335,7 +339,7 @@ class game {
 			}
 		}
 
-		for (let i = 0; i < possibleMoves.length; i++) {
+		for (let i = 0; i < possibleMoves.length; i++) { //removes invalid moves
 			if (possibleMoves[i] > 0 || possibleMoves[i] < 0) {
 				moves.push(possibleMoves[i]);
 			}
@@ -343,21 +347,21 @@ class game {
 		return moves;
 	}
 
-	queen(turn, index, board) {
+	queen(turn, index, board) { //calculates moves for queen
 		let moves1 = this.rook(turn, index, board);
 		let moves2 = this.bishop(turn, index, board);
 		let moves = moves1.concat(moves2);
-		moves.sort(function (a, b) {
+		moves.sort(function (a, b) { //sorts moves
 			return a - b;
 		});
 		return moves;
 	}
 
-	king(turn, index, board, modifier) {
+	king(turn, index, board, modifier) { //calculates moves for king
 		let col = Math.floor(index % 8);
 		let moves = [-9, -8, -7, -1, 1, 7, 8, 9];
 		let validMoves = [];
-		for (let i = 0; i < moves.length; i++) {
+		for (let i = 0; i < moves.length; i++) { //calculates valid moves
 			let destinationIndex = index + moves[i];
 			if (destinationIndex < 0 || destinationIndex > 63) {
 				continue; // skip invalid moves
@@ -384,7 +388,7 @@ class game {
 		return validMoves;
 	}
 
-	kingPinning(validMoves, index, turn, board) {
+	kingPinning(validMoves, index, turn, board) { //calculates moves for king when pinned
 		let turnW = turn ? 1 : 0;
 		let kingIndex = turn ? 3 : 27;
 		let localBishop = [];
@@ -474,15 +478,15 @@ class game {
 				}
 			});
 		}
-		possibleMoves = validMoves.filter(function (value) {
+		possibleMoves = validMoves.filter(function (value) { //remove invalid moves from valid moves
 			return !invalidMoves.includes(value);
 		});
-		return possibleMoves;
+		return possibleMoves; //return valid moves
 
 	}
 
 
-	piecePinning(validMoves, index, turn, board) {
+	piecePinning(validMoves, index, turn, board) { //check if piece is pinned
 		let turnW = turn ? 1 : 0;
 		let kingIndex = turn ? 3 : 27;
 		let localBishop = [];
@@ -535,10 +539,10 @@ class game {
 			});
 		}
 
-		possibleMoves = validMoves.filter(function (value) {
+		possibleMoves = validMoves.filter(function (value) { //remove invalid moves from valid moves
 			return !invalidMoves.includes(value);
 		});
-		return possibleMoves;
+		return possibleMoves; //return valid moves
 
 	}
 
@@ -574,7 +578,7 @@ class game {
 
 	lastMoves = [];
 
-	moveConvert(id, type, move, remove, castling, enpassant){
+	moveConvert(id, type, move, remove, castling, enpassant){ //converts move to chess notation
 		let prefix = "";
 		let suffix = "";
 		switch(type) {
@@ -624,27 +628,27 @@ class game {
 		else{
 			moveString = prefix;
 		}
-		console.log(moveString);
+		console.log(moveString); //debug
 		let moveColor = this.turn ? "white" : "black";
 		let moveElement = document.createElement("div");
 		moveElement.textContent = moveString;
 		moveElement.classList.add(moveColor);
-		document.getElementById("last-moves").appendChild(moveElement);
-		this.lastMoves.push(moveString);
+		document.getElementById("last-moves").appendChild(moveElement); //add move to last moves
+		this.lastMoves.push(moveString); //add move to last moves array
 		if (this.lastMoves.length > 36) {
-			let removedElement = document.querySelector(`#last-moves div.${moveColor}:nth-child(1)`);
+			let removedElement = document.querySelector(`#last-moves div.${moveColor}:nth-child(1)`); //remove first move if more than 36 moves
 			if (removedElement) {
 				removedElement.remove();
 			}
 		}
 	}
 	//make move
-	makeMove(number) {
+	makeMove(number) { //number is the move from the cell
 		this.movesLog.push([this.selectedPiece.pieceId, number]);
-		console.log(this.movesLog);
-		this.moveSend = [this.selectedPiece.pieceId, number];
+		console.log(this.movesLog); //debug
+		this.moveSend = [this.selectedPiece.pieceId, number]; //send move to server
 		let castling = null;//false - kingside, true - queenside
-		if (this.selectedPiece.type === "King" && number === -2){
+		if (this.selectedPiece.type === "King" && number === -2){ //castling
 			castling = false;
 		}
 		else if (this.selectedPiece.type === "King" && number === 2){
@@ -652,18 +656,18 @@ class game {
 		}
 		let previousIndex = this.selectedPiece.indexOfBoardPiece;
 		this.selectedPiece.indexOfBoardPiece += number;
-		this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8);
+		this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8); //update row and col
 		this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8);
-		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null) {
+		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null) { //remove piece if there is one
 			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling);
 		}
-		else if (number === this.enpassantMove && this.selectedPiece.type === "Pawn"){
+		else if (number === this.enpassantMove && this.selectedPiece.type === "Pawn"){ //enpassant
 			let enpassant = this.enpassantIndex;
 			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, false, true);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling, enpassant);
 		}
-		else {
+		else { //regular move
 			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number,false, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, false, castling);
 		}
@@ -671,8 +675,8 @@ class game {
 
 	// Changes the board states data on the back end
 
-	changeData(previousIndex, modifiedIndex, removePiece, castling , enpassant){
-		if (removePiece) {
+	changeData(previousIndex, modifiedIndex, removePiece, castling , enpassant){ //previousIndex is the index of the piece before the move, modifiedIndex is the index of the piece after the move
+		if (removePiece) { //remove piece if there is one
 			if (enpassant !== undefined){
 				this.oldPiece = this.board[this.board.indexOf(this.enpassantId)];
 			}
@@ -699,14 +703,14 @@ class game {
 		}
 		this.board[previousIndex] = null;
 		this.board[modifiedIndex] = this.selectedPiece.pieceId;
-		if (castling === false){
+		if (castling === false){ //kingside castling
 			this.castle = [this.turn ? 0 : 24, this.turn ? 0 : 7,  2];
 			this.board[this.turn ? 0 : 56] = null;
 			this.board[this.turn ? 2 : 58] = this.turn ? 0 : 24;
 			this.pieces[this.turn ? 0 : 24].userData.indexOfBoardPiece = this.turn ? 2 : 58;
 			this.pieces[this.turn ? 0 : 24].userData.hasMoved = true;
 		}
-		else if (castling === true){
+		else if (castling === true){ //queenside castling
 			this.castle = [this.turn ? 7 : 31, this.turn ? 0 : 7, 4];
 			this.board[this.turn ? 7 : 63] = null;
 			this.board[this.turn ? 4 : 60] = this.turn ? 7 : 31;
@@ -714,16 +718,16 @@ class game {
 			this.pieces[this.turn ? 7 : 31].userData.hasMoved = true;
 
 		}
-		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
+		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") { //promotion
 			this.continue = false;
 			this.promotion();
 		}
-		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
+		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") { //promotion
 			this.continue = false;
 			this.promotion();
 		}
 		else {
-			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
+			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) { //enpassant available
 				if (this.selectedPiece.type === "Pawn" && this.selectedPiece.moveTwo) {
 					this.enpassantAvailable[!this.turn ? 1 : 0] = true;
 					this.enpassantCol = this.selectedPiece.col;
@@ -733,7 +737,7 @@ class game {
 				}
 				this.selectedPiece.moveTwo = false;
 			}
-			if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+			if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) { //enpassant available
 				if (this.selectedPiece.type === "Pawn" && this.selectedPiece.moveTwo) {
 					this.enpassantAvailable[!this.turn ? 1 : 0] = true;
 					this.enpassantCol = this.selectedPiece.col;
@@ -743,16 +747,16 @@ class game {
 				}
 				this.selectedPiece.moveTwo = false;
 			}
-			this.updatePiece();
+			this.updatePiece(); //update piece data
 			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
 			this.continue = true;
-			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
-			this.checkForWin();
+			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board); //check for check
+			this.checkForWin(); //check for win
 		}
 	}
 
 
-	promotion(){
+	promotion(){ //promotion
 		if (this.clientID !== null && this.clientID != this.turn){
 			if (this.promotedPiece === "Queen"){
 				this.selectedPiece.type = "Queen";
@@ -787,7 +791,7 @@ class game {
 				this.checkForWin();
 			}
 		}
-		else {
+		else { //if client is the one who needs to promote
 			const menu = document.getElementById("floating-menu");
 			// Get the 2D screen position of the selected object
 			const screenPosition = this.toScreenPosition(this.selected.object, camera);
@@ -837,11 +841,11 @@ class game {
 			});
 		}
 	}
-	closeFloatingMenu() {
+	closeFloatingMenu() { //close the floating menu
 		const menu = document.getElementById("floating-menu");
 		menu.style.display = "none";
 	}
-	toScreenPosition(obj, camera) {
+	toScreenPosition(obj, camera) { //converts 3D position to 2D position
 		const vector = new THREE.Vector3();
 		const canvas = document.querySelector("canvas");
 
@@ -858,7 +862,7 @@ class game {
 		return { x: vector.x, y: vector.y };
 	}
 
-	updatePiece() {
+	updatePiece() { //updates the piece's data
 		this.pieces[this.selectedPiece.pieceId].userData.pieceId = this.selectedPiece.pieceId;
 		this.pieces[this.selectedPiece.pieceId].userData.indexOfBoardPiece = this.selectedPiece.indexOfBoardPiece;
 		this.pieces[this.selectedPiece.pieceId].userData.row = this.selectedPiece.row;
@@ -925,7 +929,7 @@ class game {
 	}
 
 
-	castling(){
+	castling(){ //castling
 		let moves = [];
 		let path = [];
 		let index = this.turn ? 3 : 59;
@@ -1161,12 +1165,11 @@ class game {
 
 	}
 
-	checkmate(turn) {
+	checkmate(turn) { //!turn is the player in check (opposite of the player who just moved)
 		let oppTurn = !turn; //opposingPlayer
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
-		console.log(this.saviourPieces[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -1174,12 +1177,12 @@ class game {
 		return false;
 	}
 
-	initKing() {
+	initKing() { //finds the king and sets the currentCheckPositions
 		this.currentCheckPositions[1] = this.checkablePositions(3, true, 1, this.board);
 		this.currentCheckPositions[0] = this.checkablePositions(59, false, 1, this.board);
 	}
 
-	getKingIndex(turn) {
+	getKingIndex(turn) { //returns the index of the king
 		return (turn ? this.board.indexOf(3) : this.board.indexOf(27));
 	}
 
@@ -1231,25 +1234,23 @@ class game {
 					break;
 				default:
 					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board, false).map(v => v + piece.userData.indexOfBoardPiece);
-					console.log(newPositions, piece.userData.indexOfBoardPiece);
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);
 				}
 			}
 		});
-		console.log(pieceSet);
 		this.saviourPieces[turnW] = pieceSet;
 	}
 
 
-	unitTest(id, move, promotedPiece) {
+	unitTest(id, move, promotedPiece) { //used to test the game logic and for online move injection
 		this.promotedPiece = promotedPiece;
 		this.testPieceData(id);
 		this.makeMove(move);
 	}
 
-	testPieceData(index) {
+	testPieceData(index) { //sets the piece data for the unit test
 		if (this.turn) {
 			this.playerPieces = this.whitePieces;
 		} else {

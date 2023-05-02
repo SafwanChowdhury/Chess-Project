@@ -4,8 +4,7 @@ const wss = new WebSocketServer({ port: 8080 });
 
 let clients = [];
 let rooms = {};
-let once = 0;
-let counter = 0;
+
 console.log("Server started on port 8080");
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
