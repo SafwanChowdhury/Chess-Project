@@ -1166,7 +1166,6 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
-		console.log(this.saviourPieces[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -1231,14 +1230,12 @@ class game {
 					break;
 				default:
 					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board, false).map(v => v + piece.userData.indexOfBoardPiece);
-					console.log(newPositions, piece.userData.indexOfBoardPiece);
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);
 				}
 			}
 		});
-		console.log(pieceSet);
 		this.saviourPieces[turnW] = pieceSet;
 	}
 
