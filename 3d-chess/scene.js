@@ -1,3 +1,6 @@
+//https://www.youtube.com/watch?v=Q7AOvWpIVHU&list=LL&index=7&ab_channel=Fireship. (fireship,2021)
+//used as inspiration and very early template, but heavily modified. Most legacy code has been removed.
+
 import * as THREE from "three";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 const scene = new THREE.Scene();
@@ -6,13 +9,14 @@ const renderer = new THREE.WebGLRenderer({
 	canvas: document.querySelector("#bg"),
 });
 let whiteColor,blackColor, nightMode;
+//initialise the lighting
 let pointLight = new THREE.PointLight(0xffffff, 0.5);
 let pointLight2 = new THREE.PointLight(0xffffff, 0.2);
 let pointLight3 = new THREE.PointLight(0xffffff, 0.2);
 let ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
 let backgroundBrightness = 1;
 
-function initScene() {
+function initScene() { //initialise the scene
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize( window.innerWidth, window.innerHeight);
 	camera.position.set(8, 18.3, -0.1369);
@@ -26,7 +30,7 @@ function initScene() {
 	scene.add(pointLight3);
 	scene.add(ambientLight);
 
-	const loader2 = new THREE.CubeTextureLoader();
+	const loader2 = new THREE.CubeTextureLoader(); //load the skybox
 	scene.background = loader2.load([
 		"skybox/right.png",
 		"skybox/left.png",
@@ -38,7 +42,7 @@ function initScene() {
 
 	scene.backgroundIntensity = backgroundBrightness;
 
-
+	//(Fireship, 2021) - Moon object retained a hommage to the original code.
 	const moonTexture = new THREE.TextureLoader().load("moon.jpg");
 	const normalTexture = new THREE.TextureLoader().load("normal.jpg");
 
@@ -52,7 +56,10 @@ function initScene() {
 
 	scene.add(moon);
 	moon.position.set(0, 25, 0);
-	let board;
+
+	//end reference
+
+	let board; //load the board
 	const loader = new GLTFLoader();
 	loader.load(
 		"models/ChessBoard.glb",
@@ -67,9 +74,9 @@ function initScene() {
 		}
 	);
 }
-function createBoardSquares() {
+function createBoardSquares() { //create the board squares
 	let boardSquares = [];
-	let squareSize = 2.1; // change this to adjust the size of the squares
+	let squareSize = 2.1;
 
 	for (let i = 0; i < 8; i++) {
 		for (let j = 0; j < 8; j++) {
@@ -169,7 +176,7 @@ const wizard = [
 
 let objArray;
 
-function updateScene(){
+function updateScene(){ //update the scene from customisation
 	if (sessionStorage.getItem("selectedMode") !== null || sessionStorage.getItem("whitePiecesColor") !== null || sessionStorage.getItem("blackPiecesColor") !== null) {
 		if (sessionStorage.getItem("selectedMode") === "Wizard") {
 			objArray = wizard;
@@ -211,7 +218,7 @@ const coordsMap = [-7.36, -5.36, -3.16, -1.06, 1.06, 3.16, 5.16, 7.36];
 const takenMap = [11.56, 13.66];
 
 const manager = new THREE.LoadingManager();
-function loadObject(i, obj, x1, z1, rot) {
+function loadObject(i, obj, x1, z1, rot) { //load the object
 	const loader = new GLTFLoader(manager);
 	loader.load(obj, function(gltf){
 		pieces[i] = gltf.scene;
@@ -252,7 +259,7 @@ const initArray = [
 	{x: 0, y: 7} , {x: 1, y: 7}, {x: 2, y: 7}, {x: 3, y: 7}, {x: 4, y: 7}, {x: 5, y: 7}, {x: 6, y: 7}, {x: 7, y: 7}
 ];
 
-function objectLoading(){
+function objectLoading(){ //load all the objects
 	let lenObj = objArray.length;
 	for (let i = 0; i < lenObj; i++) {
 		if (i > 15){
@@ -264,7 +271,7 @@ function objectLoading(){
 	}
 }
 
-function loadQueen(i, obj, x1, z1){
+function loadQueen(i, obj, x1, z1){ //load the promoted piece
 	let rot = true;
 	if (i < 16){
 		rot = false;
@@ -273,7 +280,7 @@ function loadQueen(i, obj, x1, z1){
 	loadObject(i, obj, x1, z1, rot);
 }
 
-function resize_window(camera, renderer){
+function resize_window(camera, renderer){ //resize the window
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);

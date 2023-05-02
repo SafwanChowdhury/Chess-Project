@@ -8,7 +8,8 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {game} from "./script";
 import { CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
 import {initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
-function addPieceData(){
+
+function addPieceData(){ //function used to add data to the piece objects after loading
 	for (let i = 0; i < pieces.length; i++){
 		pieces[i].userData.pieceId = i;
 		pieces[i].userData.taken = false;
@@ -34,7 +35,7 @@ function addPieceData(){
 	}
 }
 
-function addPromotionData(){
+function addPromotionData(){ //used to update the piece data after promotion
 	let i = modifiedData[0];
 	let index = modifiedData[1];
 	let side = modifiedData[2];
@@ -62,19 +63,19 @@ document.addEventListener("mousedown", onDocumentMouseDown, false);
 
 let intersectsPiece = null;
 let intersectsBoard = null;
-function onDocumentMouseDown(event) {
+function onDocumentMouseDown(event) { //interaction with the board and pieces
 	if (gameLogic.continue) {
-		if (clientID[0] == gameLogic.turn ? 1 : 0) {
+		if (clientID[0] == gameLogic.turn ? 1 : 0) { //checks if it is the players turn
 			let vector = new THREE.Vector3(
 				(event.clientX / window.innerWidth) * 2 - 1,
 				-(event.clientY / window.innerHeight) * 2 + 1,
 				0.5);
 			let raycaster = new THREE.Raycaster();
-			raycaster.setFromCamera(vector, camera);
-			intersectsBoard = raycaster.intersectObjects(boardSquares);
-			intersectsPiece = raycaster.intersectObjects(pieces, true);
+			raycaster.setFromCamera(vector, camera); //creates a ray from the camera to the mouse position
+			intersectsBoard = raycaster.intersectObjects(boardSquares); //checks if the ray intersects with any of the board squares
+			intersectsPiece = raycaster.intersectObjects(pieces, true); //checks if the ray intersects with any of the pieces
 			gameLogic.modified = [];
-			gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+			gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard); //sends the interacted piece or board square to the game logic
 		}
 	}
 }
@@ -87,10 +88,10 @@ let connected = false;
 let cameraMoved = false;
 
 
-function animate() {
+function animate() { //animation loop
 	requestAnimationFrame(animate);
-	camControls.enabled = gameLogic.selected === null;
-	if (connected && cameraMoved === false){
+	camControls.enabled = gameLogic.selected === null; //disables the camera controls if a piece is selected
+	if (connected && cameraMoved === false){ //game start animation
 		if (clientID[0]){
 			if (camera.position.x > 0.20) {
 				camera.position.x = camera.position.x - 0.1;
@@ -141,8 +142,8 @@ function animate() {
 		}
 	}
 	modified = gameLogic.modified;
-	sessionStorage.setItem("movesLog", JSON.stringify(gameLogic.movesLog));
-	if (modified.length > 0){
+	sessionStorage.setItem("movesLog", JSON.stringify(gameLogic.movesLog)); //saves the moves log to the session storage
+	if (modified.length > 0){ //checks if the game logic has modified data
 		if (clientID[0] == modified[5]) {
 			gameLogic.moveSend.push(clientID[0]);
 			if (modified[4] !== null) {
@@ -181,9 +182,9 @@ function animate() {
 		gameLogic.modified = [];
 		gameLogic.castle = [];
 		received = false;
-		updateTurnOverlay();
+		updateTurnOverlay(); //updates the turn overlay
 	}
-	renderer.render(scene,camera);
+	renderer.render(scene,camera); //renders the scene
 }
 
 
@@ -196,7 +197,7 @@ manager.onStart = function (url, itemsLoaded, itemsTotal) {
 	}
 };
 
-manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+manager.onProgress = function (url, itemsLoaded, itemsTotal) { //updates the loading screen
 	if (!onStart) {
 		let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
 		document.getElementById("title").innerHTML = percentage;
@@ -205,7 +206,7 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 };
 
 manager.onLoad = function () {
-	if (!onStart) {
+	if (!onStart) { //initialises the game once all the assets have been loaded
 		document.getElementById("pawn-container").classList.add("loading-finished");
 		setTimeout(function() {
 			document.getElementById("loading-screen").remove();
@@ -227,7 +228,7 @@ let loaded = 0;
 let clientID = [];
 let roomId = null;
 
-function initialiseGame(){
+function initialiseGame(){ //connect to server once game initialisation is complete
 	roomId = sessionStorage.getItem("roomId");
 
 	if (loaded){
@@ -281,7 +282,7 @@ const turnOverlay = document.getElementById("turn-overlay");
 const turnText = document.getElementById("turn-text");
 const popup = document.getElementById("end-screen");
 const box = document.getElementById("success-box");
-function updateTurnOverlay() {
+function updateTurnOverlay() { //updates the turn overlay
 	if (clientID[0] == 0) {
 		turnText.textContent = gameLogic.turn ? "White's Turn" : "Your Turn";
 		turnText.style.color = gameLogic.turn ? "White" : "Grey";
@@ -301,7 +302,7 @@ const turnOverlayObject = new CSS3DObject(turnOverlay);
 scene.add(turnOverlayObject);
 
 
-function sendActionToOpponent(actionData) {
+function sendActionToOpponent(actionData) { //sends the action data to the opponent
 	const message = {
 		type: "action",
 		room: roomId,
@@ -310,11 +311,11 @@ function sendActionToOpponent(actionData) {
 	socket.send(JSON.stringify(message));
 }
 
-document.addEventListener("joinGame", function() {
+document.addEventListener("joinGame", function() { //event listener for when the user joins a game
 	initialiseGame();
 });
 
-function takeScreenshot() {
+function takeScreenshot() { //takes a screenshot of the game
 	const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true });
 	renderer.setSize(window.innerWidth / 5, window.innerHeight / 5);
 	renderer.render(scene, camera);
