@@ -184,7 +184,7 @@ function sendScreenshot(issueNumber) {
 		return;
 	}
 	const url = `https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues/${issueNumber}/comments`;
-	const headers = { "Authorization": "Token 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" };
+	const headers = { "Authorization": "Token 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" };
 	const data = { body: `${screenshotData}` };
 
 	fetch(url, {
