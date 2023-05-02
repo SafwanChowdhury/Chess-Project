@@ -7,8 +7,7 @@ import {game} from "./script";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import {CSS3DObject} from "three/addons/renderers/CSS3DRenderer.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
-import {updateScene,initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
-import {func} from "three/nodes";
+import {initScene,pieces,blackPieces,whitePieces,camera,renderer,scene,boardSquares,coordsMap,takenMap,takenWhite, initArray,takenBlack,loadQueen,manager} from "./scene.js";
 function addPieceData(){
 	for (let i = 0; i < pieces.length; i++){
 		pieces[i].userData.pieceId = i;
@@ -64,16 +63,18 @@ document.addEventListener("mousedown", onDocumentMouseDown, false);
 let intersectsPiece = null;
 let intersectsBoard = null;
 function onDocumentMouseDown(event) {
-	var vector = new THREE.Vector3(
-		(event.clientX / window.innerWidth) * 2 - 1,
-		-(event.clientY / window.innerHeight) * 2 + 1,
-		0.5);
-	var raycaster =  new THREE.Raycaster();
-	raycaster.setFromCamera( vector, camera );
-	intersectsBoard = raycaster.intersectObjects(boardSquares);
-	intersectsPiece = raycaster.intersectObjects(pieces, true);
-	gameLogic.modified = [];
-	gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+	if (gameLogic.continue) {
+		var vector = new THREE.Vector3(
+			(event.clientX / window.innerWidth) * 2 - 1,
+			-(event.clientY / window.innerHeight) * 2 + 1,
+			0.5);
+		var raycaster = new THREE.Raycaster();
+		raycaster.setFromCamera(vector, camera);
+		intersectsBoard = raycaster.intersectObjects(boardSquares);
+		intersectsPiece = raycaster.intersectObjects(pieces, true);
+		gameLogic.modified = [];
+		gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+	}
 }
 
 
@@ -228,6 +229,7 @@ function render() {
 		updateTurnOverlay();
 	}
 	if (renderer.xr.isPresenting) {
+		gameLogic.vr = true;
 		cleanIntersected();
 
 		intersectObjects( controller1 );

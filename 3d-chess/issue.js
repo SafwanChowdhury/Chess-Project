@@ -131,10 +131,11 @@ function showPopup() {
 		const title = document.getElementById("issueTitle").value;
 		const text = document.getElementById("body").value;
 		const movesLogText = JSON.parse(sessionStorage.getItem("movesLog"));
+		const label = "bug";
 		const body = text + "\n Moves Log \n" + movesLogText.join("\n");
 		const url = "https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues";
 		const headers = { "Authorization": "Token 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" };
-		const data = { title: title, body: body };
+		const data = { title: title, body: body, labels: [label]};
 
 		fetch(url, {
 			method: "POST",
@@ -151,6 +152,28 @@ function showPopup() {
 				console.error(error);
 			});
 	});
+}
+
+function endGame(){
+	const movesLogText = JSON.parse(sessionStorage.getItem("movesLog"));
+	const title = "Finshed Game";
+	const body = "Moves Log \n" + movesLogText.join("\n");
+	const label = "testing";
+	const url = "https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues";
+	const headers = { "Authorization": "Token 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" };
+	const data = { title: title, body: body, labels: [label] };
+	fetch(url, {
+		method: "POST",
+		headers,
+		body: JSON.stringify(data)
+	})
+		.then(response => response.json())
+		.then(data => {
+			console.log("Success game data sent");
+		})
+		.catch(error => {
+			console.error(error);
+		});
 }
 
 function sendScreenshot(issueNumber) {
@@ -184,3 +207,5 @@ reportLink.addEventListener("click", (event) => {
 	event.preventDefault();
 	showPopup();
 });
+
+export { endGame };

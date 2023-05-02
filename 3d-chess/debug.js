@@ -62,20 +62,24 @@ document.addEventListener("mousedown", onDocumentMouseDown, false);
 let intersectsPiece = null;
 let intersectsBoard = null;
 function onDocumentMouseDown(event) {
-	var vector = new THREE.Vector3(
-		(event.clientX / window.innerWidth) * 2 - 1,
-		-(event.clientY / window.innerHeight) * 2 + 1,
-		0.5);
-	var raycaster =  new THREE.Raycaster();
-	raycaster.setFromCamera( vector, camera );
-	intersectsBoard = raycaster.intersectObjects(boardSquares);
-	intersectsPiece = raycaster.intersectObjects(pieces, true);
-	gameLogic.modified = [];
-	gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
-	//comment out when not testing game states, click through moves till saved game state
-    incr++
-    if (incr < unitTest.length)
-        gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1])
+	if (gameLogic.continue) {
+		var vector = new THREE.Vector3(
+			(event.clientX / window.innerWidth) * 2 - 1,
+			-(event.clientY / window.innerHeight) * 2 + 1,
+			0.5);
+		var raycaster = new THREE.Raycaster();
+		raycaster.setFromCamera(vector, camera);
+		intersectsBoard = raycaster.intersectObjects(boardSquares);
+		intersectsPiece = raycaster.intersectObjects(pieces, true);
+		gameLogic.modified = [];
+		gameLogic.givePiecesEventListeners(intersectsPiece, intersectsBoard);
+		//comment out when not testing game states, click through moves till saved game state
+		if (unitTest.length > 0) {
+			incr++;
+			if (incr < unitTest.length)
+				gameLogic.unitTest(unitTest[incr][0], unitTest[incr][1]);
+		}
+	}
 }
 
 
@@ -88,14 +92,41 @@ fetch(filename)
 		unitTest = JSON.parse(contents);
 		console.log(unitTest);
 	})
-	.catch(error => console.error(error));
+	.catch(error => {
+		console.error(error);
+		unitTest = [];
+	});
 
 let modified = [];
 let modifiedData = [];
 let promotion = false;
 let incr = -1;
+
+/*const pointToPanAround = new THREE.Vector3(0, 0, 0);
+const radius = 17;
+// Set the desired camera height
+const cameraHeight = 4;
+
+// Set the initial camera position
+camera.position.set(radius, cameraHeight, 0);
+camera.lookAt(pointToPanAround);
+// Set up the animation loop
+let angle = 0;
+const speed = 0.01; // Controls the speed of the panning animation*/
+
+
 function animate() {
 	requestAnimationFrame(animate);
+	/*// Update the camera position based on the angle and radius
+	camera.position.x = pointToPanAround.x + radius * Math.cos(angle);
+	camera.position.y = cameraHeight;
+	camera.position.z = pointToPanAround.z + radius * Math.sin(angle);
+
+	// Increment the angle to pan the camera
+	angle += speed;
+
+	// Make the camera look at the point to pan around
+	camera.lookAt(pointToPanAround);*/
 	//camControls.enabled = gameLogic.selected === null
 	modified = gameLogic.modified;
 	sessionStorage.setItem("movesLog", JSON.stringify(gameLogic.movesLog));
@@ -142,18 +173,20 @@ manager.onStart = function (url, itemsLoaded, itemsTotal) {
 };
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-	let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
-	document.getElementById("title").innerHTML = percentage;
-	document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
+	if (!onStart) {
+		let percentage = Math.floor((itemsLoaded / itemsTotal) * 100).toString();
+		document.getElementById("title").innerHTML = percentage;
+		document.getElementById("pawn-fill").style.clipPath = `polygon(0% ${100 - percentage}%, 100% ${100 - percentage}%, 100% 100%, 0% 100%)`;
+	}
 };
 
 manager.onLoad = function () {
-	document.getElementById("pawn-container").classList.add("loading-finished");
-	setTimeout(function() {
-		document.getElementById("loading-screen").remove();
-	}, 2000);
-	document.getElementById("title").innerHTML = "Online Chess Game";
 	if (!onStart) {
+		document.getElementById("pawn-container").classList.add("loading-finished");
+		setTimeout(function() {
+			document.getElementById("loading-screen").remove();
+		}, 2000);
+		document.getElementById("title").innerHTML = "Online Chess Game";
 		onStart = true;
 		initScene();
 		addPieceData();

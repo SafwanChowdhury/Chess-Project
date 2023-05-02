@@ -1,3 +1,9 @@
+import {camera, objArray, updateScene} from "./scene.js";
+import {endGame} from "./issue.js";
+import * as THREE from "three";
+
+updateScene();
+
 class game {
 	/*----------- Game State Data ----------*/
 	board = [
@@ -45,6 +51,18 @@ class game {
 	whiteScore = 16;
 	blackScore = 16;
 	playerPieces;
+	continue = true;
+	clientID = null;
+	vr = false;
+	promoted = "";
+	promotedPiece = null;
+	enpassantAvailable = [false,false];
+	enpassantCol = 0;
+	enpassantRow = 0;
+	enpassantIndex = 0;
+	enpassantMove = 0;
+	enpassantId = 0;
+
 
 	/*--- selected piece properties ---*/
 	selectedPiece = {
@@ -173,11 +191,11 @@ class game {
 			this.givePieceBorder(this.king(this.turn, this.selectedPiece.indexOfBoardPiece, this.board, true));
 			break;
 		default:
-			this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo, this.board));
+			this.givePieceBorder(this.pawn(this.turn, this.selectedPiece.indexOfBoardPiece, this.selectedPiece.moveTwo, this.board, true));
 		}
 	}
 
-	pawn(turn, index, moveTwo, board) {
+	pawn(turn, index, moveTwo, board, modifier) {
 		let col = Math.floor(index % 8);
 		let moves = [];
 		if (turn) { //white
@@ -209,6 +227,14 @@ class game {
 			}
 			if (board[index - 9] < 16 && col !== 0 && board[index - 9] !== null) {
 				moves.push(-9);
+			}
+		}
+		if (modifier === true) {
+			if (this.enpassantAvailable[this.turn ? 1 : 0] && (this.selectedPiece.col + 1 === this.enpassantCol || this.selectedPiece.col - 1 === this.enpassantCol)) {
+				if (this.selectedPiece.row === this.enpassantRow) {
+					moves.push(this.enpassantIndex - index);
+					this.enpassantMove = this.enpassantIndex - index;
+				}
 			}
 		}
 		return moves;
@@ -448,7 +474,6 @@ class game {
 				}
 			});
 		}
-
 		possibleMoves = validMoves.filter(function (value) {
 			return !invalidMoves.includes(value);
 		});
@@ -547,6 +572,72 @@ class game {
 		}
 	}
 
+	lastMoves = [];
+
+	moveConvert(id, type, move, remove, castling, enpassant){
+		let prefix = "";
+		let suffix = "";
+		switch(type) {
+		case "King":
+			prefix = "K";
+			break;
+		case "Queen":
+			prefix = "Q";
+			break;
+		case "Rook":
+			prefix = "R";
+			break;
+		case "Bishop":
+			prefix = "B";
+			break;
+		case "Knight":
+			prefix = "N";
+			break;
+		default:
+			prefix = "";
+			break;
+		}
+		if (remove) {
+			prefix += "x";
+		}
+		if (castling !== null) {
+			prefix = "O-O";
+			if (castling) {
+				prefix += "-O";
+			}
+		}
+		if (enpassant) {
+			suffix = " e.p.";
+		}
+		let piece = this.pieces[id];
+		let newIndex = piece.userData.indexOfBoardPiece + move;
+		let newRow = Math.floor(newIndex / 8);
+		let newCol = Math.floor(newIndex % 8);
+		newRow = 7 - newRow;
+		newCol = 7 - newCol;
+		let letter = String.fromCharCode(97 + newCol);
+		let number = 8 - newRow;
+		let moveString = "";
+		if (castling === null) {
+			moveString = prefix + letter + number + suffix;
+		}
+		else{
+			moveString = prefix;
+		}
+		console.log(moveString);
+		let moveColor = this.turn ? "white" : "black";
+		let moveElement = document.createElement("div");
+		moveElement.textContent = moveString;
+		moveElement.classList.add(moveColor);
+		document.getElementById("last-moves").appendChild(moveElement);
+		this.lastMoves.push(moveString);
+		if (this.lastMoves.length > 36) {
+			let removedElement = document.querySelector(`#last-moves div.${moveColor}:nth-child(1)`);
+			if (removedElement) {
+				removedElement.remove();
+			}
+		}
+	}
 	//make move
 	makeMove(number) {
 		this.movesLog.push([this.selectedPiece.pieceId, number]);
@@ -563,17 +654,32 @@ class game {
 		this.selectedPiece.indexOfBoardPiece += number;
 		this.selectedPiece.row = Math.floor(this.selectedPiece.indexOfBoardPiece / 8);
 		this.selectedPiece.col = Math.floor(this.selectedPiece.indexOfBoardPiece % 8);
-		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null)
+		if (this.board[this.selectedPiece.indexOfBoardPiece] !== null) {
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling);
-		else
+		}
+		else if (number === this.enpassantMove && this.selectedPiece.type === "Pawn"){
+			let enpassant = this.enpassantIndex;
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number, true, false, true);
+			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, true, castling, enpassant);
+		}
+		else {
+			this.moveConvert(this.selectedPiece.pieceId, this.selectedPiece.type, number,false, castling);
 			this.changeData(previousIndex, this.selectedPiece.indexOfBoardPiece, false, castling);
+		}
 	}
 
 	// Changes the board states data on the back end
 
-	changeData(previousIndex, modifiedIndex, removePiece, castling) {
+	changeData(previousIndex, modifiedIndex, removePiece, castling , enpassant){
 		if (removePiece) {
-			this.oldPiece = this.board[modifiedIndex];
+			if (enpassant !== undefined){
+				this.oldPiece = this.board[this.board.indexOf(this.enpassantId)];
+			}
+			else {
+				this.oldPiece = this.board[modifiedIndex];
+			}
+			let removeID = this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece);
 			this.piecesIndex[this.turn ? 1 : 0].splice(this.piecesIndex[this.turn ? 1 : 0].indexOf(this.oldPiece), 1);
 			if (this.turn && this.selectedPiece.pieceId < 16) {
 				this.blackScore--;
@@ -581,36 +687,18 @@ class game {
 			if (this.turn === false && this.selectedPiece.pieceId >= 16) {
 				this.whiteScore--;
 			}
-			if (this.turn){
-				this.blackPieces.splice(this.blackPieces.indexOf(this.oldPiece), 1);
-			}
-			else{
-				this.whitePieces.splice(this.whitePieces.indexOf(this.oldPiece), 1);
+			if (this.turn) {
+				this.blackPieces.splice(removeID, 1);
+			} else {
+				this.whitePieces.splice(removeID, 1);
 			}
 			this.pieces[this.oldPiece].userData.taken = true;
 		}
+		if (enpassant !== undefined){
+			this.board[this.board.indexOf(this.enpassantId)] = null;
+		}
 		this.board[previousIndex] = null;
 		this.board[modifiedIndex] = this.selectedPiece.pieceId;
-		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
-			this.selectedPiece.type = "Queen";
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/wQueen.glb", this.turn, null];
-		}
-		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
-			this.selectedPiece.type = "Queen";
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, "models/bQueen.glb", this.turn, null];
-		}
-		else {
-			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
-				this.selectedPiece.moveTwo = false;
-			}
-			if (this.turn === false && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
-				this.selectedPiece.moveTwo = false;
-			}
-			this.updatePiece();
-			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
-		}
 		if (castling === false){
 			this.castle = [this.turn ? 0 : 24, this.turn ? 0 : 7,  2];
 			this.board[this.turn ? 0 : 56] = null;
@@ -626,9 +714,148 @@ class game {
 			this.pieces[this.turn ? 7 : 31].userData.hasMoved = true;
 
 		}
-		//console.log("PieceId" , this.selectedPiece.pieceId, " Move: " , (this.selectedPiece.indexOfBoardPiece - previousIndex))
-		this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
-		this.checkForWin();
+		if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 56 && this.selectedPiece.type === "Pawn") {
+			this.continue = false;
+			this.promotion();
+		}
+		else if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 7 && this.selectedPiece.type === "Pawn") {
+			this.continue = false;
+			this.promotion();
+		}
+		else {
+			if (this.turn && this.selectedPiece.pieceId < 16 && modifiedIndex >= 16) {
+				if (this.selectedPiece.type === "Pawn" && this.selectedPiece.moveTwo) {
+					this.enpassantAvailable[!this.turn ? 1 : 0] = true;
+					this.enpassantCol = this.selectedPiece.col;
+					this.enpassantRow = this.selectedPiece.row;
+					this.enpassantIndex = this.selectedPiece.indexOfBoardPiece - 8;
+					this.enpassantId = this.selectedPiece.pieceId;
+				}
+				this.selectedPiece.moveTwo = false;
+			}
+			if (!this.turn && this.selectedPiece.pieceId >= 16 && modifiedIndex <= 47) {
+				if (this.selectedPiece.type === "Pawn" && this.selectedPiece.moveTwo) {
+					this.enpassantAvailable[!this.turn ? 1 : 0] = true;
+					this.enpassantCol = this.selectedPiece.col;
+					this.enpassantRow = this.selectedPiece.row;
+					this.enpassantIndex = this.selectedPiece.indexOfBoardPiece + 8;
+					this.enpassantId = this.selectedPiece.pieceId;
+				}
+				this.selectedPiece.moveTwo = false;
+			}
+			this.updatePiece();
+			this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, null , this.turn, castling];
+			this.continue = true;
+			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+			this.checkForWin();
+		}
+	}
+
+
+	promotion(){
+		if (this.clientID !== null && this.clientID != this.turn){
+			if (this.promotedPiece === "Queen"){
+				this.selectedPiece.type = "Queen";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[4], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+			else if (this.promotedPiece === "Rook") {
+				this.selectedPiece.type = "Rook";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[0], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+			else if (this.promotedPiece === "Bishop") {
+				this.selectedPiece.type = "Bishop";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[2], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+			else{
+				this.selectedPiece.type = "Knight";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[1], this.turn, null];
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			}
+		}
+		else {
+			const menu = document.getElementById("floating-menu");
+			// Get the 2D screen position of the selected object
+			const screenPosition = this.toScreenPosition(this.selected.object, camera);
+			// Set the position of the menu and show it
+			menu.style.left = `${screenPosition.x}px`;
+			menu.style.top = `${screenPosition.y}px`;
+			menu.style.display = "block";
+			document.getElementById("option-1").addEventListener("click", () => {
+				this.selectedPiece.type = "Queen";
+				this.promoted = "Queen";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[4], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById("option-2").addEventListener("click", () => {
+				this.selectedPiece.type = "Rook";
+				this.promoted = "Rook";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[0], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById("option-3").addEventListener("click", () => {
+				this.selectedPiece.type = "Bishop";
+				this.promoted = "Bishop";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[2], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+			document.getElementById("option-4").addEventListener("click", () => {
+				this.selectedPiece.type = "Knight";
+				this.promoted = "Knight";
+				this.updatePiece();
+				this.modified = [this.selectedPiece.pieceId, this.selectedPiece.row, this.selectedPiece.col, this.oldPiece, objArray[1], this.turn, null];
+				this.closeFloatingMenu();
+				this.continue = true;
+				this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
+				this.checkForWin();
+			});
+		}
+	}
+	closeFloatingMenu() {
+		const menu = document.getElementById("floating-menu");
+		menu.style.display = "none";
+	}
+	toScreenPosition(obj, camera) {
+		const vector = new THREE.Vector3();
+		const canvas = document.querySelector("canvas");
+
+		obj.updateMatrixWorld();
+		vector.setFromMatrixPosition(obj.matrixWorld);
+		vector.project(camera);
+
+		const widthHalf = canvas.clientWidth / 2;
+		const heightHalf = canvas.clientHeight / 2;
+
+		vector.x = (vector.x * widthHalf) + widthHalf;
+		vector.y = -(vector.y * heightHalf) + heightHalf;
+
+		return { x: vector.x, y: vector.y };
 	}
 
 	updatePiece() {
@@ -647,30 +874,33 @@ class game {
 	// Checks for a win
 	checkForWin() {
 		let turnW = this.turn ? 1 : 0;
-		let check = this.checkCheck(this.turn)
+		let check = this.checkCheck(this.turn);
 		if (check === 1) {
 			if (this.turn) {
-				console.log("white win");
+				console.log("White win");
 				this.checkText.textContent = "White Win!!!";
 				this.checkPopup.hidden = false;
 				this.checkContainer.style.pointerEvents = "auto";
+				endGame();
 			} else if (!this.turn) {
-				console.log("black win");
+				console.log("Black win");
 				this.checkText.textContent = "Black Win!!!";
 				this.checkText.style.color = "Black";
 				this.checkText.style.opacity = "1";
 				this.popupPawn.style.filter = "invert(10%)";
 				this.checkPopup.hidden = false;
 				this.checkContainer.style.pointerEvents = "auto";
+				endGame();
 			}
 		}
 		else if(check === 2){
 			console.log("Stalemate");
 			this.popupAlert.textContent = "Stalemate";
 			this.checkText.textContent = "Game is a Draw";
-			this.popupPawn.style.filter = 'invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)';
+			this.popupPawn.style.filter = "invert(30%) sepia(100%) saturate(500%) hue-rotate(190deg)";
 			this.checkPopup.hidden = false;
 			this.checkContainer.style.pointerEvents = "auto";
+			endGame();
 		}
 		if (this.check[turnW] === true) {
 			this.cells[this.board.indexOf(this.turn ? 3 : 27)].material.opacity = 0;
@@ -683,8 +913,8 @@ class game {
 
 	// Switches players turn
 	changePlayer() {
-		let turnB = !this.turn ? 1 : 0;
 		this.incr++;
+		this.enpassantAvailable[this.turn ? 1 : 0] = false;
 		if (this.turn) {
 			this.turn = false;
 			this.currentCheckPositions[this.turn ? 1 : 0] = this.checkablePositions(this.getKingIndex(this.turn), this.turn, 1, this.board);
@@ -708,29 +938,20 @@ class game {
 		let rookMovesQueen = this.rook(this.turn,queenSideRookI, this.board).map(v => v + queenSideRookI);
 		let intersectionKing = rookMovesKing.filter(element => kingMoves.includes(element));
 		let intersectionQueen = rookMovesQueen.filter(element => kingMoves.includes(element));
-		console.log("king", kingMoves)
-		console.log("rookK", rookMovesKing)
-		console.log("rookQ", rookMovesQueen)
-		console.log("hasMovedKingside", this.pieces[kingSideRook].userData.hasMoved)
-		console.log("hasMovedQueenside", this.pieces[queenSideRook].userData.hasMoved)
 		if (this.pieces[kingSideRook].userData.hasMoved === false && intersectionKing.length > 0 && this.pieces[kingSideRook].userData.taken === false) {
 			path.push(-1);
 		}
 		if (this.pieces[queenSideRook].userData.hasMoved === false && intersectionQueen.length > 0 && this.pieces[queenSideRook].userData.taken === false) {
 			path.push(1);
 		}
-		console.log("preP", path)
 		path = this.kingPinning(path,index,this.turn,this.board);
-		console.log("postP", path)
 		if (path.includes(1)){
 			moves.push(2);
 		}
 		if (path.includes(-1)){
 			moves.push(-2);
 		}
-		console.log("preM", moves)
 		moves = this.kingPinning(moves,index,this.turn,this.board);
-		console.log("postM", moves)
 		return moves;
 	}
 
@@ -807,20 +1028,19 @@ class game {
 
 		// Calculate the column of the pawn.
 		let col = index % 8;
-
 		if (turn) { //white
-			if (board[index + 7] === null && col !== 7) {
+			if ((board[index - 7] === null || board[index - 7] === 3 ) && col !== 0) {
 				moves.push(-7);
 			}
-			if (board[index + 9] === null && col !== 0) {
+			if ((board[index - 9] === null || board[index - 9] === 3 ) && col !== 7) {
 				moves.push(-9);
 			}
 		} else { //black
-			if (col !== 0 && board[index - 7] === null) {
-				moves.push(7);
-			}
-			if (col !== 7 && board[index - 9] === null) {
+			if (col !== 7 && (board[index + 9] === null || board[index + 9] === 27)) {
 				moves.push(9);
+			}
+			if (col !== 0 && (board[index + 7] === null || board[index + 7] === 27)) {
+				moves.push(7);
 			}
 		}
 
@@ -861,7 +1081,7 @@ class game {
 			//bug identified in moveTwo, some cases moveTwo needs to be 1 where a piece can move two and put king in check
 			// a temporary fix is to set moveTwo to 0
 			//this however still does not correctly pin the king
-			newMoves = this.pawn(this.turn, pieceIndex,0, this.board).map(v => v + pieceIndex);
+			newMoves = this.pawn(this.turn, pieceIndex,0, this.board, false).map(v => v + pieceIndex);
 			break;
 		}
 
@@ -888,10 +1108,57 @@ class game {
 					return (checkmate ? 1 : 0);
 				}
 			}
-			else if ((this.king(!turn, this.getKingIndex(!turn), this.board, true).length < 1) && ((this.turn && this.blackPieces.length < 2) || (!this.turn && this.whitePieces.length < 2))) {
+			else if (this.stalemate(!turn)) {
 				return 2;
 			}
 		}
+	}
+
+	stalemate(turn){
+		const pieces = turn ? this.whitePieces : this.blackPieces;
+		let newPositions = [];
+		pieces.forEach((piece) => {
+			let newMoves;
+			switch (piece.userData.name) {
+			case "Rook":
+				newMoves = this.rook(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Knight":
+				newMoves = this.knight(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Bishop":
+				newMoves = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Queen":
+				newMoves = this.queen(turn, piece.userData.indexOfBoardPiece, this.board);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "Pawn":
+				newMoves = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.moveTwo, this.board, false);
+				newMoves = this.piecePinning(newMoves, piece.userData.indexOfBoardPiece, turn, this.board);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			case "King":
+				newMoves = this.king(turn, piece.userData.indexOfBoardPiece, this.board, true);
+				if (newMoves !== undefined)
+					newPositions = newPositions.concat(newMoves);
+				break;
+			}
+		});
+		return newPositions.length === 0;
+
 	}
 
 	checkmate(turn) {
@@ -899,6 +1166,7 @@ class game {
 		let turnB = this.turn ? 0 : 1;
 		this.findSaviour(oppTurn);
 		let moves = this.king(oppTurn, this.getKingIndex(oppTurn), this.board, true);
+		console.log(this.saviourPieces[turnB]);
 		if (moves.length === 0 && this.saviourPieces[turnB].length === 0 && this.threatIndex[turnB] > -1) {
 			console.log("checkmate");
 			return true;
@@ -925,55 +1193,58 @@ class game {
 		let path = [];
 		let threatPiece = this.pieces[this.threatIndex[turnW]];
 		switch (threatPiece.userData.name) {
-			case "Rook":
-				path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
-				break;
-			case "Knight":
-				path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
-				break;
-			case "Bishop":
-				path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
-				break;
-			case "Queen":
-				path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
-				break;
-			default:
-				path = this.checkPawn(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
-				threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
+		case "Rook":
+			path = this.rook(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsRook[turnW].includes(value));
+			break;
+		case "Knight":
+			path = this.knight(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsKnight[turnW].includes(value));
+			break;
+		case "Bishop":
+			path = this.bishop(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsBishop[turnW].includes(value));
+			break;
+		case "Queen":
+			path = this.queen(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsQueen[turnW].includes(value));
+			break;
+		default:
+			path = this.checkPawn(turn, threatPiece.userData.indexOfBoardPiece, this.board).map(v => v + threatPiece.userData.indexOfBoardPiece);
+			threatPath = path.filter(value => this.checkPositionsPawn[turnW].includes(value));
 		}
 		pieces.forEach((piece) => {
 			if (piece.userData.taken !== true) {
 				let newPositions;
 				switch (piece.userData.name) {
-					case "Rook":
-						newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Knight":
-						newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Bishop":
-						newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					case "Queen":
-						newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
-						break;
-					default:
-						newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+				case "Rook":
+					newPositions = this.rook(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Knight":
+					newPositions = this.knight(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Bishop":
+					newPositions = this.bishop(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				case "Queen":
+					newPositions = this.queen(turn, piece.userData.indexOfBoardPiece, this.board).map(v => v + piece.userData.indexOfBoardPiece);
+					break;
+				default:
+					newPositions = this.pawn(turn, piece.userData.indexOfBoardPiece, piece.userData.moveTwo, this.board, false).map(v => v + piece.userData.indexOfBoardPiece);
+					console.log(newPositions, piece.userData.indexOfBoardPiece);
 				}
 				if (newPositions.some(element => threatPath.includes(element)) || newPositions.includes(threatPiece.userData.indexOfBoardPiece)) {
 					pieceSet.push(piece);
 				}
 			}
 		});
+		console.log(pieceSet);
 		this.saviourPieces[turnW] = pieceSet;
 	}
 
 
-	unitTest(id, move) {
+	unitTest(id, move, promotedPiece) {
+		this.promotedPiece = promotedPiece;
 		this.testPieceData(id);
 		this.makeMove(move);
 	}
