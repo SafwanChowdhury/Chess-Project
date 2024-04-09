@@ -1,5 +1,5 @@
-import WebSocket, { WebSocketServer } from "ws";
-
+const WebSocket = require('ws');
+const WebSocketServer = WebSocket.WebSocketServer;
 const wss = new WebSocketServer({ port: 3000 });
 
 let clients = [];
