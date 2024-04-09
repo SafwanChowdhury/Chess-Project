@@ -8,14 +8,16 @@ const httpsOptions = {
 };
 
 const server = https.createServer(httpsOptions);
+const PORT = 3000;
+server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
 const wss = new WebSocket.Server({ server });
 
 
 let clients = [];
 let rooms = {};
 
-const PORT = 3000;
-server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
 
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
