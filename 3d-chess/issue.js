@@ -160,7 +160,7 @@ function endGame(){
 	const body = "Moves Log \n" + movesLogText.join("\n");
 	const label = "testing";
 	const url = "https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues";
-	const headers = { "Authorization": "Token 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" };
+	const headers = { "Authorization": "Token" };
 	const data = { title: title, body: body, labels: [label] };
 	fetch(url, {
 		method: "POST",
