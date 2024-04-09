@@ -45,7 +45,7 @@ wss.on("connection", function connection(ws) {
 		case "delete":
 			const existingRoomName = message.roomName;
 			if (rooms[existingRoomName]) {
-				rooms.splice(existingRoomName,1);
+				delete rooms[existingRoomName];
 				console.log(`Lobby ${existingRoomName} Deleted.`);
 			}
 			break;
