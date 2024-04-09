@@ -1,4 +1,4 @@
-import { takeScreenshot } from "./main.js";
+// import { takeScreenshot } from "./main.js";
 
 // Create the HTML structure for the popup
 function createPopup() {
@@ -177,35 +177,37 @@ function endGame(){
 }
 
 function sendScreenshot(issueNumber) {
-	takeScreenshot();
-	const screenshotData = sessionStorage.getItem("screenshot");
-	if (!screenshotData) {
-		console.error("No screenshot data found");
-		return;
-	}
-	const url = `https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues/${issueNumber}/comments`;
-	const headers = { "Authorization": "Token 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" };
-	const data = { body: `${screenshotData}` };
+	// This function is not needed anymore
 
-	fetch(url, {
-		method: "POST",
-		headers,
-		body: JSON.stringify(data)
-	})
-		.then(response => response.json())
-		.then(data => {
-			console.log("Screenshot uploaded successfully");
-		})
-		.catch(error => {
-			console.error(error);
-		});
+	// takeScreenshot();
+	// const screenshotData = sessionStorage.getItem("screenshot");
+	// if (!screenshotData) {
+	// 	console.error("No screenshot data found");
+	// 	return;
+	// }
+	// const url = `https://api.github.com/repos/SafwanChowdhury/Chess-Project/issues/${issueNumber}/comments`;
+	// const headers = { "Authorization": "Token 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" };
+	// const data = { body: `${screenshotData}` };
+
+	// fetch(url, {
+	// 	method: "POST",
+	// 	headers,
+	// 	body: JSON.stringify(data)
+	// })
+	// 	.then(response => response.json())
+	// 	.then(data => {
+	// 		console.log("Screenshot uploaded successfully");
+	// 	})
+	// 	.catch(error => {
+	// 		console.error(error);
+	// 	});
 }
 
 
-const reportLink = document.querySelector("nav li a#report-issue");
-reportLink.addEventListener("click", (event) => {
-	event.preventDefault();
-	showPopup();
-});
+// const reportLink = document.querySelector("nav li a#report-issue");
+// reportLink.addEventListener("click", (event) => {
+// 	event.preventDefault();
+// 	showPopup();
+// });
 
 export { endGame };
