@@ -3,8 +3,8 @@ const fs = require('fs');
 const WebSocket = require('ws');
 
 const httpsOptions = {
-  cert: fs.readFileSync('/etc/letsencrypt/live/server.3d-chess.co.uk/fullchain.pem'),
-  key: fs.readFileSync('/etc/letsencrypt/live/server.3d-chess.co.uk/privkey.pem')
+  cert: fs.readFileSync('/home/bitnami/certs/fullchain.pem'),
+  key: fs.readFileSync('/home/bitnami/certs/privkey.pem')
 };
 
 const server = https.createServer(httpsOptions);
