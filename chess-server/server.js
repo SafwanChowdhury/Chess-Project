@@ -5,7 +5,7 @@ const wss = new WebSocketServer({ port: 3000 });
 let clients = [];
 let rooms = {};
 
-console.log("Server started on port 8080");
+console.log("Server started on port 3000");
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
 
