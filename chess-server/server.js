@@ -7,12 +7,16 @@ const httpsOptions = {
   key: fs.readFileSync('/etc/letsencrypt/live/server.3d-chess.co.uk/privkey.pem')
 };
 
-const server = https.createServer(httpsOptions);
+const server = https.createServer(httpsOptions, (req, res) => {
+  // Respond to all HTTP requests with a simple message
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Hello, world! This is the HTTPS server response.\n');
+});
+
 const PORT = 3000;
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
 const wss = new WebSocket.Server({ server });
-
 
 let clients = [];
 let rooms = {};
