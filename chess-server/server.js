@@ -1,28 +1,11 @@
-const https = require('https');
-const fs = require('fs');
-const WebSocket = require('ws');
+import WebSocket, { WebSocketServer } from "ws";
 
-const httpsOptions = {
-  cert: fs.readFileSync('/etc/letsencrypt/live/server.3d-chess.co.uk/fullchain.pem'),
-  key: fs.readFileSync('/etc/letsencrypt/live/server.3d-chess.co.uk/privkey.pem')
-};
-
-const server = https.createServer(httpsOptions, (req, res) => {
-  // Respond to all HTTP requests with a simple message
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Hello, world! This is the HTTPS server response.\n');
-});
-
-const PORT = 3000;
-server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ port: 3000 });
 
 let clients = [];
 let rooms = {};
 
-
-
+console.log("Server started on port 8080");
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
 
@@ -62,9 +45,9 @@ wss.on("connection", function connection(ws) {
 		case "delete":
 			const existingRoomName = message.roomName;
 			if (rooms[existingRoomName]) {
-				delete rooms[existingRoomName];
-				console.log(`Lobby ${existingRoomName} deleted.`);
-			  }
+				rooms.splice(existingRoomName,1);
+				console.log(`Lobby ${existingRoomName} Deleted.`);
+			}
 			break;
 
 		case "refresh":
