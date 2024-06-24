@@ -1,11 +1,11 @@
-import WebSocket, { WebSocketServer } from "ws";
-
-const wss = new WebSocketServer({ port: 8080 });
+const WebSocket = require('ws');
+const WebSocketServer = WebSocket.WebSocketServer;
+const wss = new WebSocketServer({ port: 3000 });
 
 let clients = [];
 let rooms = {};
 
-console.log("Server started on port 8080");
+console.log("Server started on port 3000");
 wss.on("connection", function connection(ws) {
 	clients.push(ws);
 
@@ -45,7 +45,7 @@ wss.on("connection", function connection(ws) {
 		case "delete":
 			const existingRoomName = message.roomName;
 			if (rooms[existingRoomName]) {
-				rooms.splice(existingRoomName,1);
+				delete rooms[existingRoomName];
 				console.log(`Lobby ${existingRoomName} Deleted.`);
 			}
 			break;
